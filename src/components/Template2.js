@@ -1,9 +1,6 @@
+import React from 'react';
+import TemplateWorkspace from './TemplateWorkspace';
 
-export default function Template2(){
-    return (
-        <div>
-            <h1>Template 2</h1>
-            <p>This is the second template.</p>
-        </div>
-    )
+export default function Template2() {
+  return <TemplateWorkspace templateId={2} />;
 }

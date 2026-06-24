@@ -1,0 +1,984 @@
+/* ==========================================================================
+   Unified Workspace Editor UI Styles
+   ========================================================================== */
+
+:root {
+  --primary-color: #4f46e5;
+  --primary-hover: #3b31d9;
+  --text-dark: #1e293b;
+  --text-light: #64748b;
+  --background-workspace: #f8fafc;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --white: #ffffff;
+}
+
+.container {
+  width: 100%;
+  height: calc(100vh - 68px); /* Fills screen minus header */
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.main-content {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 0;
+}
+
+/* ==========================================
+   INPUT PANEL (LEFT COLUMN SIDEBAR)
+   ========================================== */
+.input-panel {
+  width: 480px;
+  flex-shrink: 0;
+  height: 100%;
+  background-color: var(--white);
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.input-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.input-panel::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 6px;
+}
+
+.input-panel::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Input Panel Header */
+.input-panel-header {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.btn-back-templates {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.btn-back-templates:hover {
+  color: var(--primary-hover);
+  transform: translateX(-3px);
+}
+
+.input-panel h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+
+/* Strength Meter */
+.strength-meter-container {
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.strength-meter-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.strength-meter-bar {
+  width: 100%;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.strength-meter-fill {
+  height: 100%;
+  background-color: #10b981;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Draggable sections spacing */
+.draggable-section {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.draggable-section.dragging {
+  opacity: 0.5;
+  border: 1px dashed var(--primary-color);
+}
+
+/* Input Fields styling */
+.input-group {
+  padding: 20px;
+  background-color: var(--white);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.section-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: #94a3b8;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.add-btn {
+  background-color: var(--white);
+  color: var(--primary-color);
+  border: 1px dashed var(--primary-color);
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.2s;
+}
+
+.add-btn:hover {
+  background-color: rgba(79, 70, 229, 0.05);
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.sub-group {
+  border-left: 2px solid #e2e8f0;
+  padding-left: 15px;
+  margin-bottom: 20px;
+}
+
+/* ==========================================
+   MIDDLE RESIZER / DIVIDER DRAG STYLING
+   ========================================== */
+.resizer-bar {
+  width: 12px;
+  cursor: col-resize;
+  background-color: transparent;
+  flex-shrink: 0;
+  height: 100%;
+  position: relative;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resizer-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 2px;
+  background-color: var(--border-color);
+  transition: background-color 0.2s ease;
+}
+
+.resizer-bar:hover::after,
+.resizer-bar:active::after {
+  background-color: var(--primary-color);
+}
+
+.resizer-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  color: var(--text-light);
+  font-size: 0.7rem;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 101;
+}
+
+.resizer-bar:hover .resizer-knob,
+.resizer-bar:active .resizer-knob {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* ==========================================
+   RESUME PREVIEW PANEL (VIBRANT RIGHT SIDE)
+   ========================================== */
+.resume-panel {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  background: radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.05) 0%, #f1f5f9 100%);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.resume {
+  position: relative;
+  width: 560px;
+  height: 794px;
+  background-color: var(--white);
+  border-radius: 4px;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06), 
+              0 5px 15px rgba(0, 0, 0, 0.03),
+              0 0 0 1px rgba(15, 23, 42, 0.04);
+  padding: 32px;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+
+.preview-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--text-dark);
+  color: var(--white);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  opacity: 0.8;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preview-btn:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.download-btn {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+  transition: all 0.2s ease;
+}
+
+.download-btn:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+}
+
+/* ==========================================================================
+   RESUME TEMPLATE DESIGNS (A4 PREVIEW SHEETS)
+   ========================================================================== */
+
+.resume-content {
+  width: 100%;
+  height: 100%;
+  color: #334155;
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+.resume-content h1, .resume-content h2, .resume-content h3, .resume-content h4 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.resume-content ul {
+  padding-left: 12px;
+  margin: 4px 0;
+}
+
+.resume-content ul li {
+  margin-bottom: 2px;
+}
+
+.resume-content a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.resume-content a:hover {
+  text-decoration: underline;
+}
+
+.date-right {
+  float: right;
+  font-weight: 500;
+  color: #64748b;
+  font-size: 0.6rem;
+}
+
+/* --------------------------------------------------------------------------
+   Template 1: Classic Corporate
+   -------------------------------------------------------------------------- */
+.tmpl-classic {
+  font-family: 'Inter', sans-serif;
+}
+
+.tmpl-classic .resume-header {
+  text-align: center;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 10px;
+}
+
+.tmpl-classic .resume-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.tmpl-classic .contact-info {
+  font-size: 0.6rem;
+  color: #64748b;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.tmpl-classic .resume-section {
+  margin-bottom: 12px;
+}
+
+.tmpl-classic .resume-section h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.tmpl-classic .experience-entry,
+.tmpl-classic .project-entry,
+.tmpl-classic .education-entry {
+  margin-bottom: 8px;
+}
+
+.tmpl-classic .entry-header {
+  font-size: 0.68rem;
+  margin-bottom: 3px;
+}
+
+.tmpl-classic .edu-school {
+  color: #475569;
+  font-weight: 500;
+}
+
+.tmpl-classic .skills-line {
+  font-size: 0.65rem;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Template 2: Slate Sidebar Creative
+   -------------------------------------------------------------------------- */
+.tmpl-creative {
+  font-family: 'Inter', sans-serif;
+  height: 100%;
+}
+
+.tmpl-creative .creative-split-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  margin: -32px; /* Offset parent padding */
+}
+
+/* Sidebar (Left) */
+.tmpl-creative .creative-sidebar {
+  width: 33%;
+  background-color: #1e293b;
+  color: #f1f5f9;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tmpl-creative .creative-sidebar a {
+  color: #cbd5e1;
+}
+
+.tmpl-creative .sidebar-section h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #38bdf8; /* vibrant cyan accent */
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.tmpl-creative .contact-sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tmpl-creative .contact-sidebar ul li {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.58rem;
+}
+
+.tmpl-creative .contact-sidebar ul li i {
+  color: #38bdf8;
+}
+
+.tmpl-creative .skills-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tmpl-creative .sidebar-skill-tag {
+  background-color: #334155;
+  color: #f1f5f9;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 0.55rem;
+  font-weight: 500;
+}
+
+.tmpl-creative .sidebar-edu-item {
+  margin-bottom: 8px;
+}
+
+.tmpl-creative .sidebar-edu-item .edu-title {
+  font-weight: 600;
+  font-size: 0.6rem;
+}
+
+.tmpl-creative .sidebar-edu-item .edu-school {
+  color: #cbd5e1;
+  font-size: 0.55rem;
+}
+
+.tmpl-creative .sidebar-edu-item .edu-date {
+  color: #94a3b8;
+  font-size: 0.52rem;
+}
+
+/* Main Area (Right) */
+.tmpl-creative .creative-main {
+  width: 67%;
+  background-color: var(--white);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.tmpl-creative .creative-header h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.tmpl-creative .creative-title {
+  font-size: 0.75rem;
+  color: var(--primary-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.tmpl-creative .creative-section h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #0f172a;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 3px;
+  margin-bottom: 8px;
+}
+
+.tmpl-creative .creative-entry {
+  margin-bottom: 8px;
+}
+
+.tmpl-creative .creative-entry .entry-header {
+  font-size: 0.65rem;
+  margin-bottom: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   Template 3: Minimalist Stark
+   -------------------------------------------------------------------------- */
+.tmpl-minimal {
+  font-family: 'Inter', sans-serif;
+  padding: 10px 0;
+}
+
+.tmpl-minimal .minimal-header {
+  margin-bottom: 20px;
+}
+
+.tmpl-minimal .minimal-header h1 {
+  font-size: 1.6rem;
+  font-weight: 300; /* Clean thin title */
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.tmpl-minimal .minimal-contact {
+  font-size: 0.58rem;
+  color: #64748b;
+  display: flex;
+  gap: 14px;
+}
+
+.tmpl-minimal .minimal-contact a {
+  color: #475569;
+}
+
+.tmpl-minimal .minimal-section {
+  display: flex;
+  margin-bottom: 14px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 8px;
+}
+
+.tmpl-minimal .sec-label {
+  width: 22%;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #475569;
+}
+
+.tmpl-minimal .sec-body {
+  width: 78%;
+}
+
+.tmpl-minimal .font-medium {
+  font-weight: 500;
+}
+
+.tmpl-minimal .minimal-entry {
+  margin-bottom: 8px;
+}
+
+.tmpl-minimal .minimal-entry .entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.65rem;
+  margin-bottom: 3px;
+}
+
+.tmpl-minimal .minimal-entry .entry-sub {
+  font-weight: 500;
+  color: #64748b;
+  font-size: 0.58rem;
+}
+
+.tmpl-minimal .edu-score-line {
+  color: #64748b;
+  font-size: 0.58rem;
+}
+
+/* --------------------------------------------------------------------------
+   Template 4: Bold Tech (Top Header Band)
+   -------------------------------------------------------------------------- */
+.tmpl-tech {
+  font-family: 'Inter', sans-serif;
+}
+
+.tmpl-tech .tech-header-band {
+  background-color: #1e293b;
+  color: #f8fafc;
+  padding: 24px;
+  margin: -32px -32px 16px -32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tmpl-tech .tech-header-band h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.tmpl-tech .tech-contact {
+  display: flex;
+  gap: 12px;
+  font-size: 0.58rem;
+  color: #cbd5e1;
+}
+
+.tmpl-tech .tech-contact a {
+  color: #38bdf8;
+}
+
+.tmpl-tech .tech-container {
+  display: flex;
+  gap: 20px;
+}
+
+.tmpl-tech .tech-main-col {
+  width: 64%;
+}
+
+.tmpl-tech .tech-side-col {
+  width: 36%;
+}
+
+.tmpl-tech .tech-section,
+.tmpl-tech .tech-side-section {
+  margin-bottom: 12px;
+}
+
+.tmpl-tech .tech-section h3,
+.tmpl-tech .tech-side-section h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: #0f172a;
+  border-bottom: 2px solid #4f46e5; /* indigo bottom bar */
+  padding-bottom: 2px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.tmpl-tech .tech-entry {
+  margin-bottom: 8px;
+}
+
+.tmpl-tech .tech-entry-title {
+  font-size: 0.65rem;
+  margin-bottom: 3px;
+}
+
+.tmpl-tech .tech-date {
+  float: right;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.tmpl-tech .tech-skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tmpl-tech .tech-skill-pill {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.52rem;
+  font-weight: 500;
+}
+
+.tmpl-tech .tech-side-edu-item,
+.tmpl-tech .tech-side-other-item {
+  margin-bottom: 8px;
+  font-size: 0.58rem;
+}
+
+.tmpl-tech .tech-side-edu-item .edu-title,
+.tmpl-tech .tech-side-other-item .oth-title {
+  font-weight: 600;
+}
+
+.tmpl-tech .tech-side-edu-item .edu-school {
+  color: #64748b;
+}
+
+/* --------------------------------------------------------------------------
+   Template 5: Elegant Academic (Left Accented Vertical Bars)
+   -------------------------------------------------------------------------- */
+.tmpl-academic {
+  font-family: 'Inter', sans-serif;
+}
+
+.tmpl-academic .academic-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.tmpl-academic .academic-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.tmpl-academic .academic-subtitle {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tmpl-academic .academic-header-right {
+  font-size: 0.55rem;
+  color: #475569;
+  text-align: right;
+  line-height: 1.5;
+}
+
+.tmpl-academic .academic-section {
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.tmpl-academic .academic-sec-title {
+  width: 25%;
+  padding-right: 10px;
+}
+
+.tmpl-academic .academic-sec-title h3 {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-left: 3px solid var(--primary-color); /* Indigo accent bar */
+  padding-left: 6px;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+}
+
+.tmpl-academic .academic-sec-content {
+  width: 75%;
+}
+
+.tmpl-academic .academic-entry {
+  margin-bottom: 8px;
+}
+
+.tmpl-academic .academic-entry .entry-header {
+  font-size: 0.65rem;
+  margin-bottom: 2px;
+}
+
+.tmpl-academic .academic-date {
+  float: right;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.tmpl-academic .academic-sub {
+  color: #475569;
+  font-size: 0.58rem;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   PREVIEW MODAL STYLING
+   ========================================================================== */
+.preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 2000;
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+
+.preview-content {
+  position: relative;
+  max-width: 620px;
+  width: 90%;
+  margin: auto;
+}
+
+.preview-resume {
+  width: 580px;
+  height: 820px;
+  background-color: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  padding: 32px;
+  transform: scale(1);
+}
+
+.preview-content .close-btn {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background-color: var(--white);
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2100;
+}
+
+.preview-content .close-btn:hover {
+  background-color: #ef4444;
+  color: var(--white);
+  border-color: #ef4444;
+  transform: rotate(90deg);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width: 1100px) {
+  .container {
+    height: auto;
+    overflow: auto;
+  }
+  
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .resizer-bar {
+    display: none;
+  }
+
+  .input-panel {
+    width: 100% !important;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .resume-panel {
+    width: 100%;
+    height: auto;
+    padding: 40px 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .resume {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1.414;
+    padding: 20px;
+  }
+  
+  .resume-content {
+    font-size: 0.55rem;
+  }
+  
+  .download-btn {
+    width: 100%;
+  }
+  
+  .preview-resume {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1.414;
+    padding: 20px;
+  }
+}

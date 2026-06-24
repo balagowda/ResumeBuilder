@@ -1,0 +1,726 @@
+/* 
+  Template 2 Styling - Creative Modern Theme 
+  Includes premium split-screen editor UI and Creative resume styles (Left-aligned, Indigo accents)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import '~@fortawesome/fontawesome-free/css/all.min.css';
+
+:root {
+  --primary-color: #6366f1; /* Creative Indigo */
+  --primary-hover: #4f46e5;
+  --text-dark: #1e293b;
+  --text-light: #64748b;
+  --background-workspace: #f1f5f9;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --white: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--background-workspace);
+  color: var(--text-dark);
+}
+
+/* Split-screen Page Container */
+.container {
+  width: 100%;
+  height: calc(100vh - 68px); /* Fills screen minus header */
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.main-content {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 0;
+}
+
+/* Resizer / Divider Drag Styling */
+.resizer-bar {
+  width: 12px;
+  cursor: col-resize;
+  background-color: transparent;
+  flex-shrink: 0;
+  height: 100%;
+  position: relative;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+/* Separator line that highlights on hover */
+.resizer-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 5px; /* Center in the 12px area */
+  width: 2px;
+  background-color: var(--border-color);
+  transition: background-color 0.2s ease;
+}
+
+.resizer-bar:hover::after,
+.resizer-bar:active::after {
+  background-color: var(--primary-color);
+}
+
+.resizer-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  color: var(--text-light);
+  font-size: 0.7rem;
+  pointer-events: none; /* Mouse events pass through to the resizer-bar */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 101;
+}
+
+/* Highlight knob on hover or active dragging */
+.resizer-bar:hover .resizer-knob,
+.resizer-bar:active .resizer-knob {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  transform: translate(-50%, -50%) scale(1.1);
+  background-color: var(--white);
+}
+
+/* ==========================================
+   INPUT PANEL (LEFT COLUMN SIDEBAR)
+   ========================================== */
+.input-panel {
+  width: 480px;
+  flex-shrink: 0;
+  height: 100%;
+  background-color: var(--white);
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.input-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.input-panel::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 6px;
+}
+
+.input-panel::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Input Panel Header */
+.input-panel-header {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.btn-back-templates {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.btn-back-templates:hover {
+  color: var(--primary-hover);
+  transform: translateX(-3px);
+}
+
+.input-panel h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+/* Resume Strength Meter */
+.strength-meter-container {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.strength-meter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.strength-meter-bar {
+  height: 6px;
+  width: 100%;
+  background-color: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.strength-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1 0%, #10b981 100%);
+  border-radius: 3px;
+  transition: width 0.4s ease-out;
+}
+
+/* Contact Fields Grid */
+.contact-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 24px;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Collapsible Form Card Blocks (Flat style, no borders/cards) */
+.input-group {
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 16px 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.section-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-header i.fa-angle-down, 
+.section-header i.fa-angle-up {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.sub-group {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border-color);
+  position: relative;
+}
+
+.sub-group:first-of-type {
+  border-top: none;
+  margin-top: 10px;
+  padding-top: 0;
+}
+
+.input-group label,
+.sub-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+  margin-top: 12px;
+  display: block;
+}
+
+.input-group label:first-of-type,
+.sub-group label:first-of-type {
+  margin-top: 0;
+}
+
+/* Forms Fields styling */
+.input-field {
+  width: 100%;
+  padding: 11px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background-color: var(--white);
+  transition: all 0.2s ease;
+  color: var(--text-dark);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.input-field::placeholder {
+  color: #a0aec0;
+}
+
+/* Experience Heading controls */
+.heading-options {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.heading-options button {
+  padding: 6px 12px;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.heading-options button.active {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}
+
+.heading-options button:hover:not(.active) {
+  background-color: #e2e8f0;
+}
+
+/* Add / Delete Entries Buttons */
+.add-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: rgba(99, 102, 241, 0.06);
+  color: var(--primary-color);
+  border: 1px dashed rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 16px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.add-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}
+
+.delete-btn {
+  position: absolute;
+  top: 16px;
+  right: 0;
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: #ef4444;
+  color: var(--white);
+}
+
+/* Draggable handle / elements */
+.draggable-section {
+  position: relative;
+}
+
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  cursor: grab;
+  margin-right: 8px;
+  font-size: 0.95rem;
+  width: 24px;
+  height: 24px;
+  transition: color 0.2s;
+}
+
+.drag-handle:hover {
+  color: var(--primary-color);
+}
+
+.draggable-section.dragging {
+  opacity: 0.5;
+}
+
+/* ==========================================
+   RESUME PREVIEW PANEL (VIBRANT RIGHT SIDE)
+   ========================================== */
+.resume-panel {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  background: radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.08) 0%, #e2e8f0 100%);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Document sheet (floating visual with paper look) */
+.resume {
+  position: relative;
+  width: 560px;
+  height: 794px;
+  background-color: var(--white);
+  border-radius: 4px; /* Real paper sharp corners */
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08), 
+              0 5px 15px rgba(0, 0, 0, 0.04),
+              0 0 0 1px rgba(15, 23, 42, 0.05);
+  padding: 32px;
+  overflow: hidden;
+  transform: scale(1);
+  transform-origin: top;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+/* Creative Template overrides */
+.resume-content {
+  width: 100%;
+  height: 100%;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #1e293b;
+}
+
+.resume-header {
+  text-align: left; /* Left aligned name block */
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.resume-header h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.contact-info {
+  margin-top: 6px;
+  font-size: 0.65rem;
+  color: #64748b;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.contact-info span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.contact-info a {
+  color: #475569;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.contact-info a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.resume-section {
+  margin-bottom: 16px;
+}
+
+/* Left colored accent border on section titles */
+.resume-section h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+  padding-left: 8px;
+  border-left: 3px solid var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resume-section p,
+.resume-section div p {
+  font-size: 0.72rem;
+  color: #334155;
+  margin-bottom: 3px;
+}
+
+.resume-section p strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.education-entry,
+.experience-entry,
+.project-entry {
+  margin-bottom: 10px;
+}
+
+.date-right {
+  float: right;
+  margin-left: auto;
+  text-align: right;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.68rem;
+}
+
+.resume-section ul {
+  padding-left: 14px;
+  margin: 2px 0 6px;
+}
+
+.resume-section ul li {
+  margin-bottom: 2px;
+  font-size: 0.72rem;
+  color: #475569;
+}
+
+/* Floating Actions on Preview */
+.preview-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(4px);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.preview-btn:hover {
+  background-color: #0f172a;
+  transform: scale(1.02);
+}
+
+/* Download PDF Action Button */
+.download-btn {
+  width: 560px;
+  padding: 14px;
+  margin-top: 24px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.download-btn:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #3b31d9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.3);
+}
+
+.download-btn:active {
+  transform: translateY(0);
+}
+
+/* ==========================================
+   PREVIEW MODAL
+   ========================================== */
+.preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 2000;
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+
+.preview-content {
+  position: relative;
+  max-width: 620px;
+  width: 90%;
+  margin: auto; /* Vertically centers if space permits, scrolls nicely if not */
+}
+
+.preview-resume {
+  width: 580px;
+  height: 820px;
+  background-color: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  padding: 32px;
+  transform: scale(1);
+}
+
+.preview-content .close-btn {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background-color: var(--white);
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2100;
+}
+
+.preview-content .close-btn:hover {
+  background-color: #ef4444;
+  color: var(--white);
+  border-color: #ef4444;
+  transform: rotate(90deg);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+@media (max-width: 1100px) {
+  .container {
+    height: auto;
+    overflow: auto;
+  }
+  
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .resizer-bar {
+    display: none;
+  }
+
+  .input-panel {
+    width: 100% !important;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .resume-panel {
+    width: 100%;
+    height: auto;
+    padding: 40px 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .resume {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1.414;
+    padding: 20px;
+  }
+  
+  .resume-content {
+    font-size: 0.65rem;
+  }
+  
+  .download-btn {
+    width: 100%;
+  }
+  
+  .preview-resume {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1.414;
+    padding: 20px;
+  }
+}

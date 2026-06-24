@@ -5,103 +5,175 @@ import '../Styles/HomePage.css';
 const templates = [
   {
     id: 1,
-    name: 'Modern',
+    name: 'Professional Executive',
+    description: 'A classic, clean single-column layout optimized for corporate and executive jobs. Recommended for traditional industries.',
     link: '/template1',
-    thumbnail: 'https://media.licdn.com/dms/image/v2/C4E12AQEq7L7Qgj41Mw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1520061951064?e=2147483647&v=beta&t=CSquL7-mjmtB826kFrJDiNl0gjjLxwF6hIwVkOq5x8w',
+    thumbnail: '/templates/template1.png',
     category: 'Professional',
+    tags: ['ATS-Optimized', 'Corporate', 'Clean'],
   },
   {
     id: 2,
-    name: 'Creative',
+    name: 'Modern Creative',
+    description: 'A split-column layout designed to maximize space and readability. Best suited for tech, design, and marketing roles.',
     link: '/template2',
-    thumbnail: 'https://www.resumetemplates.com/wp-content/uploads/2024/03/ATS-Friendly-Resume-Templates-and-Examples.pdf.jpeg',
+    thumbnail: '/templates/template2.png',
     category: 'Creative',
+    tags: ['2-Column', 'Design & Art', 'Slate theme'],
   },
   {
     id: 3,
-    name: 'Classic',
+    name: 'Minimalist Stark',
+    description: 'A stark, elegant sidebar-labeled layout with side-by-side sections. Focused on readability and whitespace.',
     link: '/template3',
-    thumbnail: 'https://media.licdn.com/dms/image/v2/C4E12AQEq7L7Qgj41Mw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1520061951064?e=2147483647&v=beta&t=CSquL7-mjmtB826kFrJDiNl0gjjLxwF6hIwVkOq5x8w',
+    thumbnail: '/templates/template3.png',
     category: 'Professional',
+    tags: ['Stark Minimalist', 'Modern', 'Whitespace'],
   },
   {
     id: 4,
-    name: 'Modern',
+    name: 'Bold Tech Header',
+    description: 'Featuring a high-contrast dark indigo top header band and tech-oriented grid layouts. Best for engineering and developers.',
     link: '/template4',
-    thumbnail: 'https://media.licdn.com/dms/image/v2/C4E12AQEq7L7Qgj41Mw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1520061951064?e=2147483647&v=beta&t=CSquL7-mjmtB826kFrJDiNl0gjjLxwF6hIwVkOq5x8w',
-    category: 'Modern',
+    thumbnail: '/templates/template4.png',
+    category: 'Creative',
+    tags: ['Bold Accent', 'Tech & Devs', 'High Contrast'],
+  },
+  {
+    id: 5,
+    name: 'Elegant Academic',
+    description: 'Curriculum Vitae layout featuring vertical indigo left borders. Highly structured for detailed research and certification lists.',
+    link: '/template5',
+    thumbnail: '/templates/template5.png',
+    category: 'Professional',
+    tags: ['CV Layout', 'Left Borders', 'Structured Grid'],
   },
 ];
 
 const HomePage = () => {
-    const [selectedFilter, setSelectedFilter] = useState('All');
-  
-    const handleFilterChange = (category) => {
-      setSelectedFilter(category);
-    };
-  
-    const filteredTemplates = selectedFilter === 'All'
-      ? templates
-      : templates.filter(template => template.category === selectedFilter);
-  
-    return (
-      <div className="homepage-container">
-        <section className="hero-section">
-          <h1>Create Your Professional Resume</h1>
-          <p>Free Resume Templates - No Login Required, No Data Saved, Instant Download</p>
-          <p className="cta-button">
-            It's free
-          </p>
-        </section>
-        <section className="filter-bar">
-          <button
-            className={`filter-button ${selectedFilter === 'All' ? 'active' : ''}`}
-            onClick={() => handleFilterChange('All')}
-          >
-            All
-          </button>
-          <button
-            className={`filter-button ${selectedFilter === 'Modern' ? 'active' : ''}`}
-            onClick={() => handleFilterChange('Modern')}
-          >
-            Modern
-          </button>
-          <button
-            className={`filter-button ${selectedFilter === 'Creative' ? 'active' : ''}`}
-            onClick={() => handleFilterChange('Creative')}
-          >
-            Creative
-          </button>
-          <button
-            className={`filter-button ${selectedFilter === 'Professional' ? 'active' : ''}`}
-            onClick={() => handleFilterChange('Professional')}
-          >
-            Professional
-          </button>
-        </section>
-        <section className="template-cards">
-          {filteredTemplates.length > 0 ? (
-            filteredTemplates.map((template) => (
-              <article key={template.id} className="template-card" role="article" aria-labelledby={`template-${template.id}`}>
-                <div
-                  className="card-image"
-                  style={{ backgroundImage: `url(${template.thumbnail})` }}
-                  aria-label={`${template.name} template preview`}
-                ></div>
-                <div className="template-content" id='templates'>
-                  <h2 id={`template-${template.id}`}>{template.name}</h2>
-                  <Link to={template.link} className="customize-button">
-                    Customize This Template
-                  </Link>
-                </div>
-              </article>
-            ))
-          ) : (
-            <div className="no-templates-message">No templates found</div>
-          )}
-        </section>
-      </div>
-    );
+  const [selectedFilter, setSelectedFilter] = useState('All');
+  const [flippedCards, setFlippedCards] = useState({});
+
+  const handleFilterChange = (category) => {
+    setSelectedFilter(category);
   };
+
+  const handleFlip = (id, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFlippedCards(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const filteredTemplates = selectedFilter === 'All'
+    ? templates
+    : templates.filter(template => template.category === selectedFilter);
+
+  return (
+    <div className="templates-page-container">
+      {/* Background glow blobs */}
+      <div className="glow-blob blob-1"></div>
+      <div className="glow-blob blob-2"></div>
+
+      {/* Header section */}
+      <section className="templates-header">
+        <span className="templates-tagline">✨ Choose Your Layout</span>
+        <h1>Select a Resume Template</h1>
+        <p>Pick a starting layout. You can customize the fields, change layouts, and drag sections to reorder them in the next step.</p>
+      </section>
+
+      {/* Filter bar */}
+      <section className="templates-filter-bar">
+        {['All', 'Professional', 'Creative'].map((cat) => (
+          <button
+            key={cat}
+            className={`templates-filter-button ${selectedFilter === cat ? 'active' : ''}`}
+            onClick={() => handleFilterChange(cat)}
+          >
+            {cat === 'All' ? 'Show All' : `${cat} Templates`}
+          </button>
+        ))}
+      </section>
+
+      {/* Template cards grid */}
+      <section className="templates-grid-section">
+        {filteredTemplates.length > 0 ? (
+          <div className="templates-cards-grid">
+            {filteredTemplates.map((template) => {
+              const isFlipped = !!flippedCards[template.id];
+              return (
+                <div key={template.id} className="premium-template-card-container">
+                  <div className={`card-inner ${isFlipped ? 'flipped' : ''}`}>
+                    
+                    {/* Front Face: ONLY preview pic and hover Customize button */}
+                    <div className="card-face card-front">
+                      <div
+                        className="template-preview-image"
+                        style={{ backgroundImage: `url(${template.thumbnail})` }}
+                      ></div>
+                      
+                      {/* Flip button (Info/Details triggers flipping) */}
+                      <button 
+                        className="btn-card-flip" 
+                        onClick={(e) => handleFlip(template.id, e)}
+                        title="Show Details & Tags"
+                      >
+                        <i className="fa-solid fa-rotate"></i>
+                      </button>
+
+                      <div className="template-preview-overlay">
+                        <Link to={template.link} className="btn-preview-customize">
+                          Select Template <i className="fa-solid fa-pen-to-square"></i>
+                        </Link>
+                      </div>
+                    </div>
+                    
+                    {/* Back Face: Description, Tags, Use Template & Flip-back */}
+                    <div className="card-face card-back">
+                      <div className="card-back-header">
+                        <h3 className="template-name-title">{template.name}</h3>
+                        <button 
+                          className="btn-card-flip-back" 
+                          onClick={(e) => handleFlip(template.id, e)}
+                          title="Back to Preview"
+                        >
+                          <i className="fa-solid fa-rotate"></i>
+                        </button>
+                      </div>
+                      
+                      <div className="card-back-body">
+                        <div className="template-tags-row">
+                          {template.tags.map((tag, i) => (
+                            <span key={i} className="template-badge-tag">{tag}</span>
+                          ))}
+                        </div>
+                        <p className="template-desc-text">{template.description}</p>
+                      </div>
+
+                      <div className="card-back-footer">
+                        <Link to={template.link} className="btn-card-action">
+                          Use Template <i className="fa-solid fa-arrow-right"></i>
+                        </Link>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="no-templates-found-box">
+            <i className="fa-solid fa-magnifying-glass"></i>
+            <p>No templates found matching this filter.</p>
+            <button className="btn-reset-filter" onClick={() => setSelectedFilter('All')}>Reset Filter</button>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
 
 export default HomePage;
