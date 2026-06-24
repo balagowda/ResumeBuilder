@@ -982,3 +982,47 @@
     padding: 20px;
   }
 }
+
+/* ==========================================================================
+   PRINT / PDF EXPORT STYLES (ATS-FRIENDLY)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .resume-panel, .resume-panel * {
+    visibility: visible;
+  }
+
+  .resume-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  .resume {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    box-shadow: none;
+    border: none;
+    transform: none !important;
+  }
+
+  .preview-btn, .download-btn, .resizer-bar, .input-panel, .App-header, .App-footer {
+    display: none !important;
+  }
+}

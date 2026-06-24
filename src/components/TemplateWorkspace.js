@@ -191,48 +191,11 @@ export default function TemplateWorkspace({ templateId }) {
   };
   
   const handleDownloadPDF = () => {
-    const element = resumeRef.current;
-    if (element) {
-      const clonedElement = element.cloneNode(true);
-  
-      // PDF print setups
-      clonedElement.style.width = '595pt';
-      clonedElement.style.minHeight = '842pt';
-      clonedElement.style.overflow = 'hidden';
-      clonedElement.style.padding = '30pt';
-      clonedElement.style.background = 'white';
-      clonedElement.style.color = '#333';
-      clonedElement.style.boxSizing = 'border-box';
-      clonedElement.style.display = 'block';
-  
-      clonedElement.querySelectorAll('.resume-section').forEach(node => {
-        node.style.pageBreakInside = 'avoid';
-        node.style.breakInside = 'avoid';
-      });
-
-      html2pdf()
-        .from(clonedElement)
-        .set({
-          margin: 0,
-          filename: `${formData.fullName || 'resume'}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 3,
-            useCORS: true,
-            windowWidth: 595,
-          },
-          jsPDF: {
-            unit: 'pt',
-            format: 'a4',
-            orientation: 'portrait',
-            putOnlyUsedFonts: true,
-          },
-        })
-        .save()
-        .catch((error) => {
-          console.error('Error downloading PDF:', error);
-        });
-    }
+    // Native browser printing is far superior for resumes because:
+    // 1. It creates PDFs with real, selectable text (crucial for ATS tracking systems)
+    // 2. It avoids library crashes and silent failures on different browsers
+    // 3. It generates perfectly crisp vector outputs instead of blurry raster images
+    window.print();
   };
 
   const togglePreview = () => {
