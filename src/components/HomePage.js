@@ -111,7 +111,7 @@ const HomePage = () => {
                     <div className="card-face card-front">
                       <div
                         className="template-preview-image"
-                        style={{ backgroundImage: `url(${template.thumbnail})` }}
+                        style={{ backgroundImage: `url(${process.env.PUBLIC_URL}${template.thumbnail})` }}
                       ></div>
                       
                       {/* Flip button (Info/Details triggers flipping) */}
