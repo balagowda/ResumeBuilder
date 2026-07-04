@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import html2pdf from 'html2pdf.js';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import Summary from './Summary';
 import ContactFields from './ContactFields';
 import Experiences from './Experiences';
@@ -8,6 +9,7 @@ import Education from './Education';
 import Projects from './Projects';
 import Skills from './Skills';
 import Others from './Others';
+import StylingControls from './StylingControls';
 import '../Styles/TemplateWorkspace.css';
 
 export default function TemplateWorkspace({ templateId }) {
@@ -26,6 +28,12 @@ export default function TemplateWorkspace({ templateId }) {
       projects: [{ title: '', description: '', dates: '' }],
       others: [],
       skills: '',
+      addHeaderLine: false,
+      showProfessionalTitle: false,
+      fontHeading: 'Arial, Helvetica, sans-serif',
+      fontSubheading: 'Arial, Helvetica, sans-serif',
+      fontText: 'Arial, Helvetica, sans-serif',
+      lineHeight: 1.4,
     };
   });
   
@@ -164,13 +172,14 @@ export default function TemplateWorkspace({ templateId }) {
   };
 
   const handleChange = (e, section, index = null) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    const finalValue = type === 'checkbox' ? checked : value;
     if (index !== null) {
       const updatedSection = [...formData[section]];
-      updatedSection[index] = { ...updatedSection[index], [name]: value };
+      updatedSection[index] = { ...updatedSection[index], [name]: finalValue };
       setFormData({ ...formData, [section]: updatedSection });
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData({ ...formData, [name]: finalValue });
     }
   };
 
@@ -190,12 +199,113 @@ export default function TemplateWorkspace({ templateId }) {
     setFormData({ ...formData, [section]: updatedSection });
   };
   
-  const handleDownloadPDF = () => {
-    // Native browser printing is far superior for resumes because:
-    // 1. It creates PDFs with real, selectable text (crucial for ATS tracking systems)
-    // 2. It avoids library crashes and silent failures on different browsers
-    // 3. It generates perfectly crisp vector outputs instead of blurry raster images
-    window.print();
+  const handleDownloadPDF = async () => {
+    const originalElement = resumeRef.current;
+    if (!originalElement) return;
+
+    try {
+      // Find the scrolling container to temporarily reset its scroll
+      // This prevents html2canvas from capturing a blank or offset canvas
+      const panel = originalElement.closest('.resume-panel');
+      const oldScrollTop = panel ? panel.scrollTop : 0;
+      const oldScrollLeft = panel ? panel.scrollLeft : 0;
+      
+      if (panel) {
+        panel.scrollTop = 0;
+        panel.scrollLeft = 0;
+      }
+      
+      // Wait a tiny bit for the browser to register the scroll reset
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // Capture the element precisely as it appears on screen
+      const canvas = await html2canvas(originalElement, {
+        scale: 3, // 3x scale guarantees retina-quality crisp text when stretched
+        useCORS: true,
+        scrollX: 0,
+        scrollY: 0,
+        ignoreElements: (element) => {
+          // Check if classList exists and contains is a function (SVG elements can break this)
+          if (element.classList && typeof element.classList.contains === 'function') {
+            return element.classList.contains('preview-btn');
+          }
+          return false;
+        }
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+      // Create an A4 PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'pt',
+        format: 'a4'
+      });
+
+      // Safely get exact dimensions of an A4 page across different jsPDF versions
+      const pdfWidth = pdf.internal.pageSize.getWidth ? pdf.internal.pageSize.getWidth() : pdf.internal.pageSize.width;
+      const pdfHeight = pdf.internal.pageSize.getHeight ? pdf.internal.pageSize.getHeight() : pdf.internal.pageSize.height;
+
+      // Force the 560x794 image to perfectly stretch and fill the A4 page
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+      // --- INJECT CLICKABLE LINKS ---
+      // Since html2canvas outputs a flat image, we must manually map HTML <a> tags to PDF link boxes
+      const origRect = originalElement.getBoundingClientRect();
+      const links = originalElement.querySelectorAll('a');
+      
+      links.forEach((link) => {
+        const href = link.getAttribute('href');
+        if (href) {
+          const rect = link.getBoundingClientRect();
+          
+          // Calculate relative position within the resume container
+          const relX = rect.left - origRect.left;
+          const relY = rect.top - origRect.top;
+          
+          // Mathematically scale the coordinates to match the stretched A4 PDF dimensions
+          const pdfLinkX = (relX / origRect.width) * pdfWidth;
+          const pdfLinkY = (relY / origRect.height) * pdfHeight;
+          const pdfLinkW = (rect.width / origRect.width) * pdfWidth;
+          const pdfLinkH = (rect.height / origRect.height) * pdfHeight;
+          
+          // Overlay an invisible clickable region on the PDF
+          pdf.link(pdfLinkX, pdfLinkY, pdfLinkW, pdfLinkH, { url: href });
+        }
+      });
+
+      const filename = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'Resume'}.pdf`;
+      pdf.save(filename);
+
+      // Restore user's previous scroll position
+      if (panel) {
+        panel.scrollTop = oldScrollTop;
+        panel.scrollLeft = oldScrollLeft;
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert(`Failed to download PDF. Error: ${error.message}`);
+    }
+  };
+
+  const handleClearData = () => {
+    if (window.confirm("Are you sure you want to clear all your resume data? This action cannot be undone.")) {
+      localStorage.removeItem('resumeFormData');
+      setFormData({
+        fullName: '',
+        mail: '',
+        mobile: '',
+        linkedin: '',
+        github: '',
+        other: '',
+        summary: '',
+        experiences: [{ title: '', company: '', dates: '', description: '' }],
+        education: [{ studyTitle: '', school: '', date: '', score: '' }],
+        projects: [{ title: '', description: '', dates: '' }],
+        others: [],
+        skills: '',
+      });
+    }
   };
 
   const togglePreview = () => {
@@ -240,11 +350,11 @@ export default function TemplateWorkspace({ templateId }) {
   // TEMPLATE RENDERERS
   // ==========================================
 
-  // Render Template 1 (Classic Corporate)
   const renderTemplate1 = () => (
-    <div className="resume-content tmpl-classic" ref={resumeRef}>
-      <div className="resume-header">
+    <div className="resume-content tmpl-classic">
+      <div className={`resume-header ${formData.addHeaderLine ? 'with-line' : ''}`}>
         <h1>{formData.fullName || 'Your Name'}</h1>
+        {formData.showProfessionalTitle && <p className="prof-title" style={{ marginTop: '2px', marginBottom: '8px', fontSize: '1.0rem', color: '#64748b', fontWeight: '500' }}>Senior Professional</p>}
         <div className="contact-info">
           {formData.mail && <span><i className="fas fa-envelope"></i> {formData.mail}</span>}
           {formData.mobile && <span><i className="fas fa-phone"></i> {formData.mobile}</span>}
@@ -327,9 +437,8 @@ export default function TemplateWorkspace({ templateId }) {
     </div>
   );
 
-  // Render Template 2 (Slate Sidebar Creative)
   const renderTemplate2 = () => (
-    <div className="resume-content tmpl-creative" ref={resumeRef}>
+    <div className="resume-content tmpl-creative">
       <div className="creative-split-container">
         {/* Left Dark Sidebar */}
         <div className="creative-sidebar">
@@ -378,7 +487,7 @@ export default function TemplateWorkspace({ templateId }) {
         <div className="creative-main">
           <div className="creative-header">
             <h1>{formData.fullName || 'Your Name'}</h1>
-            <p className="creative-title">Senior Professional</p>
+            {formData.showProfessionalTitle && <p className="creative-title">Senior Professional</p>}
           </div>
           {sectionOrder.map((section) => {
             if (section === 'summary' && formData.summary) {
@@ -435,11 +544,11 @@ export default function TemplateWorkspace({ templateId }) {
     </div>
   );
 
-  // Render Template 3 (Minimalist Stark)
   const renderTemplate3 = () => (
-    <div className="resume-content tmpl-minimal" ref={resumeRef}>
+    <div className="resume-content tmpl-minimal">
       <div className="minimal-header">
         <h1>{formData.fullName || 'Your Name'}</h1>
+        {formData.showProfessionalTitle && <p className="prof-title" style={{ marginTop: '2px', marginBottom: '4px', fontSize: '1.0rem', color: '#475569', fontWeight: '500' }}>Senior Professional</p>}
         <div className="minimal-contact">
           {formData.mail && <span>{formData.mail}</span>}
           {formData.mobile && <span>{formData.mobile}</span>}
@@ -453,31 +562,24 @@ export default function TemplateWorkspace({ templateId }) {
         if (section === 'summary' && formData.summary) {
           return (
             <div key={section} className="minimal-section">
-              <div className="sec-label">Profile</div>
+              <h3>Professional Summary</h3>
               <div className="sec-body">{formatTextToList(formData.summary)}</div>
-            </div>
-          );
-        }
-        if (section === 'skills' && formData.skills) {
-          return (
-            <div key={section} className="minimal-section">
-              <div className="sec-label">Skills</div>
-              <div className="sec-body font-medium">{formData.skills}</div>
             </div>
           );
         }
         if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
           return (
             <div key={section} className="minimal-section">
-              <div className="sec-label">Experience</div>
+              <h3>{experienceHeading}</h3>
               <div className="sec-body">
                 {formData.experiences.map((exp, idx) => exp.title && (
                   <div key={idx} className="minimal-entry">
-                    <p className="entry-header">
-                      <strong>{exp.title}</strong>
-                      <span className="entry-sub">{exp.company} &mdash; {exp.dates}</span>
-                    </p>
-                    {formatTextToList(exp.description)}
+                    <div className="minimal-entry-header">
+                      <span className="minimal-title"><strong>{exp.title}</strong></span>
+                      <span className="minimal-date">{exp.dates}</span>
+                    </div>
+                    {exp.company && <div className="minimal-company"><strong>{exp.company}</strong></div>}
+                    <div className="minimal-desc">{formatTextToList(exp.description)}</div>
                   </div>
                 ))}
               </div>
@@ -487,15 +589,15 @@ export default function TemplateWorkspace({ templateId }) {
         if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
           return (
             <div key={section} className="minimal-section">
-              <div className="sec-label">Projects</div>
+              <h3>Projects</h3>
               <div className="sec-body">
                 {formData.projects.map((proj, idx) => proj.title && (
                   <div key={idx} className="minimal-entry">
-                    <p className="entry-header">
-                      <strong>{proj.title}</strong>
-                      <span className="entry-sub">{proj.dates}</span>
-                    </p>
-                    {formatTextToList(proj.description)}
+                    <div className="minimal-entry-header">
+                      <span className="minimal-title"><strong>{proj.title}</strong></span>
+                      <span className="minimal-date">{proj.dates}</span>
+                    </div>
+                    <div className="minimal-desc">{formatTextToList(proj.description)}</div>
                   </div>
                 ))}
               </div>
@@ -505,17 +607,27 @@ export default function TemplateWorkspace({ templateId }) {
         if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
           return (
             <div key={section} className="minimal-section">
-              <div className="sec-label">Education</div>
+              <h3>Education</h3>
               <div className="sec-body">
                 {formData.education.map((edu, idx) => edu.studyTitle && (
                   <div key={idx} className="minimal-entry">
-                    <p className="entry-header">
-                      <strong>{edu.studyTitle}</strong>
-                      <span className="entry-sub">{edu.school} &mdash; {edu.date}</span>
-                    </p>
-                    {edu.score && <p className="edu-score-line">GPA/Result: {edu.score}</p>}
+                    <div className="minimal-entry-header">
+                      <span className="minimal-title"><strong>{edu.studyTitle}</strong></span>
+                      <span className="minimal-date">{edu.date}</span>
+                    </div>
+                    {edu.school && <div className="minimal-company">{edu.school} {edu.score && `• ${edu.score}`}</div>}
                   </div>
                 ))}
+              </div>
+            </div>
+          );
+        }
+        if (section === 'skills' && formData.skills) {
+          return (
+            <div key={section} className="minimal-section">
+              <h3>Expert-Level Skills</h3>
+              <div className="sec-body" style={{ marginTop: '4px' }}>
+                {formData.skills}
               </div>
             </div>
           );
@@ -523,12 +635,14 @@ export default function TemplateWorkspace({ templateId }) {
         if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
           return (
             <div key={section} className="minimal-section">
-              <div className="sec-label">Others</div>
+              <h3>Others</h3>
               <div className="sec-body">
                 {formData.others.map((oth, idx) => oth.title && (
-                  <div key={idx} className="minimal-entry">
-                    <p className="entry-header"><strong>{oth.title}</strong></p>
-                    {formatTextToList(oth.description)}
+                  <div key={idx} className="minimal-entry" style={{ marginBottom: '8px' }}>
+                    <div className="minimal-entry-header">
+                      <span className="minimal-title"><strong>{oth.title}</strong></span>
+                    </div>
+                    <div className="minimal-desc">{formatTextToList(oth.description)}</div>
                   </div>
                 ))}
               </div>
@@ -540,11 +654,11 @@ export default function TemplateWorkspace({ templateId }) {
     </div>
   );
 
-  // Render Template 4 (Bold Tech Header-band)
   const renderTemplate4 = () => (
-    <div className="resume-content tmpl-tech" ref={resumeRef}>
+    <div className="resume-content tmpl-tech">
       <div className="tech-header-band">
         <h1>{formData.fullName || 'Your Name'}</h1>
+        {formData.showProfessionalTitle && <p className="prof-title" style={{ marginTop: '2px', marginBottom: '8px', fontSize: '1.0rem', color: '#cbd5e1', fontWeight: '500' }}>Senior Professional</p>}
         <div className="tech-contact">
           {formData.mail && <span><i className="fas fa-envelope"></i> {formData.mail}</span>}
           {formData.mobile && <span><i className="fas fa-phone"></i> {formData.mobile}</span>}
@@ -651,19 +765,19 @@ export default function TemplateWorkspace({ templateId }) {
     </div>
   );
 
-  // Render Template 5 (Elegant Academic)
   const renderTemplate5 = () => (
-    <div className="resume-content tmpl-academic" ref={resumeRef}>
+    <div className="resume-content tmpl-academic">
       <div className="academic-header">
         <div className="academic-header-left">
-          <h1>{formData.fullName || 'Your Name'}</h1>
-          <p className="academic-subtitle">Curriculum Vitae</p>
+          <h1>{formData.fullName || 'YOUR NAME'}</h1>
+          {formData.showProfessionalTitle && <p className="academic-prof-title">Senior Professional</p>}
         </div>
         <div className="academic-header-right">
-          {formData.mail && <p>email: {formData.mail}</p>}
-          {formData.mobile && <p>phone: {formData.mobile}</p>}
-          {formData.linkedin && <p>linkedin.com/in/{formData.fullName ? formData.fullName.toLowerCase().replace(/\s+/g, '') : 'linkedin'}</p>}
-          {formData.github && <p>github: {formData.github.replace(/https?:\/\/(www\.)?github\.com\//, '')}</p>}
+          {formData.mobile && <p>{formData.mobile}</p>}
+          {formData.mail && <p>{formData.mail}</p>}
+          {formData.linkedin && <p>{formData.linkedin}</p>}
+          {formData.github && <p>{formData.github}</p>}
+          {formData.other && <p>{formData.other}</p>}
         </div>
       </div>
       
@@ -671,29 +785,22 @@ export default function TemplateWorkspace({ templateId }) {
         if (section === 'summary' && formData.summary) {
           return (
             <div key={section} className="academic-section">
-              <div className="academic-sec-title"><h3>Research Profile</h3></div>
+              <h3>Professional Summary</h3>
               <div className="academic-sec-content">{formatTextToList(formData.summary)}</div>
-            </div>
-          );
-        }
-        if (section === 'skills' && formData.skills) {
-          return (
-            <div key={section} className="academic-section">
-              <div className="academic-sec-title"><h3>Technical Skills</h3></div>
-              <div className="academic-sec-content font-medium">{formData.skills}</div>
             </div>
           );
         }
         if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
           return (
             <div key={section} className="academic-section">
-              <div className="academic-sec-title"><h3>Professional Appointments</h3></div>
+              <h3>Work Experience</h3>
               <div className="academic-sec-content">
                 {formData.experiences.map((exp, idx) => exp.title && (
                   <div key={idx} className="academic-entry">
                     <p className="entry-header">
-                      <strong>{exp.title}</strong> &mdash; <span>{exp.company}</span>
-                      <span className="academic-date">{exp.dates}</span>
+                      <strong>{exp.title}</strong>
+                      {exp.company && <span> - {exp.company}</span>}
+                      {exp.dates && <span className="academic-date"> - {exp.dates}</span>}
                     </p>
                     {formatTextToList(exp.description)}
                   </div>
@@ -705,13 +812,13 @@ export default function TemplateWorkspace({ templateId }) {
         if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
           return (
             <div key={section} className="academic-section">
-              <div className="academic-sec-title"><h3>Selected Projects</h3></div>
+              <h3>Projects</h3>
               <div className="academic-sec-content">
                 {formData.projects.map((proj, idx) => proj.title && (
                   <div key={idx} className="academic-entry">
                     <p className="entry-header">
                       <strong>{proj.title}</strong>
-                      <span className="academic-date">{proj.dates}</span>
+                      {proj.dates && <span className="academic-date"> - {proj.dates}</span>}
                     </p>
                     {formatTextToList(proj.description)}
                   </div>
@@ -723,17 +830,27 @@ export default function TemplateWorkspace({ templateId }) {
         if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
           return (
             <div key={section} className="academic-section">
-              <div className="academic-sec-title"><h3>Education</h3></div>
+              <h3>Education & Certifications</h3>
               <div className="academic-sec-content">
                 {formData.education.map((edu, idx) => edu.studyTitle && (
                   <div key={idx} className="academic-entry">
                     <p className="entry-header">
-                      <strong>{edu.studyTitle}</strong>
-                      <span className="academic-date">{edu.date}</span>
+                      <strong>{edu.school || 'School'}</strong> - {edu.studyTitle}
+                      {edu.date && <span className="academic-date"> - {edu.date}</span>}
                     </p>
-                    <p className="academic-sub">{edu.school} {edu.score && `| Score: ${edu.score}`}</p>
+                    {edu.score && <p className="academic-sub" style={{ paddingLeft: '12px' }}>Score: {edu.score}</p>}
                   </div>
                 ))}
+              </div>
+            </div>
+          );
+        }
+        if (section === 'skills' && formData.skills) {
+          return (
+            <div key={section} className="academic-section">
+              <h3>Skills</h3>
+              <div className="academic-sec-content font-medium">
+                <p>{formData.skills}</p>
               </div>
             </div>
           );
@@ -741,7 +858,7 @@ export default function TemplateWorkspace({ templateId }) {
         if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
           return (
             <div key={section} className="academic-section">
-              <div className="academic-sec-title"><h3>Grants & Awards</h3></div>
+              <h3>Others</h3>
               <div className="academic-sec-content">
                 {formData.others.map((oth, idx) => oth.title && (
                   <div key={idx} className="academic-entry">
@@ -781,9 +898,14 @@ export default function TemplateWorkspace({ templateId }) {
     return (
       <div className="input-panel" style={{ width: sidebarWidth }}>
         <div className="input-panel-header">
-          <Link to="/templates" className="btn-back-templates">
-            <i className="fas fa-arrow-left"></i> Back to Templates
-          </Link>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <Link to="/templates" className="btn-back-templates" style={{ marginBottom: 0 }}>
+              <i className="fas fa-arrow-left"></i> Back to Templates
+            </Link>
+            <button className="btn-clear-data" onClick={handleClearData}>
+              <i className="fas fa-trash-alt"></i> Clear Data
+            </button>
+          </div>
           <h2>Your Details</h2>
           <div className="strength-meter-container">
             <div className="strength-meter-header">
@@ -797,6 +919,21 @@ export default function TemplateWorkspace({ templateId }) {
         </div>
 
         <ContactFields formData={formData} handleChange={handleChange} />
+        
+        {templateId === 1 && (
+          <div className="input-group" style={{ paddingTop: '0', paddingBottom: '20px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', color: '#1e293b', fontWeight: '500' }}>
+              <input
+                type="checkbox"
+                name="addHeaderLine"
+                checked={formData.addHeaderLine || false}
+                onChange={handleChange}
+                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary-color)' }}
+              />
+              Add Line under Contact Info
+            </label>
+          </div>
+        )}
         
         {sectionOrder.map((section) => (
           <div
@@ -936,6 +1073,8 @@ export default function TemplateWorkspace({ templateId }) {
             )}
           </div>
         ))}
+        
+        <StylingControls formData={formData} handleChange={handleChange} />
       </div>
     );
   };
@@ -950,7 +1089,16 @@ export default function TemplateWorkspace({ templateId }) {
           </div>
         </div>
         <div className="resume-panel">
-          <div className="resume">
+          <div 
+            className="resume" 
+            ref={resumeRef}
+            style={{
+              '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
+              '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
+              '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
+              '--line-height': formData.lineHeight || 1.4,
+            }}
+          >
             {renderResumeContent()}
             <button className="preview-btn" onClick={togglePreview}>
               Preview
@@ -968,7 +1116,17 @@ export default function TemplateWorkspace({ templateId }) {
             <button className="close-btn" onClick={togglePreview} title="Close Preview">
               <i className="fas fa-times"></i>
             </button>
-            <div className="resume preview-resume">{renderResumeContent()}</div>
+            <div 
+              className="resume preview-resume"
+              style={{
+                '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
+                '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
+                '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
+                '--line-height': formData.lineHeight || 1.4,
+              }}
+            >
+              {renderResumeContent()}
+            </div>
           </div>
         </div>
       )}

@@ -23,12 +23,12 @@ const templates = [
   },
   {
     id: 3,
-    name: 'Minimalist Stark',
-    description: 'A stark, elegant sidebar-labeled layout with side-by-side sections. Focused on readability and whitespace.',
+    name: 'Executive Centered',
+    description: 'A pristine, center-aligned corporate structure with full-width section borders. Highly professional.',
     link: '/template3',
-    thumbnail: '/templates/template3.png',
+    thumbnail: '/templates/template3_v2.png',
     category: 'Professional',
-    tags: ['Stark Minimalist', 'Modern', 'Whitespace'],
+    tags: ['Top-tier Corporate', 'Clean Borders', 'Whitespace'],
   },
   {
     id: 4,
@@ -41,12 +41,12 @@ const templates = [
   },
   {
     id: 5,
-    name: 'Elegant Academic',
-    description: 'Curriculum Vitae layout featuring vertical indigo left borders. Highly structured for detailed research and certification lists.',
+    name: 'Modern Professional',
+    description: 'A sleek two-column header with heavy section borders in a strict black-and-white aesthetic.',
     link: '/template5',
-    thumbnail: '/templates/template5.png',
+    thumbnail: '/templates/template5_v2.png',
     category: 'Professional',
-    tags: ['CV Layout', 'Left Borders', 'Structured Grid'],
+    tags: ['Two-Column Header', 'B&W Aesthetic', 'Structured'],
   },
 ];
 
