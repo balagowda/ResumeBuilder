@@ -1,70 +1,54 @@
-# Getting Started with Create React App
+# ResumeBuilder — Free Online Resume Builder
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Live site:** [https://balagowda.github.io/ResumeBuilder/](https://balagowda.github.io/ResumeBuilder/)
 
-## Available Scripts
+A 100% free, privacy-first resume builder. Pick one of 25+ professional, ATS-friendly templates, fill in your details, and download your resume as a PDF — no sign-up, no watermark, and your data never leaves the browser.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- **25+ free professional templates** — browse them at [/templates](https://balagowda.github.io/ResumeBuilder/templates/)
+- **ATS-friendly layouts** that parse cleanly in applicant tracking systems
+- **No login required** — start building immediately
+- **Instant PDF download** via html2pdf/jsPDF
+- **Complete privacy** — everything runs client-side; nothing is stored on a server
+- **Drag-and-drop section reordering** powered by dnd-kit
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Tech Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- [React 19](https://react.dev/) with [React Router 7](https://reactrouter.com/) (Create React App)
+- [@dnd-kit](https://dndkit.com/) for drag-and-drop
+- [html2pdf.js](https://github.com/eKoopmans/html2pdf.js) / [jsPDF](https://github.com/parallax/jsPDF) / [html2canvas](https://html2canvas.hertzen.com/) for PDF export
+- Hosted on **GitHub Pages** (deployed with `gh-pages`)
 
-### `npm test`
+## Getting Started
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+npm start
+```
 
-### `npm run build`
+The dev server runs at [http://localhost:3000/ResumeBuilder](http://localhost:3000/ResumeBuilder).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Scripts
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+| Command | What it does |
+| --- | --- |
+| `npm start` | Run the app in development mode |
+| `npm run build` | Production build into `build/`, then runs `scripts/seo-postbuild.js` |
+| `npm run deploy` | Build and publish `build/` to the `gh-pages` branch (GitHub Pages) |
+| `npm test` | Run the test suite |
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Project Structure
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```
+public/
+  index.html            # SEO meta tags, structured data, static crawlable content
+  404.html              # SPA redirect shim for GitHub Pages (noindex)
+  sitemap.xml           # Submitted to Google Search Console
+  templates/            # Template preview images
+scripts/
+  seo-postbuild.js      # Generates static route entry points after build
+src/
+  components/           # LandingPage, HomePage, TemplateWorkspace, templates, auth
+  Styles/               # Component styles
+```
