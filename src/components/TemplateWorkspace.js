@@ -65,6 +65,7 @@ export default function TemplateWorkspace({ templateId }) {
   const [sidebarWidth, setSidebarWidth] = useState(480);
   const [isResizing, setIsResizing] = useState(false);
   const [zoom, setZoom] = useState(100);
+  const [savedAt, setSavedAt] = useState(null);
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -106,6 +107,7 @@ export default function TemplateWorkspace({ templateId }) {
   // Save formData to localStorage
   useEffect(() => {
     localStorage.setItem('resumeFormData', JSON.stringify(formData));
+    setSavedAt(new Date());
   }, [formData]);
 
   // Warn on tab close only when the resume actually has content
@@ -398,6 +400,19 @@ export default function TemplateWorkspace({ templateId }) {
     return score;
   };
 
+  // What's still missing, so the strength meter is actionable
+  const getStrengthTips = () => {
+    const tips = [];
+    if (!formData.fullName) tips.push({ label: 'Add your name', pts: 15 });
+    if (!formData.mail) tips.push({ label: 'Add your email', pts: 10 });
+    if (!formData.mobile) tips.push({ label: 'Add a phone number', pts: 10 });
+    if (!formData.summary) tips.push({ label: 'Write a summary', pts: 15 });
+    if (!formData.skills) tips.push({ label: 'List your skills', pts: 10 });
+    if (!(formData.experiences && formData.experiences[0] && formData.experiences[0].title)) tips.push({ label: 'Add work experience', pts: 20 });
+    if (!(formData.education && formData.education[0] && formData.education[0].studyTitle)) tips.push({ label: 'Add your education', pts: 20 });
+    return tips.slice(0, 3);
+  };
+
 
   const renderResumeContent = () =>
     renderResumeTemplate(templateId, { formData, sectionOrder, experienceHeading, formatTextToList });
@@ -455,6 +470,18 @@ export default function TemplateWorkspace({ templateId }) {
             <div className="strength-meter-bar">
               <div className="strength-meter-fill" style={{ width: `${completeness}%` }}></div>
             </div>
+            {completeness < 100 && (
+              <ul className="strength-tips">
+                {getStrengthTips().map((tip) => (
+                  <li key={tip.label}><i className="fas fa-plus-circle"></i> {tip.label} <span className="tip-pts">+{tip.pts}%</span></li>
+                ))}
+              </ul>
+            )}
+            {savedAt && (
+              <p className="autosave-note">
+                <i className="fas fa-check-circle"></i> Autosaved {savedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            )}
           </div>
         </div>
 
@@ -651,11 +678,13 @@ export default function TemplateWorkspace({ templateId }) {
             <div
               className="resume print-target"
               ref={resumeRef}
+              data-accent={formData.accentColor ? 'on' : undefined}
               style={{
                 '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
                 '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
                 '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
                 '--line-height': formData.lineHeight || 1.4,
+                '--accent': formData.accentColor || undefined,
               }}
             >
               {renderResumeContent()}
@@ -684,13 +713,15 @@ export default function TemplateWorkspace({ templateId }) {
             <button className="close-btn" onClick={togglePreview} title="Close Preview">
               <i className="fas fa-times"></i>
             </button>
-            <div 
+            <div
               className="resume preview-resume"
+              data-accent={formData.accentColor ? 'on' : undefined}
               style={{
                 '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
                 '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
                 '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
                 '--line-height': formData.lineHeight || 1.4,
+                '--accent': formData.accentColor || undefined,
               }}
             >
               {renderResumeContent()}

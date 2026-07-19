@@ -74,7 +74,7 @@ const LandingPage = () => {
               </div>
               <div className="stat-divider"></div>
               <div className="stat-item">
-                <span className="stat-num">20</span>
+                <span className="stat-num">25</span>
                 <span className="stat-label">Free Pro Templates</span>
               </div>
             </div>

@@ -5,6 +5,10 @@ import '../Styles/HomePage.css';
 
 const CATEGORIES = ['All', 'ATS-Optimized', 'Professional', 'Creative'];
 
+// Which templates use a two-column page layout (everything else is single column)
+const TWO_COLUMN_IDS = [2, 4, 13, 21];
+const LAYOUTS = ['Any layout', 'Single column', 'Two column'];
+
 // Every card renders its template live with realistic sample data,
 // so previews always match the real output exactly.
 const sampleCtx = {
@@ -16,6 +20,9 @@ const sampleCtx = {
 
 const HomePage = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
+  const [selectedLayout, setSelectedLayout] = useState('Any layout');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [compactView, setCompactView] = useState(false);
   const [flippedCards, setFlippedCards] = useState({});
 
   const handleFilterChange = (category) => {
@@ -31,9 +38,23 @@ const HomePage = () => {
     }));
   };
 
-  const filteredTemplates = selectedFilter === 'All'
-    ? TEMPLATES
-    : TEMPLATES.filter(template => template.category === selectedFilter);
+  const resetFilters = () => {
+    setSelectedFilter('All');
+    setSelectedLayout('Any layout');
+    setSearchQuery('');
+  };
+
+  const query = searchQuery.trim().toLowerCase();
+  const filteredTemplates = TEMPLATES.filter((template) => {
+    if (selectedFilter !== 'All' && template.category !== selectedFilter) return false;
+    if (selectedLayout === 'Single column' && TWO_COLUMN_IDS.includes(template.id)) return false;
+    if (selectedLayout === 'Two column' && !TWO_COLUMN_IDS.includes(template.id)) return false;
+    if (query) {
+      const haystack = `${template.name} ${template.description} ${template.category} ${template.tags.join(' ')}`.toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    return true;
+  });
 
   return (
     <div className="templates-page-container">
@@ -48,23 +69,62 @@ const HomePage = () => {
         <p>Every layout is recruiter-approved. ATS-Optimized templates follow the single-column standard preferred by FAANG and top MNC recruiting systems. You can switch templates at any time without losing your data.</p>
       </section>
 
-      {/* Filter bar */}
-      <section className="templates-filter-bar">
-        {CATEGORIES.map((cat) => (
+      {/* Sticky discovery toolbar: search, filters, layout, density */}
+      <section className="templates-toolbar">
+        <div className="templates-search-row">
+          <div className="templates-search-box">
+            <i className="fa-solid fa-magnifying-glass"></i>
+            <input
+              type="text"
+              placeholder={`Search ${TEMPLATES.length} templates — try "ATS", "two column", "developer"…`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className="search-clear-btn" onClick={() => setSearchQuery('')} title="Clear search">
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            )}
+          </div>
           <button
-            key={cat}
-            className={`templates-filter-button ${selectedFilter === cat ? 'active' : ''}`}
-            onClick={() => handleFilterChange(cat)}
+            className={`view-toggle-btn ${compactView ? 'active' : ''}`}
+            onClick={() => setCompactView(!compactView)}
+            title={compactView ? 'Switch to large previews' : 'Switch to compact grid — see all templates at once'}
           >
-            {cat === 'All' ? `Show All (${TEMPLATES.length})` : `${cat} (${TEMPLATES.filter(t => t.category === cat).length})`}
+            <i className={`fa-solid ${compactView ? 'fa-table-cells-large' : 'fa-table-cells'}`}></i>
+            {compactView ? ' Large' : ' Compact'}
           </button>
-        ))}
+        </div>
+        <div className="templates-filter-bar">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              className={`templates-filter-button ${selectedFilter === cat ? 'active' : ''}`}
+              onClick={() => handleFilterChange(cat)}
+            >
+              {cat === 'All' ? `All (${TEMPLATES.length})` : `${cat} (${TEMPLATES.filter(t => t.category === cat).length})`}
+            </button>
+          ))}
+          <span className="filter-bar-divider"></span>
+          {LAYOUTS.map((layout) => (
+            <button
+              key={layout}
+              className={`templates-filter-button layout-chip ${selectedLayout === layout ? 'active' : ''}`}
+              onClick={() => setSelectedLayout(layout)}
+            >
+              {layout}
+            </button>
+          ))}
+          <span className="templates-result-count">
+            {filteredTemplates.length} of {TEMPLATES.length} shown
+          </span>
+        </div>
       </section>
 
       {/* Template cards grid */}
       <section className="templates-grid-section">
         {filteredTemplates.length > 0 ? (
-          <div className="templates-cards-grid">
+          <div className={`templates-cards-grid ${compactView ? 'compact' : ''}`}>
             {filteredTemplates.map((template) => {
               const isFlipped = !!flippedCards[template.id];
               return (
@@ -137,8 +197,8 @@ const HomePage = () => {
         ) : (
           <div className="no-templates-found-box">
             <i className="fa-solid fa-magnifying-glass"></i>
-            <p>No templates found matching this filter.</p>
-            <button className="btn-reset-filter" onClick={() => setSelectedFilter('All')}>Reset Filter</button>
+            <p>No templates match{query ? ` "${searchQuery}"` : ' these filters'}.</p>
+            <button className="btn-reset-filter" onClick={resetFilters}>Reset Filters</button>
           </div>
         )}
       </section>

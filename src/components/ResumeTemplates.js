@@ -215,6 +215,41 @@ export const TEMPLATES = [
     category: 'ATS-Optimized',
     tags: ['Shaded Headers', 'Office Standard', 'Structured'],
   },
+  {
+    id: 21,
+    name: 'Deedy Two-Column',
+    description: 'The famous Deedy format loved by CS students and new grads: a narrow left column for education, skills, and links beside a wide experience column — all on clean white.',
+    category: 'Professional',
+    tags: ['Deedy Format', 'Two Column', 'CS Students'],
+  },
+  {
+    id: 22,
+    name: 'Spearmint Fresh',
+    description: 'Modeled on the ever-popular Spearmint document style: crisp green rules over a plain single-column body. Familiar, friendly, and fully parseable.',
+    category: 'ATS-Optimized',
+    tags: ['Green Rules', 'Docs Classic', 'Single Column'],
+  },
+  {
+    id: 23,
+    name: 'Coral Warm',
+    description: 'A warm, approachable single-column layout with coral headings — a widely used standard for customer-facing, HR, and communications roles.',
+    category: 'Creative',
+    tags: ['Coral Accent', 'Approachable', 'People Roles'],
+  },
+  {
+    id: 24,
+    name: 'Developer Mono',
+    description: 'A monospace, terminal-inspired resume for developers — section headers with prompt markers and code-style typography, still strictly single-column.',
+    category: 'Creative',
+    tags: ['Monospace', 'Terminal Style', 'For Devs'],
+  },
+  {
+    id: 25,
+    name: 'Oxford Side-Headings',
+    description: 'The academic CV standard with section headings set in a left gutter beside the content — the layout used by Oxford-style and moderncv LaTeX resumes.',
+    category: 'Professional',
+    tags: ['Side Headings', 'Academic CV', 'LaTeX Style'],
+  },
 ];
 
 /* --------------------------------------------------------------------------
@@ -915,16 +950,14 @@ const renderSingleColumn = (ctx, opts) => {
   );
 };
 
-/* --- Template 13: Right Rail Modern — light sidebar on the right --------- */
+/* --- Templates 13 & 21: two-column layouts (light rail right / Deedy left) */
 
-const renderSidebarRight = (ctx) => {
+const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
   const { formData, sectionOrder, experienceHeading, formatTextToList } = ctx;
   const profTitle = getProfessionalTitle(formData);
-  return (
-    <div className="resume-content tmpl-rightbar">
-      <div className="rb-container">
-        {/* Main column */}
-        <div className="rb-main">
+
+  const mainCol = (
+        <div className="rb-main" key="main">
           <div className="rb-header">
             <h1>{formData.fullName || 'Your Name'}</h1>
             {profTitle && <p className="rb-prof-title">{profTitle}</p>}
@@ -967,9 +1000,10 @@ const renderSidebarRight = (ctx) => {
             return null;
           })}
         </div>
+  );
 
-        {/* Light right rail */}
-        <div className="rb-side">
+  const sideCol = (
+        <div className="rb-side" key="side">
           <div className="rb-side-section">
             <h4>Contact</h4>
             <ul>
@@ -1023,6 +1057,12 @@ const renderSidebarRight = (ctx) => {
             return null;
           })}
         </div>
+  );
+
+  return (
+    <div className={`resume-content tmpl-rightbar ${className}`}>
+      <div className="rb-container">
+        {sideFirst ? [sideCol, mainCol] : [mainCol, sideCol]}
       </div>
     </div>
   );
@@ -1128,6 +1168,34 @@ const SINGLE_COLUMN_VARIANTS = {
     skillsAs: 'line',
     headings: { summary: 'Professional Summary' },
   },
+  22: {
+    className: 'tmpl-spearmint',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Summary' },
+  },
+  23: {
+    className: 'tmpl-coral',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'About Me' },
+  },
+  24: {
+    className: 'tmpl-devmono',
+    showUrls: true,
+    contactSep: '//',
+    skillsAs: 'pills',
+    headings: { summary: 'About', skills: 'Stack', projects: 'Projects', experiences: 'Experience' },
+  },
+  25: {
+    className: 'tmpl-oxford',
+    showUrls: true,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: { summary: 'Profile' },
+  },
 };
 
 export const renderResumeTemplate = (templateId, ctx) => {
@@ -1137,7 +1205,8 @@ export const renderResumeTemplate = (templateId, ctx) => {
     case 3: return renderTemplate3(ctx);
     case 4: return renderTemplate4(ctx);
     case 5: return renderTemplate5(ctx);
-    case 13: return renderSidebarRight(ctx);
+    case 13: return renderTwoColumn(ctx);
+    case 21: return renderTwoColumn(ctx, { className: 'tmpl-deedy', sideFirst: true });
     default: {
       const opts = SINGLE_COLUMN_VARIANTS[templateId];
       return opts ? renderSingleColumn(ctx, opts) : renderTemplate1(ctx);

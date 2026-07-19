@@ -16,6 +16,17 @@ const SUBHEADER_FONTS = [
   { name: 'Arial', value: 'Arial, Helvetica, sans-serif' }
 ];
 
+const ACCENT_COLORS = [
+  { name: 'Template default', value: '' },
+  { name: 'Indigo', value: '#4f46e5' },
+  { name: 'Royal Blue', value: '#1d4ed8' },
+  { name: 'Teal', value: '#0f766e' },
+  { name: 'Forest Green', value: '#15803d' },
+  { name: 'Maroon', value: '#b91c1c' },
+  { name: 'Purple', value: '#7c3aed' },
+  { name: 'Slate', value: '#334155' },
+];
+
 const TEXT_FONTS = [
   { name: 'Times New Roman', value: "'Times New Roman', Times, serif" },
   { name: 'Calibri', value: "Calibri, 'Helvetica Neue', Helvetica, sans-serif" },
@@ -111,6 +122,36 @@ export default function StylingControls({ formData, handleChange }) {
             <option key={font.name} value={font.value}>{font.name}</option>
           ))}
         </select>
+      </div>
+
+      <div style={formGroupStyle}>
+        <label style={labelStyle}>Accent Color</label>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {ACCENT_COLORS.map((c) => {
+            const selected = (formData.accentColor || '') === c.value;
+            return (
+              <button
+                key={c.name}
+                type="button"
+                title={c.name}
+                onClick={() => handleChange({ target: { name: 'accentColor', value: c.value } })}
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  background: c.value || 'linear-gradient(135deg, #f8fafc 50%, #cbd5e1 50%)',
+                  border: selected ? '3px solid var(--primary-color)' : '2px solid #e2e8f0',
+                  boxShadow: selected ? '0 0 0 2px #fff inset' : 'none',
+                  transition: 'all 0.15s',
+                }}
+              />
+            );
+          })}
+        </div>
+        <p style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '8px', marginBottom: 0 }}>
+          Recolors headings, rules, and header bands. "Template default" restores the original palette.
+        </p>
       </div>
 
       <div style={{ marginTop: '28px' }}>

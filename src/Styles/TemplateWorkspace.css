@@ -1949,3 +1949,234 @@
   color: #1e293b;
   border-radius: 2px;
 }
+
+/* ==========================================================================
+   TEMPLATES 21-25
+   ========================================================================== */
+
+/* --- Template 21: Deedy Two-Column (white, side on the left) -------------- */
+
+.tmpl-rightbar.tmpl-deedy .rb-side {
+  background: transparent;
+  border-left: none;
+  border-right: 1px solid #e2e8f0;
+  width: 30%;
+  padding: 32px 16px 32px 32px;
+}
+
+.tmpl-rightbar.tmpl-deedy .rb-main {
+  padding: 32px 32px 32px 20px;
+}
+
+.tmpl-rightbar.tmpl-deedy .rb-header h1 {
+  color: #0f766e;
+}
+
+.tmpl-rightbar.tmpl-deedy .rb-section h3,
+.tmpl-rightbar.tmpl-deedy .rb-side-section h4 {
+  color: #0f766e;
+  border-bottom: 1px solid #99f6e4;
+}
+
+.tmpl-rightbar.tmpl-deedy .rb-skill-tag {
+  background: #f0fdfa;
+  color: #0f766e;
+  border: 1px solid #ccfbf1;
+}
+
+/* --- Template 22: Spearmint Fresh ----------------------------------------- */
+
+.tmpl-spearmint .sc-header {
+  border-bottom: 2px solid #16a34a;
+  padding-bottom: 8px;
+}
+
+.tmpl-spearmint .sc-section h3 {
+  color: #166534;
+  border-bottom: 2px solid #16a34a;
+  padding-bottom: 2px;
+  font-size: 0.75rem;
+  letter-spacing: 0.3px;
+}
+
+/* --- Template 23: Coral Warm ----------------------------------------------- */
+
+.tmpl-coral .sc-header h1 {
+  color: #e0554d;
+}
+
+.tmpl-coral .sc-prof-title {
+  color: #9a3412;
+}
+
+.tmpl-coral .sc-section h3 {
+  color: #e0554d;
+  border-bottom: 1px solid #fecaca;
+  padding-bottom: 2px;
+  font-size: 0.76rem;
+  letter-spacing: 0.3px;
+}
+
+.tmpl-coral .sc-skill-pill {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+/* --- Template 24: Developer Mono ------------------------------------------- */
+
+.tmpl-devmono,
+.tmpl-devmono .sc-header h1,
+.tmpl-devmono .sc-section h3,
+.tmpl-devmono .entry-header,
+.tmpl-devmono .sc-contact {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.tmpl-devmono {
+  color: #111827;
+}
+
+.tmpl-devmono .sc-header h1 {
+  font-size: 1.3rem;
+  letter-spacing: -0.5px;
+}
+
+.tmpl-devmono .sc-section h3 {
+  font-size: 0.74rem;
+  color: #111827;
+}
+
+.tmpl-devmono .sc-section h3::before {
+  content: '> ';
+  color: #16a34a;
+  font-weight: 800;
+}
+
+.tmpl-devmono .sc-skill-pill {
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.tmpl-devmono .sc-sep {
+  color: #16a34a;
+}
+
+/* --- Template 25: Oxford Side-Headings ------------------------------------- */
+
+.tmpl-oxford .sc-header {
+  border-bottom: 1px solid #1e3a8a;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.tmpl-oxford .sc-section {
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  column-gap: 14px;
+}
+
+.tmpl-oxford .sc-section > h3 {
+  grid-column: 1;
+  text-align: right;
+  color: #1e3a8a;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 0;
+}
+
+.tmpl-oxford .sc-section > *:not(h3) {
+  grid-column: 2;
+}
+
+/* ==========================================================================
+   ACCENT COLOR SYSTEM
+   When the user picks an accent, override each template's signature colors.
+   ========================================================================== */
+
+.resume[data-accent='on'] .resume-content h3,
+.resume[data-accent='on'] .resume-content .sidebar-section h4,
+.resume[data-accent='on'] .rb-side-section h4 {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.resume[data-accent='on'] .sc-header,
+.resume[data-accent='on'] .tmpl-classic .resume-header.with-line {
+  border-color: var(--accent) !important;
+}
+
+.resume[data-accent='on'] .tmpl-corpblue .sc-header,
+.resume[data-accent='on'] .tmpl-tech .tech-header-band,
+.resume[data-accent='on'] .tmpl-creative .creative-sidebar,
+.resume[data-accent='on'] .tmpl-mono .sc-monogram {
+  background-color: var(--accent) !important;
+}
+
+.resume[data-accent='on'] .tmpl-corpblue .sc-header h3,
+.resume[data-accent='on'] .tmpl-creative .creative-sidebar h4 {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.resume[data-accent='on'] .tmpl-compact .sc-header h1,
+.resume[data-accent='on'] .tmpl-teal .sc-header h1,
+.resume[data-accent='on'] .tmpl-coral .sc-header h1,
+.resume[data-accent='on'] .tmpl-deedy .rb-header h1 {
+  color: var(--accent) !important;
+}
+
+.resume[data-accent='on'] .tmpl-accentbar .sc-header h1::after,
+.resume[data-accent='on'] .tmpl-timeline .sc-entry::before {
+  background: var(--accent) !important;
+}
+
+.resume[data-accent='on'] .sc-skill-pill,
+.resume[data-accent='on'] .rb-skill-tag {
+  background: #f1f5f9 !important;
+  color: var(--accent) !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Strength checklist + autosave indicator */
+
+.strength-tips {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+}
+
+.strength-tips li {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.strength-tips li i {
+  color: var(--primary-color);
+  font-size: 0.75rem;
+}
+
+.strength-tips .tip-pts {
+  margin-left: auto;
+  font-weight: 700;
+  color: #059669;
+  font-size: 0.72rem;
+}
+
+.autosave-note {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.autosave-note i {
+  color: #059669;
+  margin-right: 4px;
+}
