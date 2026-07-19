@@ -159,6 +159,62 @@ export const TEMPLATES = [
     category: 'Creative',
     tags: ['Minimalist', 'Hairline Rules', 'Airy'],
   },
+  {
+    id: 13,
+    name: 'Right Rail Modern',
+    description: 'The balanced two-column standard used by leading resume builders: experience on the left, a light-gray rail on the right for contact, skills, and education.',
+    category: 'Professional',
+    tags: ['2-Column', 'Light Sidebar', 'Balanced'],
+  },
+  {
+    id: 14,
+    name: 'Timeline Professional',
+    description: 'Your career path drawn as a vertical timeline with connected milestones. A favorite modern style for showing steady progression.',
+    category: 'Professional',
+    tags: ['Timeline Dots', 'Career Path', 'Sky Accent'],
+  },
+  {
+    id: 15,
+    name: 'Classic Serif',
+    description: 'The timeless Times-style resume trusted for decades in law, government, and academia. Understated serif typography, fully single-column and ATS-safe.',
+    category: 'ATS-Optimized',
+    tags: ['Times Classic', 'Traditional', '100% ATS'],
+  },
+  {
+    id: 16,
+    name: 'Corporate Blue',
+    description: 'A solid blue header band over a clean single-column body — the most widely used corporate style at banks, consultancies, and Fortune 500 companies.',
+    category: 'Professional',
+    tags: ['Blue Header', 'Corporate', 'Single Column'],
+  },
+  {
+    id: 17,
+    name: 'Monogram Modern',
+    description: 'A personal-brand favorite: your initials in a badge beside your name, followed by a clean modern layout.',
+    category: 'Creative',
+    tags: ['Initials Badge', 'Personal Brand', 'Modern'],
+  },
+  {
+    id: 18,
+    name: 'Teal Graduate',
+    description: 'A fresh, approachable layout with teal accents — the go-to standard for students, internships, and first jobs.',
+    category: 'Creative',
+    tags: ['Entry Level', 'Fresh & Clean', 'Teal Accent'],
+  },
+  {
+    id: 19,
+    name: 'Swiss Minimal',
+    description: 'Design-led Swiss typography: an oversized name, generous whitespace, and a single red rule. Popular for design, media, and marketing portfolios.',
+    category: 'Creative',
+    tags: ['Big Typography', 'Red Accent', 'Design-Led'],
+  },
+  {
+    id: 20,
+    name: 'Boxed Headers Classic',
+    description: 'The classic office-document style with shaded section header bars — instantly familiar to recruiters and cleanly parsed by tracking systems.',
+    category: 'ATS-Optimized',
+    tags: ['Shaded Headers', 'Office Standard', 'Structured'],
+  },
 ];
 
 /* --------------------------------------------------------------------------
@@ -749,18 +805,29 @@ const renderSingleColumn = (ctx, opts) => {
     return <p className="sc-skills-line">{formData.skills}</p>;
   };
 
+  const initials = (formData.fullName || 'Your Name')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
     <div className={`resume-content tmpl-single ${opts.className}`}>
       <div className="sc-header">
-        <h1>{formData.fullName || 'Your Name'}</h1>
-        {profTitle && <p className="sc-prof-title">{profTitle}</p>}
-        <div className="sc-contact">
-          {contactItems.map((item, i) => (
-            <React.Fragment key={i}>
-              {i > 0 && <span className="sc-sep">{opts.contactSep || '|'}</span>}
-              {item}
-            </React.Fragment>
-          ))}
+        {opts.monogram && <div className="sc-monogram">{initials}</div>}
+        <div className="sc-header-main">
+          <h1>{formData.fullName || 'Your Name'}</h1>
+          {profTitle && <p className="sc-prof-title">{profTitle}</p>}
+          <div className="sc-contact">
+            {contactItems.map((item, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span className="sc-sep">{opts.contactSep || '|'}</span>}
+                {item}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </div>
       {sectionOrder.map((section) => {
@@ -848,6 +915,119 @@ const renderSingleColumn = (ctx, opts) => {
   );
 };
 
+/* --- Template 13: Right Rail Modern — light sidebar on the right --------- */
+
+const renderSidebarRight = (ctx) => {
+  const { formData, sectionOrder, experienceHeading, formatTextToList } = ctx;
+  const profTitle = getProfessionalTitle(formData);
+  return (
+    <div className="resume-content tmpl-rightbar">
+      <div className="rb-container">
+        {/* Main column */}
+        <div className="rb-main">
+          <div className="rb-header">
+            <h1>{formData.fullName || 'Your Name'}</h1>
+            {profTitle && <p className="rb-prof-title">{profTitle}</p>}
+          </div>
+          {sectionOrder.map((section) => {
+            if (section === 'summary' && formData.summary) {
+              return (
+                <div key={section} className="rb-section">
+                  <h3>Profile</h3>
+                  {formatTextToList(formData.summary)}
+                </div>
+              );
+            }
+            if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
+              return (
+                <div key={section} className="rb-section">
+                  <h3>{experienceHeading}</h3>
+                  {formData.experiences.map((exp, idx) => exp.title && (
+                    <div key={idx} className="rb-entry">
+                      <p className="entry-header"><strong>{exp.title}</strong> | {exp.company} <span className="date-right">{exp.dates}</span></p>
+                      {formatTextToList(exp.description)}
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+            if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
+              return (
+                <div key={section} className="rb-section">
+                  <h3>Projects</h3>
+                  {formData.projects.map((proj, idx) => proj.title && (
+                    <div key={idx} className="rb-entry">
+                      <p className="entry-header"><strong>{proj.title}</strong> <span className="date-right">{proj.dates}</span></p>
+                      {formatTextToList(proj.description)}
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+
+        {/* Light right rail */}
+        <div className="rb-side">
+          <div className="rb-side-section">
+            <h4>Contact</h4>
+            <ul>
+              {formData.mail && <li>{formData.mail}</li>}
+              {formData.mobile && <li>{formData.mobile}</li>}
+              {formData.linkedin && <li><a href={formData.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></li>}
+              {formData.github && <li><a href={formData.github} target="_blank" rel="noopener noreferrer">GitHub</a></li>}
+              {formData.other && <li><a href={formData.other} target="_blank" rel="noopener noreferrer">Portfolio</a></li>}
+            </ul>
+          </div>
+          {sectionOrder.map((section) => {
+            if (section === 'skills' && formData.skills) {
+              return (
+                <div key={section} className="rb-side-section">
+                  <h4>Skills</h4>
+                  <div className="rb-skill-tags">
+                    {formData.skills.split(',').map((skill, sIdx) => skill.trim() && (
+                      <span key={sIdx} className="rb-skill-tag">{skill.trim()}</span>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
+              return (
+                <div key={section} className="rb-side-section">
+                  <h4>Education</h4>
+                  {formData.education.map((edu, idx) => edu.studyTitle && (
+                    <div key={idx} className="rb-side-edu">
+                      <p className="edu-title">{edu.studyTitle}</p>
+                      <p className="edu-school">{edu.school}</p>
+                      <p className="edu-date">{edu.date} {edu.score && `| ${edu.score}`}</p>
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+            if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
+              return (
+                <div key={section} className="rb-side-section">
+                  <h4>Additional</h4>
+                  {formData.others.map((oth, idx) => oth.title && (
+                    <div key={idx} className="rb-side-other">
+                      <p className="oth-title">{oth.title}</p>
+                      {formatTextToList(oth.description)}
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const SINGLE_COLUMN_VARIANTS = {
   6: {
     className: 'tmpl-faang',
@@ -898,6 +1078,56 @@ const SINGLE_COLUMN_VARIANTS = {
     skillsAs: 'line',
     headings: { summary: 'About' },
   },
+  14: {
+    className: 'tmpl-timeline',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'pills',
+    headings: { summary: 'Profile' },
+  },
+  15: {
+    className: 'tmpl-serif',
+    showUrls: true,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: { summary: 'Summary' },
+  },
+  16: {
+    className: 'tmpl-corpblue',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary', skills: 'Key Skills' },
+  },
+  17: {
+    className: 'tmpl-mono',
+    monogram: true,
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'About' },
+  },
+  18: {
+    className: 'tmpl-teal',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'pills',
+    headings: { summary: 'About Me' },
+  },
+  19: {
+    className: 'tmpl-swiss',
+    showUrls: false,
+    contactSep: '—',
+    skillsAs: 'line',
+    headings: { summary: 'Profile' },
+  },
+  20: {
+    className: 'tmpl-boxed',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
 };
 
 export const renderResumeTemplate = (templateId, ctx) => {
@@ -907,6 +1137,7 @@ export const renderResumeTemplate = (templateId, ctx) => {
     case 3: return renderTemplate3(ctx);
     case 4: return renderTemplate4(ctx);
     case 5: return renderTemplate5(ctx);
+    case 13: return renderSidebarRight(ctx);
     default: {
       const opts = SINGLE_COLUMN_VARIANTS[templateId];
       return opts ? renderSingleColumn(ctx, opts) : renderTemplate1(ctx);
