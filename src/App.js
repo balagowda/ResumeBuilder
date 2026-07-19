@@ -3,11 +3,8 @@ import { Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-d
 import './App.css';
 import LandingPage from './components/LandingPage';
 import HomePage from './components/HomePage';
-import Template1 from './components/Template1';
-import Template2 from './components/Template2';
-import Template3 from './components/Template3';
-import Template4 from './components/Template4';
-import Template5 from './components/Template5';
+import TemplateWorkspace from './components/TemplateWorkspace';
+import { TEMPLATES } from './components/ResumeTemplates';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 
@@ -74,11 +71,9 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/templates" element={<HomePage />} />
-          <Route path="/template1" element={<Template1 />} />
-          <Route path="/template2" element={<Template2 />} />
-          <Route path="/template3" element={<Template3 />} />
-          <Route path="/template4" element={<Template4 />} />
-          <Route path="/template5" element={<Template5 />} />
+          {TEMPLATES.map((t) => (
+            <Route key={t.id} path={`/template${t.id}`} element={<TemplateWorkspace templateId={t.id} />} />
+          ))}
           <Route path="/signin" element={<SignIn setUser={setUser} />} />
           <Route path="/signup" element={<SignUp setUser={setUser} />} />
         </Routes>

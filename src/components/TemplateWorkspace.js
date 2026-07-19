@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { renderResumeTemplate, TEMPLATES, SAMPLE_DATA, formatTextToList } from './ResumeTemplates';
 import Summary from './Summary';
 import ContactFields from './ContactFields';
 import Experiences from './Experiences';
@@ -17,6 +18,7 @@ export default function TemplateWorkspace({ templateId }) {
     const savedData = localStorage.getItem('resumeFormData');
     return savedData ? JSON.parse(savedData) : {
       fullName: '',
+      professionalTitle: '',
       mail: '',
       mobile: '',
       linkedin: '',
@@ -57,9 +59,12 @@ export default function TemplateWorkspace({ templateId }) {
   ]);
 
   const resumeRef = useRef();
+  const importInputRef = useRef();
+  const navigate = useNavigate();
 
   const [sidebarWidth, setSidebarWidth] = useState(480);
   const [isResizing, setIsResizing] = useState(false);
+  const [zoom, setZoom] = useState(100);
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -103,19 +108,22 @@ export default function TemplateWorkspace({ templateId }) {
     localStorage.setItem('resumeFormData', JSON.stringify(formData));
   }, [formData]);
 
-  // Alert on tab close
+  // Warn on tab close only when the resume actually has content
   useEffect(() => {
+    const hasContent = formData.fullName || formData.summary || formData.skills ||
+      (formData.experiences && formData.experiences[0] && formData.experiences[0].title);
+    if (!hasContent) return undefined;
+
     const handleBeforeUnload = (event) => {
-      const confirmationMessage = 'Are you sure you want to leave? This will erase your saved data. Click "OK" to clear data, or "Cancel" to stay.';
-      event.returnValue = confirmationMessage;
-      return confirmationMessage;
+      event.preventDefault();
+      event.returnValue = '';
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, []);
+  }, [formData]);
 
   // Drag-and-Drop section reordering
   const handleDragStart = (e, section) => {
@@ -203,6 +211,13 @@ export default function TemplateWorkspace({ templateId }) {
     const originalElement = resumeRef.current;
     if (!originalElement) return;
 
+    // Capture must happen at 100% zoom or coordinates come out scaled
+    const prevZoom = zoom;
+    if (prevZoom !== 100) {
+      setZoom(100);
+      await new Promise(resolve => setTimeout(resolve, 150));
+    }
+
     try {
       // Find the scrolling container to temporarily reset its scroll
       // This prevents html2canvas from capturing a blank or offset canvas
@@ -285,7 +300,58 @@ export default function TemplateWorkspace({ templateId }) {
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(`Failed to download PDF. Error: ${error.message}`);
+    } finally {
+      if (prevZoom !== 100) setZoom(prevZoom);
     }
+  };
+
+  // Text-based export through the browser's print-to-PDF pipeline.
+  // Unlike the image capture, the resulting PDF has selectable text that
+  // ATS parsers can actually read.
+  const handlePrintPDF = () => {
+    window.print();
+  };
+
+  const handleSwitchTemplate = (e) => {
+    navigate(`/template${e.target.value}`);
+  };
+
+  const handleLoadSample = () => {
+    const hasContent = formData.fullName || formData.summary ||
+      (formData.experiences && formData.experiences[0] && formData.experiences[0].title);
+    if (hasContent && !window.confirm('Load sample data? This will replace your current resume content.')) {
+      return;
+    }
+    setFormData({ ...formData, ...SAMPLE_DATA });
+  };
+
+  const handleExportJSON = () => {
+    const blob = new Blob([JSON.stringify(formData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'resume'}_backup.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportJSON = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (typeof imported !== 'object' || imported === null || Array.isArray(imported)) {
+          throw new Error('Not a resume backup file');
+        }
+        setFormData((prev) => ({ ...prev, ...imported }));
+      } catch (err) {
+        alert('Could not import this file. Please choose a resume backup (.json) exported from this site.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleClearData = () => {
@@ -293,6 +359,7 @@ export default function TemplateWorkspace({ templateId }) {
       localStorage.removeItem('resumeFormData');
       setFormData({
         fullName: '',
+        professionalTitle: '',
         mail: '',
         mobile: '',
         linkedin: '',
@@ -310,21 +377,6 @@ export default function TemplateWorkspace({ templateId }) {
 
   const togglePreview = () => {
     setIsPreviewOpen(!isPreviewOpen);
-  };
-
-  const formatTextToList = (text) => {
-    if (!text) return null;
-    const lines = text.split('\n').filter(line => line.trim() !== '');
-    if (lines.length > 1) {
-      return (
-        <ul>
-          {lines.map((line, index) => (
-            <li key={index}>{line}</li>
-          ))}
-        </ul>
-      );
-    }
-    return <p>{text}</p>;
   };
 
   const toggleSection = (section) => {
@@ -346,552 +398,9 @@ export default function TemplateWorkspace({ templateId }) {
     return score;
   };
 
-  // ==========================================
-  // TEMPLATE RENDERERS
-  // ==========================================
 
-  const renderTemplate1 = () => (
-    <div className="resume-content tmpl-classic">
-      <div className={`resume-header ${formData.addHeaderLine ? 'with-line' : ''}`}>
-        <h1>{formData.fullName || 'Your Name'}</h1>
-        {formData.showProfessionalTitle && <p className="prof-title" style={{ marginTop: '2px', marginBottom: '8px', fontSize: '1.0rem', color: '#64748b', fontWeight: '500' }}>Senior Professional</p>}
-        <div className="contact-info">
-          {formData.mail && <span><i className="fas fa-envelope"></i> {formData.mail}</span>}
-          {formData.mobile && <span><i className="fas fa-phone"></i> {formData.mobile}</span>}
-          {formData.linkedin && <span><i className="fab fa-linkedin"></i> <a href={formData.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></span>}
-          {formData.github && <span><i className="fab fa-github"></i> <a href={formData.github} target="_blank" rel="noopener noreferrer">GitHub</a></span>}
-          {formData.other && <span>🔗 <a href={formData.other} target="_blank" rel="noopener noreferrer">Other</a></span>}
-        </div>
-      </div>
-      {sectionOrder.map((section) => {
-        if (section === 'summary' && formData.summary) {
-          return (
-            <div key={section} className="resume-section">
-              <h3>Summary</h3>
-              {formatTextToList(formData.summary)}
-            </div>
-          );
-        }
-        if (section === 'skills' && formData.skills) {
-          return (
-            <div key={section} className="resume-section">
-              <h3>Skills</h3>
-              <p className="skills-line">{formData.skills}</p>
-            </div>
-          );
-        }
-        if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
-          return (
-            <div key={section} className="resume-section">
-              <h3>{experienceHeading}</h3>
-              {formData.experiences.map((exp, idx) => exp.title && (
-                <div key={idx} className="experience-entry">
-                  <p className="entry-header"><strong>{exp.title}</strong> | {exp.company} <span className="date-right">{exp.dates}</span></p>
-                  {formatTextToList(exp.description)}
-                </div>
-              ))}
-            </div>
-          );
-        }
-        if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
-          return (
-            <div key={section} className="resume-section">
-              <h3>Projects</h3>
-              {formData.projects.map((proj, idx) => proj.title && (
-                <div key={idx} className="project-entry">
-                  <p className="entry-header"><strong>{proj.title}</strong> <span className="date-right">{proj.dates}</span></p>
-                  {formatTextToList(proj.description)}
-                </div>
-              ))}
-            </div>
-          );
-        }
-        if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
-          return (
-            <div key={section} className="resume-section">
-              <h3>Education</h3>
-              {formData.education.map((edu, idx) => edu.studyTitle && (
-                <div key={idx} className="education-entry">
-                  <p className="entry-header"><strong>{edu.studyTitle}</strong> <span className="date-right">{edu.date}</span></p>
-                  <p className="edu-school">{edu.school} | {edu.score}</p>
-                </div>
-              ))}
-            </div>
-          );
-        }
-        if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
-          return (
-            <div key={section} className="resume-section">
-              <h3>Others</h3>
-              {formData.others.map((oth, idx) => oth.title && (
-                <div key={idx} className="other-entry">
-                  <p className="entry-header"><strong>{oth.title}</strong></p>
-                  {formatTextToList(oth.description)}
-                </div>
-              ))}
-            </div>
-          );
-        }
-        return null;
-      })}
-    </div>
-  );
-
-  const renderTemplate2 = () => (
-    <div className="resume-content tmpl-creative">
-      <div className="creative-split-container">
-        {/* Left Dark Sidebar */}
-        <div className="creative-sidebar">
-          <div className="sidebar-section contact-sidebar">
-            <h4>Contact</h4>
-            <ul>
-              {formData.mail && <li><i className="fas fa-envelope"></i> {formData.mail}</li>}
-              {formData.mobile && <li><i className="fas fa-phone"></i> {formData.mobile}</li>}
-              {formData.linkedin && <li><i className="fab fa-linkedin"></i> <a href={formData.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></li>}
-              {formData.github && <li><i className="fab fa-github"></i> <a href={formData.github} target="_blank" rel="noopener noreferrer">GitHub</a></li>}
-              {formData.other && <li>🔗 <a href={formData.other} target="_blank" rel="noopener noreferrer">Other</a></li>}
-            </ul>
-          </div>
-          {sectionOrder.map((section) => {
-            if (section === 'skills' && formData.skills) {
-              return (
-                <div key={section} className="sidebar-section">
-                  <h4>Skills</h4>
-                  <div className="skills-tags-container">
-                    {formData.skills.split(',').map((skill, sIdx) => skill.trim() && (
-                      <span key={sIdx} className="sidebar-skill-tag">{skill.trim()}</span>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-            if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
-              return (
-                <div key={section} className="sidebar-section">
-                  <h4>Education</h4>
-                  {formData.education.map((edu, idx) => edu.studyTitle && (
-                    <div key={idx} className="sidebar-edu-item">
-                      <p className="edu-title">{edu.studyTitle}</p>
-                      <p className="edu-school">{edu.school}</p>
-                      <p className="edu-date">{edu.date} {edu.score && `| ${edu.score}`}</p>
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-
-        {/* Right Main Body */}
-        <div className="creative-main">
-          <div className="creative-header">
-            <h1>{formData.fullName || 'Your Name'}</h1>
-            {formData.showProfessionalTitle && <p className="creative-title">Senior Professional</p>}
-          </div>
-          {sectionOrder.map((section) => {
-            if (section === 'summary' && formData.summary) {
-              return (
-                <div key={section} className="creative-section">
-                  <h3>Profile</h3>
-                  {formatTextToList(formData.summary)}
-                </div>
-              );
-            }
-            if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
-              return (
-                <div key={section} className="creative-section">
-                  <h3>{experienceHeading}</h3>
-                  {formData.experiences.map((exp, idx) => exp.title && (
-                    <div key={idx} className="creative-entry">
-                      <p className="entry-header"><strong>{exp.title}</strong> | {exp.company} <span className="date-right">{exp.dates}</span></p>
-                      {formatTextToList(exp.description)}
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
-              return (
-                <div key={section} className="creative-section">
-                  <h3>Projects</h3>
-                  {formData.projects.map((proj, idx) => proj.title && (
-                    <div key={idx} className="creative-entry">
-                      <p className="entry-header"><strong>{proj.title}</strong> <span className="date-right">{proj.dates}</span></p>
-                      {formatTextToList(proj.description)}
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
-              return (
-                <div key={section} className="creative-section">
-                  <h3>Others</h3>
-                  {formData.others.map((oth, idx) => oth.title && (
-                    <div key={idx} className="creative-entry">
-                      <p className="entry-header"><strong>{oth.title}</strong></p>
-                      {formatTextToList(oth.description)}
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderTemplate3 = () => (
-    <div className="resume-content tmpl-minimal">
-      <div className="minimal-header">
-        <h1>{formData.fullName || 'Your Name'}</h1>
-        {formData.showProfessionalTitle && <p className="prof-title" style={{ marginTop: '2px', marginBottom: '4px', fontSize: '1.0rem', color: '#475569', fontWeight: '500' }}>Senior Professional</p>}
-        <div className="minimal-contact">
-          {formData.mail && <span>{formData.mail}</span>}
-          {formData.mobile && <span>{formData.mobile}</span>}
-          {formData.linkedin && <span><a href={formData.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></span>}
-          {formData.github && <span><a href={formData.github} target="_blank" rel="noopener noreferrer">GitHub</a></span>}
-          {formData.other && <span><a href={formData.other} target="_blank" rel="noopener noreferrer">Portfolio</a></span>}
-        </div>
-      </div>
-      
-      {sectionOrder.map((section) => {
-        if (section === 'summary' && formData.summary) {
-          return (
-            <div key={section} className="minimal-section">
-              <h3>Professional Summary</h3>
-              <div className="sec-body">{formatTextToList(formData.summary)}</div>
-            </div>
-          );
-        }
-        if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
-          return (
-            <div key={section} className="minimal-section">
-              <h3>{experienceHeading}</h3>
-              <div className="sec-body">
-                {formData.experiences.map((exp, idx) => exp.title && (
-                  <div key={idx} className="minimal-entry">
-                    <div className="minimal-entry-header">
-                      <span className="minimal-title"><strong>{exp.title}</strong></span>
-                      <span className="minimal-date">{exp.dates}</span>
-                    </div>
-                    {exp.company && <div className="minimal-company"><strong>{exp.company}</strong></div>}
-                    <div className="minimal-desc">{formatTextToList(exp.description)}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
-          return (
-            <div key={section} className="minimal-section">
-              <h3>Projects</h3>
-              <div className="sec-body">
-                {formData.projects.map((proj, idx) => proj.title && (
-                  <div key={idx} className="minimal-entry">
-                    <div className="minimal-entry-header">
-                      <span className="minimal-title"><strong>{proj.title}</strong></span>
-                      <span className="minimal-date">{proj.dates}</span>
-                    </div>
-                    <div className="minimal-desc">{formatTextToList(proj.description)}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
-          return (
-            <div key={section} className="minimal-section">
-              <h3>Education</h3>
-              <div className="sec-body">
-                {formData.education.map((edu, idx) => edu.studyTitle && (
-                  <div key={idx} className="minimal-entry">
-                    <div className="minimal-entry-header">
-                      <span className="minimal-title"><strong>{edu.studyTitle}</strong></span>
-                      <span className="minimal-date">{edu.date}</span>
-                    </div>
-                    {edu.school && <div className="minimal-company">{edu.school} {edu.score && `• ${edu.score}`}</div>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        if (section === 'skills' && formData.skills) {
-          return (
-            <div key={section} className="minimal-section">
-              <h3>Expert-Level Skills</h3>
-              <div className="sec-body" style={{ marginTop: '4px' }}>
-                {formData.skills}
-              </div>
-            </div>
-          );
-        }
-        if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
-          return (
-            <div key={section} className="minimal-section">
-              <h3>Others</h3>
-              <div className="sec-body">
-                {formData.others.map((oth, idx) => oth.title && (
-                  <div key={idx} className="minimal-entry" style={{ marginBottom: '8px' }}>
-                    <div className="minimal-entry-header">
-                      <span className="minimal-title"><strong>{oth.title}</strong></span>
-                    </div>
-                    <div className="minimal-desc">{formatTextToList(oth.description)}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        return null;
-      })}
-    </div>
-  );
-
-  const renderTemplate4 = () => (
-    <div className="resume-content tmpl-tech">
-      <div className="tech-header-band">
-        <h1>{formData.fullName || 'Your Name'}</h1>
-        {formData.showProfessionalTitle && <p className="prof-title" style={{ marginTop: '2px', marginBottom: '8px', fontSize: '1.0rem', color: '#cbd5e1', fontWeight: '500' }}>Senior Professional</p>}
-        <div className="tech-contact">
-          {formData.mail && <span><i className="fas fa-envelope"></i> {formData.mail}</span>}
-          {formData.mobile && <span><i className="fas fa-phone"></i> {formData.mobile}</span>}
-          {formData.linkedin && <span><i className="fab fa-linkedin"></i> <a href={formData.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></span>}
-          {formData.github && <span><i className="fab fa-github"></i> <a href={formData.github} target="_blank" rel="noopener noreferrer">GitHub</a></span>}
-          {formData.other && <span>🔗 <a href={formData.other} target="_blank" rel="noopener noreferrer">Portfolio</a></span>}
-        </div>
-      </div>
-      
-      <div className="tech-container">
-        {/* Left Column (65%) */}
-        <div className="tech-main-col">
-          {sectionOrder.map((section) => {
-            if (section === 'summary' && formData.summary) {
-              return (
-                <div key={section} className="tech-section">
-                  <h3>Professional Summary</h3>
-                  {formatTextToList(formData.summary)}
-                </div>
-              );
-            }
-            if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
-              return (
-                <div key={section} className="tech-section">
-                  <h3>Professional Experience</h3>
-                  {formData.experiences.map((exp, idx) => exp.title && (
-                    <div key={idx} className="tech-entry">
-                      <div className="tech-entry-title">
-                        <strong>{exp.title}</strong> &mdash; <span>{exp.company}</span>
-                        <span className="tech-date">{exp.dates}</span>
-                      </div>
-                      {formatTextToList(exp.description)}
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
-              return (
-                <div key={section} className="tech-section">
-                  <h3>Projects</h3>
-                  {formData.projects.map((proj, idx) => proj.title && (
-                    <div key={idx} className="tech-entry">
-                      <div className="tech-entry-title">
-                        <strong>{proj.title}</strong>
-                        <span className="tech-date">{proj.dates}</span>
-                      </div>
-                      {formatTextToList(proj.description)}
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-
-        {/* Right Column (35%) */}
-        <div className="tech-side-col">
-          {sectionOrder.map((section) => {
-            if (section === 'skills' && formData.skills) {
-              return (
-                <div key={section} className="tech-side-section">
-                  <h3>Technical Skills</h3>
-                  <div className="tech-skills-grid">
-                    {formData.skills.split(',').map((skill, sIdx) => skill.trim() && (
-                      <span key={sIdx} className="tech-skill-pill">{skill.trim()}</span>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-            if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
-              return (
-                <div key={section} className="tech-side-section">
-                  <h3>Education</h3>
-                  {formData.education.map((edu, idx) => edu.studyTitle && (
-                    <div key={idx} className="tech-side-edu-item">
-                      <p className="edu-title">{edu.studyTitle}</p>
-                      <p className="edu-school">{edu.school}</p>
-                      <p className="edu-date">{edu.date} {edu.score && `(${edu.score})`}</p>
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
-              return (
-                <div key={section} className="tech-side-section">
-                  <h3>Other Details</h3>
-                  {formData.others.map((oth, idx) => oth.title && (
-                    <div key={idx} className="tech-side-other-item">
-                      <p className="oth-title">{oth.title}</p>
-                      {formatTextToList(oth.description)}
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderTemplate5 = () => (
-    <div className="resume-content tmpl-academic">
-      <div className="academic-header">
-        <div className="academic-header-left">
-          <h1>{formData.fullName || 'YOUR NAME'}</h1>
-          {formData.showProfessionalTitle && <p className="academic-prof-title">Senior Professional</p>}
-        </div>
-        <div className="academic-header-right">
-          {formData.mobile && <p>{formData.mobile}</p>}
-          {formData.mail && <p>{formData.mail}</p>}
-          {formData.linkedin && <p>{formData.linkedin}</p>}
-          {formData.github && <p>{formData.github}</p>}
-          {formData.other && <p>{formData.other}</p>}
-        </div>
-      </div>
-      
-      {sectionOrder.map((section) => {
-        if (section === 'summary' && formData.summary) {
-          return (
-            <div key={section} className="academic-section">
-              <h3>Professional Summary</h3>
-              <div className="academic-sec-content">{formatTextToList(formData.summary)}</div>
-            </div>
-          );
-        }
-        if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
-          return (
-            <div key={section} className="academic-section">
-              <h3>Work Experience</h3>
-              <div className="academic-sec-content">
-                {formData.experiences.map((exp, idx) => exp.title && (
-                  <div key={idx} className="academic-entry">
-                    <p className="entry-header">
-                      <strong>{exp.title}</strong>
-                      {exp.company && <span> - {exp.company}</span>}
-                      {exp.dates && <span className="academic-date"> - {exp.dates}</span>}
-                    </p>
-                    {formatTextToList(exp.description)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
-          return (
-            <div key={section} className="academic-section">
-              <h3>Projects</h3>
-              <div className="academic-sec-content">
-                {formData.projects.map((proj, idx) => proj.title && (
-                  <div key={idx} className="academic-entry">
-                    <p className="entry-header">
-                      <strong>{proj.title}</strong>
-                      {proj.dates && <span className="academic-date"> - {proj.dates}</span>}
-                    </p>
-                    {formatTextToList(proj.description)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
-          return (
-            <div key={section} className="academic-section">
-              <h3>Education & Certifications</h3>
-              <div className="academic-sec-content">
-                {formData.education.map((edu, idx) => edu.studyTitle && (
-                  <div key={idx} className="academic-entry">
-                    <p className="entry-header">
-                      <strong>{edu.school || 'School'}</strong> - {edu.studyTitle}
-                      {edu.date && <span className="academic-date"> - {edu.date}</span>}
-                    </p>
-                    {edu.score && <p className="academic-sub" style={{ paddingLeft: '12px' }}>Score: {edu.score}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        if (section === 'skills' && formData.skills) {
-          return (
-            <div key={section} className="academic-section">
-              <h3>Skills</h3>
-              <div className="academic-sec-content font-medium">
-                <p>{formData.skills}</p>
-              </div>
-            </div>
-          );
-        }
-        if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
-          return (
-            <div key={section} className="academic-section">
-              <h3>Others</h3>
-              <div className="academic-sec-content">
-                {formData.others.map((oth, idx) => oth.title && (
-                  <div key={idx} className="academic-entry">
-                    <p className="entry-header"><strong>{oth.title}</strong></p>
-                    {formatTextToList(oth.description)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        }
-        return null;
-      })}
-    </div>
-  );
-
-  // Renders the correct layout HTML based on templateId
-  const renderResumeContent = () => {
-    switch (templateId) {
-      case 1:
-        return renderTemplate1();
-      case 2:
-        return renderTemplate2();
-      case 3:
-        return renderTemplate3();
-      case 4:
-        return renderTemplate4();
-      case 5:
-        return renderTemplate5();
-      default:
-        return renderTemplate1();
-    }
-  };
+  const renderResumeContent = () =>
+    renderResumeTemplate(templateId, { formData, sectionOrder, experienceHeading, formatTextToList });
 
   const renderInputPanel = () => {
     const completeness = calculateCompleteness();
@@ -907,6 +416,37 @@ export default function TemplateWorkspace({ templateId }) {
             </button>
           </div>
           <h2>Your Details</h2>
+          <div className="template-switcher-row">
+            <label htmlFor="template-switcher"><i className="fas fa-layer-group"></i> Template</label>
+            <select
+              id="template-switcher"
+              className="template-switcher-select"
+              value={templateId}
+              onChange={handleSwitchTemplate}
+            >
+              {TEMPLATES.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="data-tools-row">
+            <button className="data-tool-btn" onClick={handleLoadSample} title="Fill the form with example content">
+              <i className="fas fa-magic"></i> Sample
+            </button>
+            <button className="data-tool-btn" onClick={handleExportJSON} title="Download your data as a backup file">
+              <i className="fas fa-file-export"></i> Backup
+            </button>
+            <button className="data-tool-btn" onClick={() => importInputRef.current && importInputRef.current.click()} title="Restore data from a backup file">
+              <i className="fas fa-file-import"></i> Restore
+            </button>
+            <input
+              type="file"
+              accept="application/json,.json"
+              ref={importInputRef}
+              onChange={handleImportJSON}
+              style={{ display: 'none' }}
+            />
+          </div>
           <div className="strength-meter-container">
             <div className="strength-meter-header">
               <span>Resume Strength</span>
@@ -1089,24 +629,52 @@ export default function TemplateWorkspace({ templateId }) {
           </div>
         </div>
         <div className="resume-panel">
-          <div 
-            className="resume" 
-            ref={resumeRef}
-            style={{
-              '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
-              '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
-              '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
-              '--line-height': formData.lineHeight || 1.4,
-            }}
-          >
-            {renderResumeContent()}
-            <button className="preview-btn" onClick={togglePreview}>
-              Preview
+          <div className="zoom-toolbar">
+            <button className="zoom-btn" onClick={() => setZoom((z) => Math.max(50, z - 10))} title="Zoom out">
+              <i className="fas fa-search-minus"></i>
+            </button>
+            <button className="zoom-label" onClick={() => setZoom(100)} title="Reset zoom">
+              {zoom}%
+            </button>
+            <button className="zoom-btn" onClick={() => setZoom((z) => Math.min(150, z + 10))} title="Zoom in">
+              <i className="fas fa-search-plus"></i>
             </button>
           </div>
-          <button className="download-btn" onClick={handleDownloadPDF}>
-            Download as PDF
-          </button>
+          <div
+            className="resume-zoom-wrapper"
+            style={{
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: 'top center',
+              height: `${Math.round(814 * (zoom / 100))}px`,
+            }}
+          >
+            <div
+              className="resume print-target"
+              ref={resumeRef}
+              style={{
+                '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
+                '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
+                '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
+                '--line-height': formData.lineHeight || 1.4,
+              }}
+            >
+              {renderResumeContent()}
+              <button className="preview-btn" onClick={togglePreview}>
+                Preview
+              </button>
+            </div>
+          </div>
+          <div className="download-actions">
+            <button className="download-btn download-btn-ats" onClick={handlePrintPDF} title="Opens your browser's print dialog — choose 'Save as PDF'. Text stays selectable, so ATS software can read it.">
+              <i className="fas fa-robot"></i> Download ATS PDF
+            </button>
+            <button className="download-btn" onClick={handleDownloadPDF} title="Exact snapshot of the preview as an image-based PDF">
+              <i className="fas fa-camera"></i> Download Print PDF
+            </button>
+          </div>
+          <p className="ats-hint">
+            <i className="fas fa-circle-info"></i> ATS PDF keeps text selectable so recruiting software can parse it — in the print dialog, choose "Save as PDF".
+          </p>
         </div>
       </div>
 

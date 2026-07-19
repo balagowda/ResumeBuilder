@@ -1094,3 +1094,472 @@
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   WORKSPACE TOOLBAR (template switcher + data tools)
+   ========================================================================== */
+
+.template-switcher-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 10px;
+}
+
+.template-switcher-row label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.template-switcher-row label i {
+  color: var(--primary-color);
+  margin-right: 4px;
+}
+
+.template-switcher-select {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  font-size: 0.88rem;
+  color: #1e293b;
+  cursor: pointer;
+  outline: none;
+}
+
+.template-switcher-select:focus {
+  border-color: var(--primary-color);
+}
+
+.data-tools-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.data-tool-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.data-tool-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: #eef2ff;
+}
+
+/* ==========================================================================
+   PREVIEW ZOOM & DOWNLOAD ACTIONS
+   ========================================================================== */
+
+.zoom-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 4px 8px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+}
+
+.zoom-btn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+.zoom-btn:hover {
+  color: var(--primary-color);
+  background: #eef2ff;
+}
+
+.zoom-label {
+  border: none;
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  min-width: 44px;
+  text-align: center;
+}
+
+.resume-zoom-wrapper {
+  flex-shrink: 0;
+  transition: transform 0.15s ease, height 0.15s ease;
+}
+
+.download-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.download-btn-ats {
+  background-color: #059669;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.2);
+}
+
+.download-btn-ats:hover {
+  background-color: #047857;
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3);
+}
+
+.ats-hint {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: #64748b;
+  max-width: 480px;
+  text-align: center;
+}
+
+.ats-hint i {
+  color: #059669;
+  margin-right: 4px;
+}
+
+/* ==========================================================================
+   TEMPLATES 6-12: ATS-FIRST SINGLE-COLUMN FAMILY
+   Shared skeleton (.tmpl-single) + per-template visual variants
+   ========================================================================== */
+
+.tmpl-single .sc-header {
+  margin-bottom: 12px;
+}
+
+.tmpl-single .sc-header h1 {
+  font-size: 1.45rem;
+  letter-spacing: -0.3px;
+  margin-bottom: 2px;
+}
+
+.tmpl-single .sc-prof-title {
+  margin: 2px 0 5px;
+  font-size: 0.85rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.tmpl-single .sc-contact {
+  font-size: 0.6rem;
+  color: #475569;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+.tmpl-single .sc-sep {
+  color: #94a3b8;
+  margin: 0 3px;
+}
+
+.tmpl-single .sc-section {
+  margin-bottom: 11px;
+}
+
+.tmpl-single .sc-section h3 {
+  font-size: 0.78rem;
+  margin-bottom: 5px;
+}
+
+.tmpl-single .sc-entry {
+  margin-bottom: 7px;
+}
+
+.tmpl-single .entry-header {
+  font-size: 0.68rem;
+  margin: 0 0 2px;
+}
+
+.tmpl-single .sc-company {
+  font-weight: 500;
+  color: #475569;
+}
+
+.tmpl-single .sc-edu-school {
+  margin: 1px 0 0;
+  color: #475569;
+}
+
+.tmpl-single .sc-skills-line {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.tmpl-single .sc-skill-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tmpl-single .sc-skill-pill {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.58rem;
+  background: #eef2ff;
+  color: #3730a3;
+  font-weight: 600;
+}
+
+.tmpl-single p {
+  margin: 2px 0;
+}
+
+/* --- Template 6: FAANG Engineer ------------------------------------------ */
+
+.tmpl-faang .sc-header {
+  text-align: center;
+}
+
+.tmpl-faang .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-faang .sc-contact a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tmpl-faang .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.72rem;
+  color: #0f172a;
+  border-bottom: 1px solid #0f172a;
+  padding-bottom: 2px;
+}
+
+/* --- Template 7: ATS Pro Plain ------------------------------------------- */
+
+.tmpl-atspro {
+  color: #1f2937;
+}
+
+.tmpl-atspro .sc-header h1 {
+  font-size: 1.35rem;
+}
+
+.tmpl-atspro .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: 0.72rem;
+  color: #111827;
+}
+
+/* --- Template 8: Harvard Classic ----------------------------------------- */
+
+.tmpl-harvard .sc-header {
+  text-align: center;
+}
+
+.tmpl-harvard .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-harvard .sc-header h1 {
+  font-variant: small-caps;
+  letter-spacing: 1px;
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.tmpl-harvard .sc-section h3 {
+  font-variant: small-caps;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  border-bottom: 1px solid #111827;
+  padding-bottom: 2px;
+}
+
+/* --- Template 9: Compact One-Page ---------------------------------------- */
+
+.tmpl-compact .sc-header {
+  border-bottom: 2px solid #1e3a8a;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.tmpl-compact .sc-header h1 {
+  font-size: 1.25rem;
+  color: #1e3a8a;
+}
+
+.tmpl-compact .sc-section {
+  margin-bottom: 8px;
+}
+
+.tmpl-compact .sc-entry {
+  margin-bottom: 5px;
+}
+
+.tmpl-compact .sc-section h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1e3a8a;
+  margin-bottom: 4px;
+}
+
+.tmpl-compact .sc-skill-pill {
+  background: #e0e7ff;
+  color: #1e3a8a;
+}
+
+/* --- Template 10: Modern Accent ------------------------------------------ */
+
+.tmpl-accentbar .sc-header h1 {
+  position: relative;
+  padding-bottom: 7px;
+  margin-bottom: 5px;
+}
+
+.tmpl-accentbar .sc-header h1::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 48px;
+  height: 3px;
+  background: #4f46e5;
+  border-radius: 2px;
+}
+
+.tmpl-accentbar .sc-section h3 {
+  border-left: 3px solid #4f46e5;
+  padding-left: 7px;
+  color: #312e81;
+  font-size: 0.75rem;
+}
+
+/* --- Template 11: Executive Slate ---------------------------------------- */
+
+.tmpl-exec .sc-header {
+  background: #f1f5f9;
+  margin: -32px -32px 14px;
+  padding: 26px 32px 18px;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.tmpl-exec .sc-header h1 {
+  letter-spacing: 0.5px;
+}
+
+.tmpl-exec .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 0.68rem;
+  color: #334155;
+  border-bottom: 3px double #94a3b8;
+  padding-bottom: 3px;
+}
+
+/* --- Template 12: Elegant Minimal ---------------------------------------- */
+
+.tmpl-elegant .sc-header {
+  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.tmpl-elegant .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-elegant .sc-header h1 {
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-size: 1.3rem;
+}
+
+.tmpl-elegant .sc-prof-title {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.62rem;
+  color: #64748b;
+}
+
+.tmpl-elegant .sc-section h3 {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  font-size: 0.62rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   PRINT: text-based ATS export (browser "Save as PDF")
+   ========================================================================== */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  .App-header,
+  .App-footer,
+  .input-panel,
+  .resizer-bar,
+  .zoom-toolbar,
+  .download-actions,
+  .ats-hint,
+  .preview-btn,
+  .preview-modal {
+    display: none !important;
+  }
+
+  .App,
+  .App-main-full,
+  .container,
+  .main-content,
+  .resume-panel,
+  .resume-zoom-wrapper {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+  }
+
+  .resume-zoom-wrapper {
+    transform: none !important;
+  }
+
+  .print-target {
+    height: auto !important;
+    min-height: 794px;
+    margin: 0 auto !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    /* Scale the 560px preview sheet up to true A4 width (794px @ 96dpi) */
+    zoom: 1.4178;
+  }
+}

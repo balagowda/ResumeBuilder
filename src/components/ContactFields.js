@@ -12,16 +12,17 @@ const ContactFields = ({ formData, handleChange }) => (
         placeholder="e.g., John Doe"
         className="input-field"
       />
-      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '0.8rem', color: '#64748b', marginTop: '6px' }}>
-        <input
-          type="checkbox"
-          name="showProfessionalTitle"
-          checked={formData.showProfessionalTitle || false}
-          onChange={(e) => handleChange({ target: { name: 'showProfessionalTitle', type: 'checkbox', checked: e.target.checked } })}
-          style={{ cursor: 'pointer' }}
-        />
-        Add "Senior Professional" title
-      </label>
+    </div>
+    <div className="contact-field">
+      <label htmlFor="professionalTitle">💼 Professional Title</label>
+      <input
+        type="text"
+        name="professionalTitle"
+        value={formData.professionalTitle || ''}
+        onChange={(e) => handleChange(e, 'professionalTitle')}
+        placeholder="e.g., Senior Software Engineer (shown under your name)"
+        className="input-field"
+      />
     </div>
     <div className="contact-field">
       <label htmlFor="mail"><i className="fas fa-envelope"></i> Mail</label>

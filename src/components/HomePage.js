@@ -1,54 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../Styles/HomePage.css'; 
+import { TEMPLATES, SAMPLE_DATA, DEFAULT_SECTION_ORDER, renderResumeTemplate, formatTextToList } from './ResumeTemplates';
+import '../Styles/HomePage.css';
 
-const templates = [
-  {
-    id: 1,
-    name: 'Professional Executive',
-    description: 'A classic, clean single-column layout optimized for corporate and executive jobs. Recommended for traditional industries.',
-    link: '/template1',
-    thumbnail: '/templates/template1.png',
-    category: 'Professional',
-    tags: ['ATS-Optimized', 'Corporate', 'Clean'],
-  },
-  {
-    id: 2,
-    name: 'Modern Creative',
-    description: 'A split-column layout designed to maximize space and readability. Best suited for tech, design, and marketing roles.',
-    link: '/template2',
-    thumbnail: '/templates/template2.png',
-    category: 'Creative',
-    tags: ['2-Column', 'Design & Art', 'Slate theme'],
-  },
-  {
-    id: 3,
-    name: 'Executive Centered',
-    description: 'A pristine, center-aligned corporate structure with full-width section borders. Highly professional.',
-    link: '/template3',
-    thumbnail: '/templates/template3_v2.png',
-    category: 'Professional',
-    tags: ['Top-tier Corporate', 'Clean Borders', 'Whitespace'],
-  },
-  {
-    id: 4,
-    name: 'Bold Tech Header',
-    description: 'Featuring a high-contrast dark indigo top header band and tech-oriented grid layouts. Best for engineering and developers.',
-    link: '/template4',
-    thumbnail: '/templates/template4.png',
-    category: 'Creative',
-    tags: ['Bold Accent', 'Tech & Devs', 'High Contrast'],
-  },
-  {
-    id: 5,
-    name: 'Modern Professional',
-    description: 'A sleek two-column header with heavy section borders in a strict black-and-white aesthetic.',
-    link: '/template5',
-    thumbnail: '/templates/template5_v2.png',
-    category: 'Professional',
-    tags: ['Two-Column Header', 'B&W Aesthetic', 'Structured'],
-  },
-];
+const CATEGORIES = ['All', 'ATS-Optimized', 'Professional', 'Creative'];
+
+// Every card renders its template live with realistic sample data,
+// so previews always match the real output exactly.
+const sampleCtx = {
+  formData: SAMPLE_DATA,
+  sectionOrder: DEFAULT_SECTION_ORDER,
+  experienceHeading: 'Experience',
+  formatTextToList,
+};
 
 const HomePage = () => {
   const [selectedFilter, setSelectedFilter] = useState('All');
@@ -68,8 +32,8 @@ const HomePage = () => {
   };
 
   const filteredTemplates = selectedFilter === 'All'
-    ? templates
-    : templates.filter(template => template.category === selectedFilter);
+    ? TEMPLATES
+    : TEMPLATES.filter(template => template.category === selectedFilter);
 
   return (
     <div className="templates-page-container">
@@ -79,20 +43,20 @@ const HomePage = () => {
 
       {/* Header section */}
       <section className="templates-header">
-        <span className="templates-tagline">✨ Choose Your Layout</span>
+        <span className="templates-tagline">✨ {TEMPLATES.length} Professional Templates</span>
         <h1>Select a Resume Template</h1>
-        <p>Pick a starting layout. You can customize the fields, change layouts, and drag sections to reorder them in the next step.</p>
+        <p>Every layout is recruiter-approved. ATS-Optimized templates follow the single-column standard preferred by FAANG and top MNC recruiting systems. You can switch templates at any time without losing your data.</p>
       </section>
 
       {/* Filter bar */}
       <section className="templates-filter-bar">
-        {['All', 'Professional', 'Creative'].map((cat) => (
+        {CATEGORIES.map((cat) => (
           <button
             key={cat}
             className={`templates-filter-button ${selectedFilter === cat ? 'active' : ''}`}
             onClick={() => handleFilterChange(cat)}
           >
-            {cat === 'All' ? 'Show All' : `${cat} Templates`}
+            {cat === 'All' ? `Show All (${TEMPLATES.length})` : `${cat} (${TEMPLATES.filter(t => t.category === cat).length})`}
           </button>
         ))}
       </section>
@@ -106,17 +70,23 @@ const HomePage = () => {
               return (
                 <div key={template.id} className="premium-template-card-container">
                   <div className={`card-inner ${isFlipped ? 'flipped' : ''}`}>
-                    
-                    {/* Front Face: ONLY preview pic and hover Customize button */}
+
+                    {/* Front Face: live template preview and hover Customize button */}
                     <div className="card-face card-front">
-                      <div
-                        className="template-preview-image"
-                        style={{ backgroundImage: `url(${process.env.PUBLIC_URL}${template.thumbnail})` }}
-                      ></div>
-                      
+                      <div className="template-preview-live">
+                        <div className="template-thumb-sheet">
+                          {renderResumeTemplate(template.id, sampleCtx)}
+                        </div>
+                      </div>
+
+                      <div className="template-front-label">
+                        <span className="template-front-name">{template.name}</span>
+                        <span className={`template-front-category cat-${template.category.toLowerCase().replace(/[^a-z]/g, '')}`}>{template.category}</span>
+                      </div>
+
                       {/* Flip button (Info/Details triggers flipping) */}
-                      <button 
-                        className="btn-card-flip" 
+                      <button
+                        className="btn-card-flip"
                         onClick={(e) => handleFlip(template.id, e)}
                         title="Show Details & Tags"
                       >
@@ -124,25 +94,25 @@ const HomePage = () => {
                       </button>
 
                       <div className="template-preview-overlay">
-                        <Link to={template.link} className="btn-preview-customize">
+                        <Link to={`/template${template.id}`} className="btn-preview-customize">
                           Select Template <i className="fa-solid fa-pen-to-square"></i>
                         </Link>
                       </div>
                     </div>
-                    
+
                     {/* Back Face: Description, Tags, Use Template & Flip-back */}
                     <div className="card-face card-back">
                       <div className="card-back-header">
                         <h3 className="template-name-title">{template.name}</h3>
-                        <button 
-                          className="btn-card-flip-back" 
+                        <button
+                          className="btn-card-flip-back"
                           onClick={(e) => handleFlip(template.id, e)}
                           title="Back to Preview"
                         >
                           <i className="fa-solid fa-rotate"></i>
                         </button>
                       </div>
-                      
+
                       <div className="card-back-body">
                         <div className="template-tags-row">
                           {template.tags.map((tag, i) => (
@@ -153,7 +123,7 @@ const HomePage = () => {
                       </div>
 
                       <div className="card-back-footer">
-                        <Link to={template.link} className="btn-card-action">
+                        <Link to={`/template${template.id}`} className="btn-card-action">
                           Use Template <i className="fa-solid fa-arrow-right"></i>
                         </Link>
                       </div>
