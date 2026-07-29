@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
+import { Routes, Route, NavLink, Link, useLocation } from 'react-router-dom';
 import './App.css';
 import LandingPage from './components/LandingPage';
 import HomePage from './components/HomePage';
 import TemplateWorkspace from './components/TemplateWorkspace';
 import { TEMPLATES } from './components/ResumeTemplates';
+import { SUPPORT_EMAIL } from './constants';
 
 function App() {
   const location = useLocation();
@@ -20,6 +21,12 @@ function App() {
   const isFullWidthPage = location.pathname === '/' ||
                           location.pathname.startsWith('/template');
 
+  // The resume builder needs the full viewport for the live preview, so the
+  // footer only shows on the landing page and the templates gallery. The site
+  // is served with trailing slashes (/templates/), so normalise before matching.
+  const path = location.pathname.replace(/\/+$/, '') || '/';
+  const showFooter = path === '/' || path === '/templates';
+
   return (
     <div className="App">
       <header className="App-header">
@@ -34,6 +41,9 @@ function App() {
             <NavLink to="/templates" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               Templates
             </NavLink>
+            <Link to="/#feedback" className="nav-link">
+              Feedback
+            </Link>
             <NavLink to="/templates" className="nav-btn-build">
               Build My Resume
             </NavLink>
@@ -49,14 +59,20 @@ function App() {
           ))}
         </Routes>
       </main>
-      <footer className="App-footer">
-        <div className="footer-content">
-          <p>
-            Contact us at: <a href="mailto:support@hatchresume.com">support@hatchresume.com</a>
-          </p>
-          <p>&copy; 2026 resumebuilder. All rights reserved.</p>
-        </div>
-      </footer>
+      {showFooter && (
+        <footer className="App-footer">
+          <div className="footer-content">
+            <p>
+              Contact us at: <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+            </p>
+            <p>
+              Have a suggestion or found a bug?{' '}
+              <Link to="/#feedback">Let us know</Link>.
+            </p>
+            <p>&copy; 2026 resumebuilder. All rights reserved.</p>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
