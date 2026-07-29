@@ -1,12 +1,12 @@
 # ResumeBuilder — Free Online Resume Builder
 
-**Live site:** [https://balagowda.github.io/ResumeBuilder/](https://balagowda.github.io/ResumeBuilder/)
+**Live site:** [https://hatchresume.com](https://hatchresume.com)
 
 A 100% free, privacy-first resume builder. Pick one of 25+ professional, ATS-friendly templates, fill in your details, and download your resume as a PDF — no sign-up, no watermark, and your data never leaves the browser.
 
 ## Features
 
-- **25+ free professional templates** — browse them at [/templates](https://balagowda.github.io/ResumeBuilder/templates/)
+- **25+ free professional templates** — browse them at [/templates](https://hatchresume.com/templates/)
 - **ATS-friendly layouts** that parse cleanly in applicant tracking systems
 - **No login required** — start building immediately
 - **Instant PDF download** via html2pdf/jsPDF
@@ -27,7 +27,7 @@ npm install
 npm start
 ```
 
-The dev server runs at [http://localhost:3000/ResumeBuilder](http://localhost:3000/ResumeBuilder).
+The dev server runs at [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 

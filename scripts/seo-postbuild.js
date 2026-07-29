@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const BUILD_DIR = path.join(__dirname, '..', 'build');
-const SITE_URL = 'https://balagowda.github.io/ResumeBuilder';
+const SITE_URL = 'https://hatchresume.com';
 
 const ROUTES = [
   {

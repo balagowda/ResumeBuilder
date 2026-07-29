@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://balagowda.github.io/ResumeBuilder/sitemap.xml
+Sitemap: https://hatchresume.com/sitemap.xml
