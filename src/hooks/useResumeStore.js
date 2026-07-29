@@ -141,6 +141,21 @@ export default function useResumeStore(makeEmpty) {
     [makeEmpty, commit]
   );
 
+  /**
+   * Create a resume that already has content, in one commit.
+   *
+   * Used by import: creating an empty resume and then filling it would be two
+   * undo steps, with a meaningless empty-but-named resume in between.
+   */
+  const createResumeWith = useCallback(
+    (name, data, label = 'import resume') => {
+      const record = createResumeRecord(name || 'Imported resume', { ...makeEmpty(), ...data });
+      commit((doc) => ({ resumes: [...doc.resumes, record], activeId: record.id }), { label });
+      return record.id;
+    },
+    [makeEmpty, commit]
+  );
+
   const duplicateResume = useCallback(
     (id) => {
       const source = resumes.find((r) => r.id === id);
@@ -250,6 +265,7 @@ export default function useResumeStore(makeEmpty) {
     setFormData,
     updateActive,
     createResume,
+    createResumeWith,
     duplicateResume,
     renameResume,
     deleteResume,

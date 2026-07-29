@@ -15,6 +15,7 @@ import StylingControls from './StylingControls';
 import ResumeVersions from './ResumeVersions';
 import StorageNotice from './StorageNotice';
 import ContentReview from './ContentReview';
+import ImportResume from './ImportResume';
 import useResumeStore from '../hooks/useResumeStore';
 import { applyVerbToDescription } from '../utils/contentLint';
 import '../Styles/TemplateWorkspace.css';
@@ -90,6 +91,7 @@ export default function TemplateWorkspace({ templateId }) {
     others: true,
     jobMatch: true,
     contentReview: true,
+    importResume: true,
   });
 
   const resumeRef = useRef();
@@ -670,6 +672,23 @@ export default function TemplateWorkspace({ templateId }) {
   const resetScale = () => setFormData((prev) => ({ ...prev, contentScale: 1 }));
 
   /**
+   * Take parsed data from an imported resume.
+   *
+   * 'new' opens a fresh resume so nothing in the current one is touched;
+   * 'replace' overwrites the open one, which undo can reverse in a single step.
+   * Only the fields the parser actually recognised are merged, so a partial
+   * parse never blanks anything it failed to find.
+   */
+  const handleImportParsed = (parsed, mode) => {
+    if (mode === 'new') {
+      const name = parsed.fullName ? `${parsed.fullName}'s resume` : 'Imported resume';
+      store.createResumeWith(name, parsed);
+      return;
+    }
+    setFormData((prev) => ({ ...prev, ...parsed }), { label: 'import resume' });
+  };
+
+  /**
    * Rewrite one bullet to open with the verb the user picked in the writing
    * review. Goes through setFormData, so it lands as a single undo step.
    */
@@ -847,6 +866,13 @@ export default function TemplateWorkspace({ templateId }) {
             )}
           </div>
         </div>
+
+        <ImportResume
+          collapsed={collapsedSections.importResume}
+          toggleSection={() => toggleSection('importResume')}
+          onImport={handleImportParsed}
+          hasExistingContent={Boolean(formData.fullName || formData.summary)}
+        />
 
         <ContentReview
           formData={formData}
