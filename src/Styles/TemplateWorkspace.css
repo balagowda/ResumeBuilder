@@ -3035,3 +3035,45 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+/* Action-verb suggestions inside the writing review */
+
+.verb-suggest {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.verb-suggest-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.verb-suggest-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.verb-chip {
+  padding: 5px 12px;
+  border: 1px solid #ddd6fe;
+  border-radius: 14px;
+  background-color: #f5f3ff;
+  color: #6d28d9;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.verb-chip:hover {
+  background-color: #6d28d9;
+  border-color: #6d28d9;
+  color: #ffffff;
+  transform: translateY(-1px);
+}

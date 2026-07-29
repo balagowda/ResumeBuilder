@@ -16,6 +16,7 @@ import ResumeVersions from './ResumeVersions';
 import StorageNotice from './StorageNotice';
 import ContentReview from './ContentReview';
 import useResumeStore from '../hooks/useResumeStore';
+import { applyVerbToDescription } from '../utils/contentLint';
 import '../Styles/TemplateWorkspace.css';
 
 // Preview sheet geometry. The sheet is 560x794 CSS px (A4 at the preview's
@@ -668,6 +669,23 @@ export default function TemplateWorkspace({ templateId }) {
 
   const resetScale = () => setFormData((prev) => ({ ...prev, contentScale: 1 }));
 
+  /**
+   * Rewrite one bullet to open with the verb the user picked in the writing
+   * review. Goes through setFormData, so it lands as a single undo step.
+   */
+  const handleApplyVerb = (item, verb) => {
+    const { section, entryIndex, rawIndex, rule } = item;
+    const list = formData[section];
+    if (!Array.isArray(list) || !list[entryIndex]) return;
+
+    const updated = [...list];
+    updated[entryIndex] = {
+      ...updated[entryIndex],
+      description: applyVerbToDescription(updated[entryIndex].description, rawIndex, verb, rule),
+    };
+    setFormData({ ...formData, [section]: updated }, { label: 'rewrite bullet' });
+  };
+
   // Append a keyword from the job-match panel to the Skills field, skipping
   // anything already listed there.
   const handleAddSkill = (term) => {
@@ -834,6 +852,7 @@ export default function TemplateWorkspace({ templateId }) {
           formData={formData}
           collapsed={collapsedSections.contentReview}
           toggleSection={() => toggleSection('contentReview')}
+          onApplyVerb={handleApplyVerb}
         />
 
         <JobMatch

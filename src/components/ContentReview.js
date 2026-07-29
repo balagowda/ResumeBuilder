@@ -17,7 +17,7 @@ const scoreTone = (score) => {
  * The writing-quality counterpart to the strength meter: strength asks whether
  * a field is filled, this asks whether what is in it reads well.
  */
-const ContentReview = ({ formData, collapsed, toggleSection }) => {
+const ContentReview = ({ formData, collapsed, toggleSection, onApplyVerb }) => {
   const [showAll, setShowAll] = useState(false);
   const { score, issues, bulletCount } = useMemo(() => lintResume(formData), [formData]);
 
@@ -77,6 +77,29 @@ const ContentReview = ({ formData, collapsed, toggleSection }) => {
                   <p className="content-review-fix">
                     <i className="fas fa-arrow-right"></i> {item.fix}
                   </p>
+
+                  {item.suggestions && item.suggestions.length > 0 && (
+                    <div className="verb-suggest">
+                      <span className="verb-suggest-label">
+                        {item.keepsOwnWording
+                          ? 'Rewrite using your own wording:'
+                          : 'Start it with:'}
+                      </span>
+                      <div className="verb-suggest-chips">
+                        {item.suggestions.map((verb) => (
+                          <button
+                            key={verb}
+                            type="button"
+                            className="verb-chip"
+                            onClick={() => onApplyVerb(item, verb)}
+                            title={`Rewrite this bullet to start with "${verb}"`}
+                          >
+                            {verb}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
