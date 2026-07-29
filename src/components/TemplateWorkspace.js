@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from
 import { Link, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { renderResumeTemplate, TEMPLATES, SAMPLE_DATA, formatTextToList } from './ResumeTemplates';
+import { renderResumeTemplate, TEMPLATES, SAMPLE_DATA, formatTextToList, DEFAULT_SECTION_ORDER } from './ResumeTemplates';
 import Summary from './Summary';
 import ContactFields from './ContactFields';
 import Experiences from './Experiences';
@@ -12,6 +12,10 @@ import Skills from './Skills';
 import Others from './Others';
 import JobMatch from './JobMatch';
 import StylingControls from './StylingControls';
+import ResumeVersions from './ResumeVersions';
+import StorageNotice from './StorageNotice';
+import ContentReview from './ContentReview';
+import useResumeStore from '../hooks/useResumeStore';
 import '../Styles/TemplateWorkspace.css';
 
 // Preview sheet geometry. The sheet is 560x794 CSS px (A4 at the preview's
@@ -47,14 +51,35 @@ const createEmptyFormData = () => ({
   contentScale: 1,
 });
 
+const DEFAULT_EXPERIENCE_HEADING = 'Experience and Internships';
+
 export default function TemplateWorkspace({ templateId }) {
-  const [formData, setFormData] = useState(() => {
-    const savedData = localStorage.getItem('resumeFormData');
-    return savedData ? JSON.parse(savedData) : createEmptyFormData();
-  });
-  
+  const store = useResumeStore(createEmptyFormData);
+  const {
+    formData,
+    setFormData,
+    updateActive,
+    savedAt,
+    needsBackup,
+    markBackedUp,
+    storageError,
+    clearEverything,
+  } = store;
+
+  // Per-resume view state, previously component-only — so a reload silently
+  // reset the section order the user had arranged.
+  const sectionOrder = store.active?.sectionOrder || DEFAULT_SECTION_ORDER;
+  const setSectionOrder = useCallback(
+    (order) => updateActive({ sectionOrder: order }),
+    [updateActive]
+  );
+  const experienceHeading = store.active?.experienceHeading || DEFAULT_EXPERIENCE_HEADING;
+  const setExperienceHeading = useCallback(
+    (heading) => updateActive({ experienceHeading: heading }),
+    [updateActive]
+  );
+
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [experienceHeading, setExperienceHeading] = useState('Experience and Internships');
   const [collapsedSections, setCollapsedSections] = useState({
     summary: true,
     experiences: true,
@@ -63,15 +88,8 @@ export default function TemplateWorkspace({ templateId }) {
     skills: true,
     others: true,
     jobMatch: true,
+    contentReview: true,
   });
-  const [sectionOrder, setSectionOrder] = useState([
-    'summary',
-    'skills',
-    'experiences',
-    'projects',
-    'education',
-    'others',
-  ]);
 
   const resumeRef = useRef();
   const importInputRef = useRef();
@@ -80,7 +98,6 @@ export default function TemplateWorkspace({ templateId }) {
   const [sidebarWidth, setSidebarWidth] = useState(480);
   const [isResizing, setIsResizing] = useState(false);
   const [zoom, setZoom] = useState(100);
-  const [savedAt, setSavedAt] = useState(null);
 
   // Layout height of .resume-content in CSS px, before --content-scale is
   // applied. Drives the page count and the overflow warning.
@@ -243,17 +260,17 @@ export default function TemplateWorkspace({ templateId }) {
     };
   }, [isResizing]);
 
-  // Save formData to localStorage
-  useEffect(() => {
-    localStorage.setItem('resumeFormData', JSON.stringify(formData));
-    setSavedAt(new Date());
-  }, [formData]);
+  // Persistence itself now lives in useResumeStore.
 
-  // Warn on tab close only when the resume actually has content
+  // Warn before the tab closes, but only when closing would actually cost the
+  // user something: there is real content, it has not been backed up, and the
+  // data is session-scoped so the browser is about to erase it.
+  //
+  // The browser shows its own generic wording here — custom text has been
+  // ignored by every major browser for years — so the StorageNotice banner
+  // carries the explanation this dialog cannot.
   useEffect(() => {
-    const hasContent = formData.fullName || formData.summary || formData.skills ||
-      (formData.experiences && formData.experiences[0] && formData.experiences[0].title);
-    if (!hasContent) return undefined;
+    if (!needsBackup) return undefined;
 
     const handleBeforeUnload = (event) => {
       event.preventDefault();
@@ -264,7 +281,7 @@ export default function TemplateWorkspace({ templateId }) {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [formData]);
+  }, [needsBackup]);
 
   // Drag-and-Drop section reordering
   const handleDragStart = (e, section) => {
@@ -346,6 +363,17 @@ export default function TemplateWorkspace({ templateId }) {
   const deleteEntry = (section, index) => {
     const updatedSection = formData[section].filter((_, i) => i !== index);
     setFormData({ ...formData, [section]: updatedSection });
+  };
+
+  // Reorder a single entry — adding a job out of order used to mean retyping
+  // both of them, since only whole sections could be moved.
+  const moveEntry = (section, index, direction) => {
+    const target = index + direction;
+    const list = formData[section] || [];
+    if (target < 0 || target >= list.length) return;
+    const updated = [...list];
+    [updated[index], updated[target]] = [updated[target], updated[index]];
+    setFormData({ ...formData, [section]: updated });
   };
   
   const handleDownloadPDF = async () => {
@@ -485,6 +513,24 @@ export default function TemplateWorkspace({ templateId }) {
     navigate(`/template${e.target.value}`);
   };
 
+  // Remember which template the outgoing resume was on before switching, then
+  // follow the incoming one back to its own template. Doing both here rather
+  // than in an effect avoids the two writes racing each other.
+  const handleSwitchResume = (id) => {
+    if (id === store.activeId) return;
+    updateActive({ templateId });
+    store.switchResume(id);
+    const target = store.resumes.find((r) => r.id === id);
+    if (target && target.templateId && target.templateId !== templateId) {
+      navigate(`/template${target.templateId}`);
+    }
+  };
+
+  const handleCreateResume = () => {
+    updateActive({ templateId });
+    store.createResume(`Resume ${store.resumes.length + 1}`);
+  };
+
   const handleLoadSample = () => {
     const hasContent = formData.fullName || formData.summary ||
       (formData.experiences && formData.experiences[0] && formData.experiences[0].title);
@@ -502,6 +548,8 @@ export default function TemplateWorkspace({ templateId }) {
     link.download = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'resume'}_backup.json`;
     link.click();
     URL.revokeObjectURL(url);
+    // Clears the "not backed up" warning and the close prompt.
+    markBackedUp();
   };
 
   const handleImportJSON = (e) => {
@@ -524,9 +572,8 @@ export default function TemplateWorkspace({ templateId }) {
   };
 
   const handleClearData = () => {
-    if (window.confirm("Are you sure you want to clear all your resume data? This action cannot be undone.")) {
-      localStorage.removeItem('resumeFormData');
-      setFormData(createEmptyFormData());
+    if (window.confirm('Clear every resume you have here? This cannot be undone — download a backup first if you want to keep them.')) {
+      clearEverything();
       setFitFailed(false);
     }
   };
@@ -665,6 +712,26 @@ export default function TemplateWorkspace({ templateId }) {
             </button>
           </div>
           <h2>Your Details</h2>
+
+          <StorageNotice
+            mode={store.mode}
+            onChangeMode={store.changeMode}
+            needsBackup={needsBackup}
+            onBackup={handleExportJSON}
+            storageError={storageError}
+          />
+
+          <ResumeVersions
+            resumes={store.resumes}
+            activeId={store.activeId}
+            active={store.active}
+            onSwitch={handleSwitchResume}
+            onCreate={handleCreateResume}
+            onDuplicate={store.duplicateResume}
+            onRename={store.renameResume}
+            onDelete={store.deleteResume}
+          />
+
           <div className="template-switcher-row">
             <label htmlFor="template-switcher"><i className="fas fa-layer-group"></i> Template</label>
             <select
@@ -718,6 +785,12 @@ export default function TemplateWorkspace({ templateId }) {
             )}
           </div>
         </div>
+
+        <ContentReview
+          formData={formData}
+          collapsed={collapsedSections.contentReview}
+          toggleSection={() => toggleSection('contentReview')}
+        />
 
         <JobMatch
           jobDescription={formData.jobDescription}
@@ -800,6 +873,7 @@ export default function TemplateWorkspace({ templateId }) {
                 handleChange={handleChange}
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
+                moveEntry={moveEntry}
                 experienceHeading={experienceHeading}
                 handleHeadingChange={setExperienceHeading}
                 dragHandle={
@@ -824,6 +898,7 @@ export default function TemplateWorkspace({ templateId }) {
                 handleChange={handleChange}
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
+                moveEntry={moveEntry}
                 dragHandle={
                   <span
                     className="drag-handle"
@@ -846,6 +921,7 @@ export default function TemplateWorkspace({ templateId }) {
                 handleChange={handleChange}
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
+                moveEntry={moveEntry}
                 dragHandle={
                   <span
                     className="drag-handle"
@@ -868,6 +944,7 @@ export default function TemplateWorkspace({ templateId }) {
                 handleChange={handleChange}
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
+                moveEntry={moveEntry}
                 dragHandle={
                   <span
                     className="drag-handle"

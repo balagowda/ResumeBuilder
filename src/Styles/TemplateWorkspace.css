@@ -2547,3 +2547,458 @@
   color: #059669;
   margin-right: 4px;
 }
+
+/* ---------------------------------------------------------------------------
+   STORAGE NOTICE + RESUME VERSIONS
+   --------------------------------------------------------------------------- */
+
+.storage-notice {
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid;
+  font-size: 0.8rem;
+}
+
+.storage-notice.is-session {
+  background-color: #fffbeb;
+  border-color: #fde68a;
+  color: #78350f;
+}
+
+.storage-notice.is-device {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #14532d;
+}
+
+.storage-notice-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.storage-notice-body {
+  margin: 0;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.storage-notice-backup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #b45309;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.storage-notice-backup:hover {
+  background-color: #92400e;
+}
+
+.storage-notice-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.storage-notice-toggle input {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.storage-notice-error {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  color: #b91c1c;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.resume-versions {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+.resume-versions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resume-versions-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.resume-versions-select,
+.resume-versions-rename {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.resume-versions-select:focus,
+.resume-versions-rename:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.resume-versions-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.resume-versions-actions button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resume-versions-actions button:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.resume-versions-delete {
+  flex: 0 0 34px !important;
+}
+
+.resume-versions-delete:hover {
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+/* ---------------------------------------------------------------------------
+   CONTENT REVIEW (writing linter)
+   --------------------------------------------------------------------------- */
+
+.content-review-icon {
+  color: #7c3aed;
+  margin-right: 8px;
+}
+
+.content-review-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.content-review-badge-good {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.content-review-badge-ok {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.content-review-badge-low {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.content-review-intro,
+.content-review-hint {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+
+.content-review-clear {
+  font-size: 0.82rem;
+  color: #15803d;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0;
+}
+
+.content-review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.content-review-item {
+  border: 1px solid #e2e8f0;
+  border-left-width: 3px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background-color: #ffffff;
+}
+
+.content-review-item.sev-high {
+  border-left-color: #ef4444;
+}
+
+.content-review-item.sev-medium {
+  border-left-color: #f59e0b;
+}
+
+.content-review-item.sev-low {
+  border-left-color: #94a3b8;
+}
+
+.content-review-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+
+.content-review-sev {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.content-review-sev.sev-high {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.content-review-sev.sev-medium {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.content-review-sev.sev-low {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.content-review-where {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.content-review-message {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.content-review-excerpt {
+  margin: 5px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.content-review-fix {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: #4f46e5;
+  line-height: 1.45;
+}
+
+.content-review-fix i {
+  font-size: 0.68rem;
+  margin-right: 4px;
+}
+
+.content-review-more {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  background: none;
+  color: #475569;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.content-review-more:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* ---------------------------------------------------------------------------
+   ENTRY CONTROLS + DATE RANGE PICKERS
+   --------------------------------------------------------------------------- */
+
+.entry-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.entry-move-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #475569;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.entry-move-btn:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.entry-move-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.entry-controls .delete-btn {
+  margin-left: auto;
+}
+
+.date-range-field {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.date-range-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.date-range-select {
+  flex: 1;
+  min-width: 68px;
+  padding: 8px 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 0.82rem;
+}
+
+.date-range-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.date-range-select:disabled {
+  background-color: #f8fafc;
+  color: #94a3b8;
+}
+
+.date-range-dash {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.date-range-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.date-range-present {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  color: #475569 !important;
+  cursor: pointer;
+  margin: 0 !important;
+}
+
+.date-range-present input {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.date-range-switch {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--primary-color);
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}

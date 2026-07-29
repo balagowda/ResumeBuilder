@@ -1,6 +1,7 @@
 import React from 'react';
+import EntryControls from './EntryControls';
 
-const Others = ({ others, collapsed, toggleSection, handleChange, addEntry, deleteEntry ,dragHandle}) => (
+const Others = ({ others, collapsed, toggleSection, handleChange, addEntry, deleteEntry ,dragHandle, moveEntry }) => (
   <div className="input-group">
     <div className="section-header" onClick={toggleSection}>
       <h3>
@@ -34,12 +35,14 @@ const Others = ({ others, collapsed, toggleSection, handleChange, addEntry, dele
               placeholder="Describe your role and achievements"
               className="input-field"
             />
-            <button
-              className="delete-btn"
-              onClick={() => deleteEntry('others', index)}
-            >
-              <i className="fas fa-trash"></i>
-            </button>
+            <EntryControls
+              section="others"
+              index={index}
+              total={others.length}
+              moveEntry={moveEntry}
+              deleteEntry={deleteEntry}
+              label="item"
+            />
           </div>
         ))}
         <button className="add-btn" onClick={() => addEntry('others')}>

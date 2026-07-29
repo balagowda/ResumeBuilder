@@ -1,6 +1,8 @@
 import React from 'react';
+import DateRangeField from './DateRangeField';
+import EntryControls from './EntryControls';
 
-const Projects = ({ projects, collapsed, toggleSection, handleChange, addEntry, deleteEntry , dragHandle}) => (
+const Projects = ({ projects, collapsed, toggleSection, handleChange, addEntry, deleteEntry, moveEntry, dragHandle }) => (
   <div className="input-group">
     <div className="section-header"  onClick={toggleSection}>
       <h3>
@@ -25,14 +27,12 @@ const Projects = ({ projects, collapsed, toggleSection, handleChange, addEntry, 
               placeholder="e.g., Portfolio Website"
               className="input-field"
             />
-            <label htmlFor="dates">Dates</label>
-            <input
-              type="text"
-              name="dates"
+            <DateRangeField
+              id={`project-dates-${index}`}
               value={proj.dates}
-              onChange={(e) => handleChange(e, 'projects', index)}
-              placeholder="e.g., Jan 2021 - Mar 2021"
-              className="input-field"
+              onChange={(next) =>
+                handleChange({ target: { name: 'dates', value: next } }, 'projects', index)
+              }
             />
             <label htmlFor="description">Description</label>
             <textarea
@@ -43,12 +43,14 @@ const Projects = ({ projects, collapsed, toggleSection, handleChange, addEntry, 
               placeholder="Describe the project and your role"
               className="input-field"
             />
-            <button
-              className="delete-btn"
-              onClick={() => deleteEntry('projects', index)}
-            >
-              <i className="fas fa-trash"></i>
-            </button>
+            <EntryControls
+              section="projects"
+              index={index}
+              total={projects.length}
+              moveEntry={moveEntry}
+              deleteEntry={deleteEntry}
+              label="project"
+            />
           </div>
         ))}
         <button className="add-btn" onClick={() => addEntry('projects')}>

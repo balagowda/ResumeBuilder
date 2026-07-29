@@ -1,4 +1,6 @@
 import React from 'react';
+import DateRangeField from './DateRangeField';
+import EntryControls from './EntryControls';
 
 const Experiences = ({
   experiences,
@@ -7,6 +9,7 @@ const Experiences = ({
   handleChange,
   addEntry,
   deleteEntry,
+  moveEntry,
   experienceHeading,
   handleHeadingChange,
   dragHandle,
@@ -64,14 +67,12 @@ const Experiences = ({
               placeholder="e.g., ABC Corp"
               className="input-field"
             />
-            <label htmlFor="dates">Dates</label>
-            <input
-              type="text"
-              name="dates"
+            <DateRangeField
+              id={`experience-dates-${index}`}
               value={exp.dates}
-              onChange={(e) => handleChange(e, 'experiences', index)}
-              placeholder="e.g., Jan 2020 - Dec 2021"
-              className="input-field"
+              onChange={(next) =>
+                handleChange({ target: { name: 'dates', value: next } }, 'experiences', index)
+              }
             />
             <label htmlFor="description">Description</label>
             <textarea
@@ -82,12 +83,14 @@ const Experiences = ({
               placeholder="Describe your role and achievements"
               className="input-field"
             />
-            <button
-              className="delete-btn"
-              onClick={() => deleteEntry('experiences', index)}
-            >
-              <i className="fas fa-trash"></i>
-            </button>
+            <EntryControls
+              section="experiences"
+              index={index}
+              total={experiences.length}
+              moveEntry={moveEntry}
+              deleteEntry={deleteEntry}
+              label="role"
+            />
           </div>
         ))}
         <button className="add-btn" onClick={() => addEntry('experiences')}>

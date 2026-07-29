@@ -1,6 +1,8 @@
 import React from 'react';
+import DateRangeField from './DateRangeField';
+import EntryControls from './EntryControls';
 
-const Education = ({ education, collapsed, toggleSection, handleChange, addEntry, deleteEntry, dragHandle }) => (
+const Education = ({ education, collapsed, toggleSection, handleChange, addEntry, deleteEntry, dragHandle, moveEntry }) => (
   <div className="input-group">
     <div className="section-header" onClick={toggleSection}>
       <h3>
@@ -34,14 +36,13 @@ const Education = ({ education, collapsed, toggleSection, handleChange, addEntry
               placeholder="e.g., XYZ University"
               className="input-field"
             />
-            <label htmlFor="date">Date</label>
-            <input
-              type="text"
-              name="date"
+            <DateRangeField
+              id={`education-date-${index}`}
+              label="Date"
               value={edu.date}
-              onChange={(e) => handleChange(e, 'education', index)}
-              placeholder="e.g., 2015 - 2019"
-              className="input-field"
+              onChange={(next) =>
+                handleChange({ target: { name: 'date', value: next } }, 'education', index)
+              }
             />
             <label htmlFor="score">Score</label>
             <input
@@ -52,12 +53,14 @@ const Education = ({ education, collapsed, toggleSection, handleChange, addEntry
               placeholder="e.g., 3.8 GPA"
               className="input-field"
             />
-            <button
-              className="delete-btn"
-              onClick={() => deleteEntry('education', index)}
-            >
-              <i className="fas fa-trash"></i>
-            </button>
+            <EntryControls
+              section="education"
+              index={index}
+              total={education.length}
+              moveEntry={moveEntry}
+              deleteEntry={deleteEntry}
+              label="qualification"
+            />
           </div>
         ))}
         <button className="add-btn" onClick={() => addEntry('education')}>
