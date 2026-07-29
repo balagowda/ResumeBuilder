@@ -588,16 +588,22 @@
 /* --------------------------------------------------------------------------
    Template 2: Slate Sidebar Creative
    -------------------------------------------------------------------------- */
+/* This element IS .resume-content for template 2, and it is what the page-count
+   logic measures. Clamping it to 100% of the sheet makes that measurement
+   self-referential — the sheet could never grow, so overflow was silently
+   clipped instead of paginating. The full-height rail comes from the sheet
+   background gradient, not from this height. */
 .tmpl-creative {
-    height: 100%;
+  height: auto;
 }
 
 .tmpl-creative .creative-split-container {
   display: flex;
   width: calc(100% + 64px);
-  /* Fills a whole sheet when content is short; flex stretch keeps the dark
-     rail level with the main column once content grows past one page. */
-  min-height: 794px;
+  /* No min-height: this element's height is what the page-count logic measures,
+     so a full-page floor would make even an empty resume report two pages. The
+     rail still reaches the bottom of the sheet — that band is painted as the
+     sheet's background (see .resume:has(.tmpl-creative)). */
   margin: -32px; /* Offset parent padding */
 }
 
@@ -1133,11 +1139,6 @@
 
   .page-guides {
     display: none;
-  }
-
-  .tmpl-creative .creative-split-container,
-  .tmpl-rightbar .rb-container {
-    min-height: 0;
   }
 
   .overflow-banner {
@@ -1909,11 +1910,6 @@
     height: auto !important;
   }
 
-  .tmpl-creative .creative-split-container,
-  .tmpl-rightbar .rb-container {
-    min-height: 0 !important;
-  }
-
   /* Never split an individual job, project, or degree across a page break. */
   .sc-entry,
   .rb-entry,
@@ -1947,9 +1943,8 @@
 .tmpl-rightbar .rb-container {
   display: flex;
   width: calc(100% + 64px);
-  /* See .creative-split-container — constant one-sheet floor, then flex
-     stretch keeps the rail level with the main column. */
-  min-height: 794px;
+  /* See .creative-split-container — no full-page floor here either; the rail
+     band is painted as the sheet background instead. */
   margin: -32px; /* Offset parent padding */
 }
 

@@ -20,31 +20,37 @@ const PAGE_H = 794;
 const SHEET_PAD = 64; // 32px top + 32px bottom
 const MIN_SCALE = 0.7;
 
+// Single source of truth for a pristine resume, so "Clear Data" lands on
+// exactly the same state as a first visit — including typography, which used
+// to be dropped rather than reset.
+const createEmptyFormData = () => ({
+  fullName: '',
+  professionalTitle: '',
+  mail: '',
+  mobile: '',
+  linkedin: '',
+  github: '',
+  other: '',
+  summary: '',
+  experiences: [{ title: '', company: '', dates: '', description: '' }],
+  education: [{ studyTitle: '', school: '', date: '', score: '' }],
+  projects: [{ title: '', description: '', dates: '' }],
+  others: [],
+  skills: '',
+  jobDescription: '',
+  addHeaderLine: false,
+  showProfessionalTitle: false,
+  fontHeading: 'Arial, Helvetica, sans-serif',
+  fontSubheading: 'Arial, Helvetica, sans-serif',
+  fontText: 'Arial, Helvetica, sans-serif',
+  lineHeight: 1.4,
+  contentScale: 1,
+});
+
 export default function TemplateWorkspace({ templateId }) {
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem('resumeFormData');
-    return savedData ? JSON.parse(savedData) : {
-      fullName: '',
-      professionalTitle: '',
-      mail: '',
-      mobile: '',
-      linkedin: '',
-      github: '',
-      other: '',
-      summary: '',
-      experiences: [{ title: '', company: '', dates: '', description: '' }],
-      education: [{ studyTitle: '', school: '', date: '', score: '' }],
-      projects: [{ title: '', description: '', dates: '' }],
-      others: [],
-      skills: '',
-      addHeaderLine: false,
-      showProfessionalTitle: false,
-      fontHeading: 'Arial, Helvetica, sans-serif',
-      fontSubheading: 'Arial, Helvetica, sans-serif',
-      fontText: 'Arial, Helvetica, sans-serif',
-      lineHeight: 1.4,
-      contentScale: 1,
-    };
+    return savedData ? JSON.parse(savedData) : createEmptyFormData();
   });
   
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -80,6 +86,8 @@ export default function TemplateWorkspace({ templateId }) {
   // applied. Drives the page count and the overflow warning.
   const [contentHeight, setContentHeight] = useState(0);
   const [isFitting, setIsFitting] = useState(false);
+  // Set when even the smallest readable text size still spills onto page two.
+  const [fitFailed, setFitFailed] = useState(false);
 
   const contentScale = formData.contentScale || 1;
   const scaledHeight = contentHeight * contentScale;
@@ -180,6 +188,13 @@ export default function TemplateWorkspace({ templateId }) {
   // the page count already accounts for the injected breaks.
   useLayoutEffect(applyPageBreaks);
   useLayoutEffect(measureContent);
+
+  // A failed fit describes the resume as it was, so any edit makes it stale.
+  // Keyed on formData identity rather than the measured height: the height
+  // jitters by a pixel after probing, which would clear the flag immediately.
+  useEffect(() => {
+    setFitFailed(false);
+  }, [formData]);
 
   useEffect(() => {
     const root = resumeRef.current;
@@ -511,23 +526,8 @@ export default function TemplateWorkspace({ templateId }) {
   const handleClearData = () => {
     if (window.confirm("Are you sure you want to clear all your resume data? This action cannot be undone.")) {
       localStorage.removeItem('resumeFormData');
-      setFormData({
-        fullName: '',
-        professionalTitle: '',
-        mail: '',
-        mobile: '',
-        linkedin: '',
-        github: '',
-        other: '',
-        summary: '',
-        experiences: [{ title: '', company: '', dates: '', description: '' }],
-        education: [{ studyTitle: '', school: '', date: '', score: '' }],
-        projects: [{ title: '', description: '', dates: '' }],
-        others: [],
-        skills: '',
-        jobDescription: '',
-        contentScale: 1,
-      });
+      setFormData(createEmptyFormData());
+      setFitFailed(false);
     }
   };
 
@@ -558,15 +558,18 @@ export default function TemplateWorkspace({ templateId }) {
 
     try {
       if (heightAt(1) <= PAGE_H) {
+        setFitFailed(false);
         setFormData((prev) => ({ ...prev, contentScale: 1 }));
         return;
       }
       if (heightAt(MIN_SCALE) > PAGE_H) {
-        // Even at the smallest readable size it will not fit — settle at the
-        // floor and let the banner tell the user to cut content instead.
-        setFormData((prev) => ({ ...prev, contentScale: MIN_SCALE }));
+        // Even at the smallest readable size it will not fit. Shrinking anyway
+        // would leave the user on tiny text *and* still on two pages, with no
+        // hint as to why — so change nothing and say so instead.
+        setFitFailed(true);
         return;
       }
+      setFitFailed(false);
 
       let lo = MIN_SCALE; // known to fit
       let hi = 1; // known not to fit
@@ -583,7 +586,11 @@ export default function TemplateWorkspace({ templateId }) {
       }
       setFormData((prev) => ({ ...prev, contentScale: best }));
     } finally {
-      root.style.removeProperty('--content-scale');
+      // Put the property back to what React currently believes rather than
+      // removing it. React only rewrites an inline style when the prop itself
+      // changes, so on the "cannot fit" path — where we deliberately commit no
+      // new scale — removing it would silently drop the user's size setting.
+      root.style.setProperty('--content-scale', String(formData.contentScale || 1));
       setIsFitting(false);
     }
   };
@@ -909,13 +916,30 @@ export default function TemplateWorkspace({ templateId }) {
               <span className="overflow-banner-text">
                 <strong>Your resume runs onto {pageCount === 2 ? 'a 2nd page' : `${pageCount} pages`}.</strong>
                 <span className="overflow-banner-sub">
-                  Recruiters usually expect one page. Shrink it to fit, or use "Download ATS PDF",
-                  which breaks pages cleanly between entries.
+                  {fitFailed ? (
+                    <>
+                      This won't fit on one page even at the smallest readable text size, so we
+                      left your size alone. Try Compact line spacing, trimming a bullet or two, or
+                      keep two pages and use "Download ATS PDF" — it breaks pages between entries.
+                    </>
+                  ) : (
+                    <>
+                      Recruiters usually expect one page. Shrink it to fit, or use "Download ATS
+                      PDF", which breaks pages cleanly between entries.
+                    </>
+                  )}
                 </span>
               </span>
-              <button className="btn-autofit" onClick={fitToOnePage} disabled={isFitting}>
-                {isFitting ? 'Fitting…' : 'Fit to one page'}
-              </button>
+              {!fitFailed && (
+                <button className="btn-autofit" onClick={fitToOnePage} disabled={isFitting}>
+                  {isFitting ? 'Fitting…' : 'Fit to one page'}
+                </button>
+              )}
+              {contentScale !== 1 && (
+                <button className="btn-autofit-reset" onClick={resetScale}>
+                  Reset to 100%
+                </button>
+              )}
             </div>
           ) : contentScale < 1 ? (
             <div className="overflow-banner overflow-banner-ok">
