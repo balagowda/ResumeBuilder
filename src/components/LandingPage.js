@@ -58,8 +58,8 @@ const LandingPage = () => {
               <Link to="/templates" className="btn-primary-large">
                 Get Started Free <i className="fas fa-arrow-right icon-right"></i>
               </Link>
-              <Link to="/signin" className="btn-secondary-large">
-                Sign In Account
+              <Link to="/template7" className="btn-secondary-large">
+                Skip to the ATS Template
               </Link>
             </div>
             <div className="hero-stats">
@@ -183,6 +183,22 @@ const LandingPage = () => {
               <h3>Complete Data Privacy</h3>
               <p>Your details are saved exclusively in your browser's local storage. We do not store or send any of your private credentials to a server.</p>
             </div>
+            <div className="feature-item">
+              <div className="feature-icon-wrapper">
+                <i className="fas fa-crosshairs"></i>
+              </div>
+              <h3>Job Description Matching</h3>
+              <p>Paste any job posting and instantly see which of its keywords your resume is missing — the feature other builders charge a monthly subscription for.</p>
+            </div>
+
+            <div className="feature-item">
+              <div className="feature-icon-wrapper">
+                <i className="fas fa-compress"></i>
+              </div>
+              <h3>Fit To One Page</h3>
+              <p>We warn you the moment your content spills onto a second page, and resize the whole resume to fit in a single click.</p>
+            </div>
+
             <div className="feature-item">
               <div className="feature-icon-wrapper">
                 <i className="fas fa-arrows-alt"></i>

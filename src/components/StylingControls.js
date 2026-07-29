@@ -35,7 +35,20 @@ const TEXT_FONTS = [
   { name: 'Helvetica', value: 'Helvetica, Arial, sans-serif' }
 ];
 
+// Matches MIN_SCALE in TemplateWorkspace — below 70% the type stops being
+// readable in print.
+const MIN_SCALE = 0.7;
+const MAX_SCALE = 1.1;
+const SCALE_STEP = 0.05;
+
 export default function StylingControls({ formData, handleChange }) {
+  const scale = formData.contentScale || 1;
+
+  const setScale = (value) => {
+    const clamped = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.round(value * 100) / 100));
+    handleChange({ target: { name: 'contentScale', value: clamped } });
+  };
+
   const labelStyle = {
     display: 'block',
     fontSize: '0.85rem',
@@ -151,6 +164,32 @@ export default function StylingControls({ formData, handleChange }) {
         </div>
         <p style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '8px', marginBottom: 0 }}>
           Recolors headings, rules, and header bands. "Template default" restores the original palette.
+        </p>
+      </div>
+
+      <div style={formGroupStyle}>
+        <label style={labelStyle}>Text Size</label>
+        <div className="scale-stepper">
+          <button
+            type="button"
+            title="Smaller text — fits more on the page"
+            disabled={scale <= MIN_SCALE}
+            onClick={() => setScale(scale - SCALE_STEP)}
+          >
+            <i className="fas fa-minus"></i>
+          </button>
+          <span className="scale-stepper-value">{Math.round(scale * 100)}%</span>
+          <button
+            type="button"
+            title="Larger text"
+            disabled={scale >= MAX_SCALE}
+            onClick={() => setScale(scale + SCALE_STEP)}
+          >
+            <i className="fas fa-plus"></i>
+          </button>
+        </div>
+        <p style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '8px', marginBottom: 0 }}>
+          Scales the whole resume. Use it with "Fit to one page" when your content spills over.
         </p>
       </div>
 

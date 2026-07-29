@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -10,8 +10,15 @@ import Education from './Education';
 import Projects from './Projects';
 import Skills from './Skills';
 import Others from './Others';
+import JobMatch from './JobMatch';
 import StylingControls from './StylingControls';
 import '../Styles/TemplateWorkspace.css';
+
+// Preview sheet geometry. The sheet is 560x794 CSS px (A4 at the preview's
+// scale) with 32px padding, and grows in whole-page increments.
+const PAGE_H = 794;
+const SHEET_PAD = 64; // 32px top + 32px bottom
+const MIN_SCALE = 0.7;
 
 export default function TemplateWorkspace({ templateId }) {
   const [formData, setFormData] = useState(() => {
@@ -36,6 +43,7 @@ export default function TemplateWorkspace({ templateId }) {
       fontSubheading: 'Arial, Helvetica, sans-serif',
       fontText: 'Arial, Helvetica, sans-serif',
       lineHeight: 1.4,
+      contentScale: 1,
     };
   });
   
@@ -48,6 +56,7 @@ export default function TemplateWorkspace({ templateId }) {
     projects: true,
     skills: true,
     others: true,
+    jobMatch: true,
   });
   const [sectionOrder, setSectionOrder] = useState([
     'summary',
@@ -66,6 +75,121 @@ export default function TemplateWorkspace({ templateId }) {
   const [isResizing, setIsResizing] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [savedAt, setSavedAt] = useState(null);
+
+  // Layout height of .resume-content in CSS px, before --content-scale is
+  // applied. Drives the page count and the overflow warning.
+  const [contentHeight, setContentHeight] = useState(0);
+  const [isFitting, setIsFitting] = useState(false);
+
+  const contentScale = formData.contentScale || 1;
+  const scaledHeight = contentHeight * contentScale;
+  const pageCount = Math.max(1, Math.ceil((scaledHeight + SHEET_PAD) / PAGE_H));
+  const sheetHeight = pageCount * PAGE_H;
+
+  const measureContent = useCallback(() => {
+    const root = resumeRef.current;
+    if (!root) return;
+    const el = root.querySelector('.resume-content');
+    if (!el) return;
+    const next = el.offsetHeight;
+    setContentHeight((prev) => (prev === next ? prev : next));
+  }, []);
+
+  // Elements currently carrying an injected page-break margin, so each pass
+  // can undo the previous one before recalculating.
+  const pushedElsRef = useRef([]);
+
+  const clearPageBreaks = useCallback(() => {
+    // Restore whatever the template itself had set inline — some templates use
+    // inline margins, so blanking the property outright would corrupt them.
+    pushedElsRef.current.forEach(({ el, originalMarginTop }) => {
+      el.style.marginTop = originalMarginTop;
+    });
+    pushedElsRef.current = [];
+  }, []);
+
+  /**
+   * Keep any single block — a job, a project, a bullet — from straddling a page
+   * boundary, by nudging it down onto the next page. Without this the PDF
+   * export, which slices the sheet at fixed page intervals, would cut straight
+   * through a line of text.
+   */
+  const applyPageBreaks = useCallback(() => {
+    const root = resumeRef.current;
+    if (!root) return;
+    const content = root.querySelector('.resume-content');
+    if (!content) return;
+
+    clearPageBreaks();
+
+    const scale = formData.contentScale || 1;
+    const pad = SHEET_PAD / 2; // top margin given to content pushed onto a new page
+    const usableHeight = PAGE_H - pad;
+
+    // Treat a block as atomic once it is small enough to fit on a page;
+    // descend into anything larger so we move entries rather than whole columns.
+    const collectAtoms = () => {
+      const rootTop = root.getBoundingClientRect().top;
+      const atoms = [];
+      const walk = (el) => {
+        Array.from(el.children).forEach((child) => {
+          const rect = child.getBoundingClientRect();
+          if (rect.height <= 0) return;
+          if (rect.height > PAGE_H * 0.35 && child.children.length > 0) {
+            walk(child);
+          } else {
+            atoms.push({ el: child, top: rect.top - rootTop, bottom: rect.bottom - rootTop });
+          }
+        });
+      };
+      walk(content);
+      return atoms;
+    };
+
+    // One push per pass, then re-measure, since moving a block shifts
+    // everything after it. The cap stops any pathological layout from looping.
+    for (let pass = 0; pass < 40; pass += 1) {
+      const atoms = collectAtoms();
+      const target = atoms.find((atom) => {
+        // A block taller than a page can never be made to fit; leave it be.
+        if (atom.bottom - atom.top > usableHeight) return false;
+        const pageIdx = Math.floor(atom.top / PAGE_H);
+        // Trigger on the line the PDF actually slices at, not on the page
+        // margin — pushing a block that merely runs into the bottom margin
+        // would cost a whole extra page for no visible benefit. The 1px
+        // tolerance ignores sub-pixel descender overhang.
+        return atom.bottom > (pageIdx + 1) * PAGE_H + 1;
+      });
+      if (!target) break;
+
+      const pageIdx = Math.floor(target.top / PAGE_H);
+      const deltaVisual = (pageIdx + 1) * PAGE_H + pad - target.top;
+      if (deltaVisual <= 0) break;
+
+      const currentMargin = parseFloat(getComputedStyle(target.el).marginTop) || 0;
+      pushedElsRef.current.push({
+        el: target.el,
+        originalMarginTop: target.el.style.marginTop,
+      });
+      // Margins are applied pre-transform, so undo the content scale.
+      target.el.style.marginTop = `${currentMargin + deltaVisual / scale}px`;
+    }
+  }, [clearPageBreaks, formData.contentScale]);
+
+  // Order matters: repaginate first, then measure, so the height that drives
+  // the page count already accounts for the injected breaks.
+  useLayoutEffect(applyPageBreaks);
+  useLayoutEffect(measureContent);
+
+  useEffect(() => {
+    const root = resumeRef.current;
+    if (!root || typeof ResizeObserver === 'undefined') return undefined;
+    const el = root.querySelector('.resume-content');
+    if (!el) return undefined;
+    const ro = new ResizeObserver(measureContent);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [templateId, measureContent]);
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -244,13 +368,12 @@ export default function TemplateWorkspace({ templateId }) {
         ignoreElements: (element) => {
           // Check if classList exists and contains is a function (SVG elements can break this)
           if (element.classList && typeof element.classList.contains === 'function') {
-            return element.classList.contains('preview-btn');
+            return element.classList.contains('preview-btn') ||
+                   element.classList.contains('page-guides');
           }
           return false;
         }
       });
-
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
       // Create an A4 PDF
       const pdf = new jsPDF({
@@ -263,32 +386,61 @@ export default function TemplateWorkspace({ templateId }) {
       const pdfWidth = pdf.internal.pageSize.getWidth ? pdf.internal.pageSize.getWidth() : pdf.internal.pageSize.width;
       const pdfHeight = pdf.internal.pageSize.getHeight ? pdf.internal.pageSize.getHeight() : pdf.internal.pageSize.height;
 
-      // Force the 560x794 image to perfectly stretch and fill the A4 page
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      // The sheet is pageCount x 794 CSS px tall, so slice the tall capture
+      // into one A4 image per page instead of squashing it all onto page 1.
+      const pxPerPage = canvas.height / pageCount;
+
+      for (let page = 0; page < pageCount; page += 1) {
+        if (page > 0) pdf.addPage();
+
+        const sliceTop = Math.round(page * pxPerPage);
+        const sliceHeight = Math.min(Math.round(pxPerPage), canvas.height - sliceTop);
+
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = Math.round(pxPerPage);
+        const ctx = pageCanvas.getContext('2d');
+        // Pad the final slice with white rather than leaving it transparent
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(
+          canvas,
+          0, sliceTop, canvas.width, sliceHeight,
+          0, 0, canvas.width, sliceHeight
+        );
+
+        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      }
 
       // --- INJECT CLICKABLE LINKS ---
       // Since html2canvas outputs a flat image, we must manually map HTML <a> tags to PDF link boxes
       const origRect = originalElement.getBoundingClientRect();
+      const cssPageHeight = origRect.height / pageCount;
       const links = originalElement.querySelectorAll('a');
-      
+
       links.forEach((link) => {
         const href = link.getAttribute('href');
-        if (href) {
-          const rect = link.getBoundingClientRect();
-          
-          // Calculate relative position within the resume container
-          const relX = rect.left - origRect.left;
-          const relY = rect.top - origRect.top;
-          
-          // Mathematically scale the coordinates to match the stretched A4 PDF dimensions
-          const pdfLinkX = (relX / origRect.width) * pdfWidth;
-          const pdfLinkY = (relY / origRect.height) * pdfHeight;
-          const pdfLinkW = (rect.width / origRect.width) * pdfWidth;
-          const pdfLinkH = (rect.height / origRect.height) * pdfHeight;
-          
-          // Overlay an invisible clickable region on the PDF
-          pdf.link(pdfLinkX, pdfLinkY, pdfLinkW, pdfLinkH, { url: href });
-        }
+        if (!href) return;
+
+        const rect = link.getBoundingClientRect();
+
+        // Calculate relative position within the resume container
+        const relX = rect.left - origRect.left;
+        const relY = rect.top - origRect.top;
+
+        // Work out which page the link landed on, and its offset within it
+        const linkPage = Math.min(pageCount - 1, Math.floor(relY / cssPageHeight));
+        const relYOnPage = relY - linkPage * cssPageHeight;
+
+        // Mathematically scale the coordinates to match the stretched A4 page
+        const pdfLinkX = (relX / origRect.width) * pdfWidth;
+        const pdfLinkY = (relYOnPage / cssPageHeight) * pdfHeight;
+        const pdfLinkW = (rect.width / origRect.width) * pdfWidth;
+        const pdfLinkH = (rect.height / cssPageHeight) * pdfHeight;
+
+        // Overlay an invisible clickable region on the right page
+        pdf.setPage(linkPage + 1);
+        pdf.link(pdfLinkX, pdfLinkY, pdfLinkW, pdfLinkH, { url: href });
       });
 
       const filename = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'Resume'}.pdf`;
@@ -373,8 +525,83 @@ export default function TemplateWorkspace({ templateId }) {
         projects: [{ title: '', description: '', dates: '' }],
         others: [],
         skills: '',
+        jobDescription: '',
+        contentScale: 1,
       });
     }
+  };
+
+  // --- Fit to one page -----------------------------------------------------
+  // Changing --content-scale also changes the layout width the content wraps
+  // at, so the resulting height can only be found by measuring. Probe the DOM
+  // directly (bypassing React state) and commit the winner once.
+  const fitToOnePage = () => {
+    const root = resumeRef.current;
+    if (!root || isFitting) return;
+    const el = root.querySelector('.resume-content');
+    if (!el) return;
+
+    setIsFitting(true);
+
+    // Probe against unpaginated content — the page-break margins are only
+    // meaningful once the final scale is known, and would otherwise inflate
+    // every measurement. The layout effect re-applies them after we commit.
+    clearPageBreaks();
+
+    // Writing the custom property and then reading offsetHeight forces a
+    // synchronous style + layout pass, so the measurement is already current.
+    // (Waiting on requestAnimationFrame here would stall in a hidden tab.)
+    const heightAt = (s) => {
+      root.style.setProperty('--content-scale', String(s));
+      return el.offsetHeight * s + SHEET_PAD;
+    };
+
+    try {
+      if (heightAt(1) <= PAGE_H) {
+        setFormData((prev) => ({ ...prev, contentScale: 1 }));
+        return;
+      }
+      if (heightAt(MIN_SCALE) > PAGE_H) {
+        // Even at the smallest readable size it will not fit — settle at the
+        // floor and let the banner tell the user to cut content instead.
+        setFormData((prev) => ({ ...prev, contentScale: MIN_SCALE }));
+        return;
+      }
+
+      let lo = MIN_SCALE; // known to fit
+      let hi = 1; // known not to fit
+      for (let i = 0; i < 7; i += 1) {
+        const mid = (lo + hi) / 2;
+        if (heightAt(mid) <= PAGE_H) lo = mid;
+        else hi = mid;
+      }
+
+      // Round down to a tidy 1% step, then confirm the rounded value still fits.
+      let best = Math.floor(lo * 100) / 100;
+      while (best > MIN_SCALE && heightAt(best) > PAGE_H) {
+        best = Math.round((best - 0.01) * 100) / 100;
+      }
+      setFormData((prev) => ({ ...prev, contentScale: best }));
+    } finally {
+      root.style.removeProperty('--content-scale');
+      setIsFitting(false);
+    }
+  };
+
+  const resetScale = () => setFormData((prev) => ({ ...prev, contentScale: 1 }));
+
+  // Append a keyword from the job-match panel to the Skills field, skipping
+  // anything already listed there.
+  const handleAddSkill = (term) => {
+    setFormData((prev) => {
+      const current = (prev.skills || '').replace(/,\s*$/, '').trim();
+      const listed = current
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean);
+      if (listed.includes(term.toLowerCase())) return prev;
+      return { ...prev, skills: current ? `${current}, ${term}` : term };
+    });
   };
 
   const togglePreview = () => {
@@ -484,6 +711,15 @@ export default function TemplateWorkspace({ templateId }) {
             )}
           </div>
         </div>
+
+        <JobMatch
+          jobDescription={formData.jobDescription}
+          formData={formData}
+          collapsed={collapsedSections.jobMatch}
+          toggleSection={() => toggleSection('jobMatch')}
+          handleChange={handleChange}
+          onAddSkill={handleAddSkill}
+        />
 
         <ContactFields formData={formData} handleChange={handleChange} />
         
@@ -667,12 +903,37 @@ export default function TemplateWorkspace({ templateId }) {
               <i className="fas fa-search-plus"></i>
             </button>
           </div>
+          {pageCount > 1 ? (
+            <div className="overflow-banner overflow-banner-warn">
+              <i className="fas fa-triangle-exclamation"></i>
+              <span className="overflow-banner-text">
+                <strong>Your resume runs onto {pageCount === 2 ? 'a 2nd page' : `${pageCount} pages`}.</strong>
+                <span className="overflow-banner-sub">
+                  Recruiters usually expect one page. Shrink it to fit, or use "Download ATS PDF",
+                  which breaks pages cleanly between entries.
+                </span>
+              </span>
+              <button className="btn-autofit" onClick={fitToOnePage} disabled={isFitting}>
+                {isFitting ? 'Fitting…' : 'Fit to one page'}
+              </button>
+            </div>
+          ) : contentScale < 1 ? (
+            <div className="overflow-banner overflow-banner-ok">
+              <i className="fas fa-circle-check"></i>
+              <span className="overflow-banner-text">
+                <strong>Fits on one page</strong> at {Math.round(contentScale * 100)}% text size.
+              </span>
+              <button className="btn-autofit-reset" onClick={resetScale}>
+                Reset to 100%
+              </button>
+            </div>
+          ) : null}
           <div
             className="resume-zoom-wrapper"
             style={{
               transform: `scale(${zoom / 100})`,
               transformOrigin: 'top center',
-              height: `${Math.round(814 * (zoom / 100))}px`,
+              height: `${Math.round((sheetHeight + 20) * (zoom / 100))}px`,
             }}
           >
             <div
@@ -680,14 +941,30 @@ export default function TemplateWorkspace({ templateId }) {
               ref={resumeRef}
               data-accent={formData.accentColor ? 'on' : undefined}
               style={{
+                height: `${sheetHeight}px`,
                 '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
                 '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
                 '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
                 '--line-height': formData.lineHeight || 1.4,
+                '--content-scale': contentScale,
                 '--accent': formData.accentColor || undefined,
               }}
             >
-              {renderResumeContent()}
+              <div className="resume-fit">
+                {renderResumeContent()}
+              </div>
+              {pageCount > 1 && (
+                <div className="page-guides" aria-hidden="true">
+                  {Array.from({ length: pageCount - 1 }, (_, i) => (
+                    <div
+                      key={i}
+                      className="page-guide"
+                      style={{ top: `${(i + 1) * PAGE_H}px` }}
+                      data-label={`Page ${i + 2}`}
+                    />
+                  ))}
+                </div>
+              )}
               <button className="preview-btn" onClick={togglePreview}>
                 Preview
               </button>
@@ -717,14 +994,18 @@ export default function TemplateWorkspace({ templateId }) {
               className="resume preview-resume"
               data-accent={formData.accentColor ? 'on' : undefined}
               style={{
+                height: `${sheetHeight}px`,
                 '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
                 '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
                 '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
                 '--line-height': formData.lineHeight || 1.4,
+                '--content-scale': contentScale,
                 '--accent': formData.accentColor || undefined,
               }}
             >
-              {renderResumeContent()}
+              <div className="resume-fit">
+                {renderResumeContent()}
+              </div>
             </div>
           </div>
         </div>
