@@ -1,10 +1,30 @@
-import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import FeedbackForm from './FeedbackForm';
 import '../Styles/LandingPage.css';
 
 const LandingPage = () => {
   const cardRef = useRef(null);
   const [tiltStyle, setTiltStyle] = useState({});
+  const location = useLocation();
+
+  // The "Feedback" nav link routes here as /#feedback. location.key changes on
+  // every push, so repeat clicks scroll again instead of going nowhere.
+  useEffect(() => {
+    if (location.hash !== '#feedback') return;
+    const target = document.getElementById('feedback');
+    if (!target) return;
+    // scrollIntoView would get swallowed by .landing-container's overflow:hidden,
+    // so scroll the window directly and leave room for the sticky header.
+    const top = target.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top, behavior: 'smooth' });
+    // Smooth scrolling is a no-op in some browsers (reduced-motion settings,
+    // older engines), so snap into place if nothing actually moved.
+    const snap = setTimeout(() => {
+      if (Math.abs(window.scrollY - top) > 8) window.scrollTo(0, top);
+    }, 700);
+    return () => clearTimeout(snap);
+  }, [location.hash, location.key]);
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
@@ -236,6 +256,9 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Suggestions / bug reports */}
+      <FeedbackForm />
     </div>
   );
 };
