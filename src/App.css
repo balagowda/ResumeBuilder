@@ -71,13 +71,7 @@ body {
   color: var(--primary-color);
 }
 
-.auth-links {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.nav-btn-signup {
+.nav-btn-build {
   font-size: 1rem;
   font-weight: 600;
   color: var(--white);
@@ -89,40 +83,10 @@ body {
   box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
 }
 
-.nav-btn-signup:hover {
+.nav-btn-build:hover {
   background-color: #3b31d9;
   transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(79, 70, 229, 0.3);
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.welcome-text {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text-dark);
-}
-
-.signout-btn {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #ef4444;
-  background-color: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  padding: 6px 14px;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.signout-btn:hover {
-  color: var(--white);
-  background-color: #ef4444;
-  border-color: #ef4444;
 }
 
 /* Main content */

@@ -8,6 +8,8 @@ A 100% free, privacy-first resume builder. Pick one of 25+ professional, ATS-fri
 
 - **25+ free professional templates** — browse them at [/templates](https://hatchresume.com/templates/)
 - **ATS-friendly layouts** that parse cleanly in applicant tracking systems
+- **Job description matching** — paste a posting and see which of its keywords your resume is missing, scored and ranked, entirely in-browser
+- **Page overflow protection** — warns when content runs onto a second page, with one-click "fit to one page" resizing and multi-page PDF export
 - **No login required** — start building immediately
 - **Instant PDF download** via html2pdf/jsPDF
 - **Complete privacy** — everything runs client-side; nothing is stored on a server
@@ -49,6 +51,8 @@ public/
 scripts/
   seo-postbuild.js      # Generates static route entry points after build
 src/
-  components/           # LandingPage, HomePage, TemplateWorkspace, templates, auth
+  components/           # LandingPage, HomePage, TemplateWorkspace, templates, JobMatch
+  utils/
+    keywordMatch.js     # Job-description keyword extraction and resume matching
   Styles/               # Component styles
 ```

@@ -315,19 +315,93 @@
   justify-content: flex-start;
 }
 
+/* The sheet is exactly N x 794px tall, where N is the page count computed in
+   TemplateWorkspace. It used to be a hard 794px with overflow:hidden, which
+   silently deleted anything past page one. */
 .resume {
   position: relative;
   width: 560px;
   height: 794px;
   background-color: var(--white);
   border-radius: 4px;
-  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06), 
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06),
               0 5px 15px rgba(0, 0, 0, 0.03),
               0 0 0 1px rgba(15, 23, 42, 0.04);
   padding: 32px;
   overflow: hidden;
   flex-shrink: 0;
   margin-bottom: 20px;
+}
+
+/* Shrink-to-fit wrapper. Laying out at 1/scale width and then scaling down
+   means rem-based template type shrinks proportionally instead of reflowing. */
+.resume-fit {
+  width: calc(100% / var(--content-scale, 1));
+  height: calc(100% / var(--content-scale, 1));
+  transform: scale(var(--content-scale, 1));
+  transform-origin: top left;
+}
+
+/* Full-bleed side columns are sized by their content, so on a multi-page sheet
+   they stop partway down and the rest of the sheet looks empty. Paint the same
+   band as the sheet's own background so it always reaches the bottom, and let
+   the real column render on top of it.
+   Offsets are absolute because the sheet is exactly 560px wide: the split
+   containers span the full 560px, so 33% = 184.8px, 31% = 173.6px, 30% = 168px. */
+.resume:has(.tmpl-creative) {
+  background-image: linear-gradient(
+    to right,
+    var(--accent, #1e293b) 0 184.8px,
+    var(--white) 184.8px
+  );
+}
+
+.resume:has(.tmpl-rightbar:not(.tmpl-deedy)) {
+  background-image: linear-gradient(
+    to right,
+    var(--white) 0 386.4px,
+    #e2e8f0 386.4px 387.4px,
+    #f1f5f9 387.4px
+  );
+}
+
+.resume:has(.tmpl-deedy) {
+  background-image: linear-gradient(
+    to right,
+    var(--white) 0 167px,
+    #e2e8f0 167px 168px,
+    var(--white) 168px
+  );
+}
+
+/* Dashed rules showing where each printed page ends. */
+.page-guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.page-guide {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.page-guide::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 1px 5px;
+  border-radius: 3px;
 }
 
 .preview-btn {
@@ -380,7 +454,7 @@
 
 .resume-content {
   width: 100%;
-  height: 100%;
+  height: auto; /* grows with content so page overflow can be measured */
   color: #475569; /* Professional text tone */
   font-weight: 400;
   font-size: 0.65rem;
@@ -514,14 +588,22 @@
 /* --------------------------------------------------------------------------
    Template 2: Slate Sidebar Creative
    -------------------------------------------------------------------------- */
+/* This element IS .resume-content for template 2, and it is what the page-count
+   logic measures. Clamping it to 100% of the sheet makes that measurement
+   self-referential — the sheet could never grow, so overflow was silently
+   clipped instead of paginating. The full-height rail comes from the sheet
+   background gradient, not from this height. */
 .tmpl-creative {
-    height: 100%;
+  height: auto;
 }
 
 .tmpl-creative .creative-split-container {
   display: flex;
   width: calc(100% + 64px);
-  height: calc(100% + 64px);
+  /* No min-height: this element's height is what the page-count logic measures,
+     so a full-page floor would make even an empty resume report two pages. The
+     rail still reaches the bottom of the sheet — that band is painted as the
+     sheet's background (see .resume:has(.tmpl-creative)). */
   margin: -32px; /* Offset parent padding */
 }
 
@@ -957,9 +1039,10 @@
   margin: auto;
 }
 
+/* Same 560x794 geometry as the editor sheet so the inline page height and the
+   template's rem sizing agree. */
 .preview-resume {
-  width: 580px;
-  height: 820px;
+  width: 560px;
   background-color: var(--white);
   border-radius: 16px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
@@ -1028,73 +1111,44 @@
 }
 
 @media (max-width: 600px) {
-  .resume {
+  /* The sheet gets an inline pixel height from the page-count logic; on narrow
+     screens let it hug its content instead so it never leaves a tall gap. */
+  .resume,
+  .preview-resume {
     width: 100%;
-    height: auto;
-    aspect-ratio: 1 / 1.414;
+    height: auto !important;
+    min-height: 0;
     padding: 20px;
   }
-  
+
   .resume-content {
     font-size: 0.55rem;
   }
-  
+
   .download-btn {
     width: 100%;
   }
-  
-  .preview-resume {
-    width: 100%;
+
+  .resume-fit {
     height: auto;
-    aspect-ratio: 1 / 1.414;
-    padding: 20px;
+  }
+
+  .resume-zoom-wrapper {
+    height: auto !important;
+  }
+
+  .page-guides {
+    display: none;
+  }
+
+  .overflow-banner {
+    width: 100%;
   }
 }
 
 /* ==========================================================================
    PRINT / PDF EXPORT STYLES (ATS-FRIENDLY)
    ========================================================================== */
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-
-  body * {
-    visibility: hidden;
-  }
-
-  .resume-panel, .resume-panel * {
-    visibility: visible;
-  }
-
-  .resume-panel {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background: white;
-  }
-
-  .resume {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    box-shadow: none;
-    border: none;
-    transform: none !important;
-  }
-
-  .preview-btn, .download-btn, .resizer-bar, .input-panel, .App-header, .App-footer {
-    display: none !important;
-  }
-}
-
 /* ==========================================================================
    WORKSPACE TOOLBAR (template switcher + data tools)
    ========================================================================== */
@@ -1238,6 +1292,287 @@
 .ats-hint i {
   color: #059669;
   margin-right: 4px;
+}
+
+/* ==========================================================================
+   JOB MATCH PANEL
+   ========================================================================== */
+
+.job-match-icon {
+  color: var(--primary-color);
+  margin-right: 8px;
+}
+
+.job-match-badge {
+  margin-left: 10px;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.job-match-badge-good { background: #d1fae5; color: #065f46; }
+.job-match-badge-ok   { background: #fef3c7; color: #92400e; }
+.job-match-badge-low  { background: #fee2e2; color: #991b1b; }
+
+.job-match-intro {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.job-match-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 10px 0 0;
+}
+
+.job-match-hint i {
+  color: var(--primary-color);
+  margin-right: 4px;
+}
+
+.job-match-results {
+  margin-top: 16px;
+}
+
+.job-match-score-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.job-match-score-bar {
+  flex: 1;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.job-match-score-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease-out;
+}
+
+.job-match-fill-good { background: linear-gradient(90deg, #10b981, #059669); }
+.job-match-fill-ok   { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+.job-match-fill-low  { background: linear-gradient(90deg, #f87171, #ef4444); }
+
+.job-match-score-num {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  min-width: 40px;
+  text-align: right;
+}
+
+.job-match-summary {
+  font-size: 0.78rem;
+  color: #475569;
+  margin: 8px 0 0;
+}
+
+.job-match-block {
+  margin-top: 18px;
+}
+
+.job-match-block h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 6px;
+}
+
+.job-match-block h4 .fa-circle-exclamation { color: #f59e0b; }
+.job-match-block h4 .fa-circle-check { color: #10b981; }
+
+.job-match-count {
+  background: #e2e8f0;
+  color: #475569;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.job-match-block-hint {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin: 0 0 8px;
+}
+
+.job-match-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.job-match-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.job-match-tag-missing {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.job-match-tag-missing i {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.job-match-tag-missing:hover {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #fff;
+}
+
+.job-match-tag-matched {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+/* ==========================================================================
+   PAGE OVERFLOW BANNER + FIT CONTROLS
+   ========================================================================== */
+
+.overflow-banner {
+  width: 560px;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  border: 1px solid transparent;
+}
+
+.overflow-banner-warn {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
+.overflow-banner-ok {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+
+.overflow-banner i {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.overflow-banner-text {
+  flex: 1;
+  min-width: 180px;
+}
+
+.overflow-banner-text strong {
+  font-weight: 700;
+}
+
+.overflow-banner-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  opacity: 0.85;
+}
+
+.btn-autofit {
+  background: #92400e;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 18px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.btn-autofit:hover {
+  background: #78350f;
+  transform: translateY(-1px);
+}
+
+.btn-autofit-reset {
+  background: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+  padding: 7px 13px;
+  border-radius: 18px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.8;
+}
+
+.btn-autofit-reset:hover {
+  opacity: 1;
+}
+
+/* Text size stepper inside the styling panel */
+.scale-stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scale-stepper button {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.scale-stepper button:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.scale-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.scale-stepper-value {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
 }
 
 /* ==========================================================================
@@ -1529,6 +1864,8 @@
   .zoom-toolbar,
   .download-actions,
   .ats-hint,
+  .overflow-banner,
+  .page-guides,
   .preview-btn,
   .preview-modal {
     display: none !important;
@@ -1562,6 +1899,35 @@
     /* Scale the 560px preview sheet up to true A4 width (794px @ 96dpi) */
     zoom: 1.4178;
   }
+
+  /* The on-screen sheet is one tall block; let the browser paginate it for
+     real instead, so page 2+ gets proper breaks rather than sliced text. */
+  .print-target .resume-fit {
+    height: auto !important;
+  }
+
+  .resume-content {
+    height: auto !important;
+  }
+
+  /* Never split an individual job, project, or degree across a page break. */
+  .sc-entry,
+  .rb-entry,
+  .tech-entry,
+  .creative-entry,
+  .resume-entry,
+  .sub-entry {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .resume-content h1,
+  .resume-content h2,
+  .resume-content h3,
+  .resume-content h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
 }
 
 /* ==========================================================================
@@ -1571,13 +1937,14 @@
 /* --- Template 13: Right Rail Modern (light sidebar right) ----------------- */
 
 .tmpl-rightbar {
-  height: 100%;
+  height: auto;
 }
 
 .tmpl-rightbar .rb-container {
   display: flex;
   width: calc(100% + 64px);
-  height: calc(100% + 64px);
+  /* See .creative-split-container — no full-page floor here either; the rail
+     band is painted as the sheet background instead. */
   margin: -32px; /* Offset parent padding */
 }
 

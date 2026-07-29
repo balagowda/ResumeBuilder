@@ -1,0 +1,244 @@
+/**
+ * Client-side job-description keyword matching.
+ *
+ * Everything here runs in the browser — no job description, resume text, or
+ * derived data ever leaves the page. The approach is deliberately rule-based
+ * rather than statistical: frequency ranking, plus a curated dictionary that
+ * promotes real skills over generic prose so the "missing keywords" list stays
+ * actionable instead of full of filler like "team" or "work".
+ */
+
+const STOPWORDS = new Set([
+  'a', 'about', 'above', 'across', 'after', 'again', 'against', 'all', 'also', 'am', 'an',
+  'and', 'any', 'are', 'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below',
+  'between', 'both', 'but', 'by', 'can', 'could', 'did', 'do', 'does', 'doing', 'down',
+  'during', 'each', 'else', 'etc', 'even', 'ever', 'every', 'few', 'for', 'from', 'further',
+  'get', 'go', 'had', 'has', 'have', 'having', 'he', 'her', 'here', 'hers', 'herself', 'him',
+  'himself', 'his', 'how', 'however', 'i', 'if', 'in', 'into', 'is', 'it', 'its', 'itself',
+  'just', 'like', 'made', 'make', 'many', 'may', 'me', 'might', 'more', 'most', 'much',
+  'must', 'my', 'myself', 'need', 'no', 'nor', 'not', 'now', 'of', 'off', 'on', 'once',
+  'one', 'only', 'or', 'other', 'others', 'ought', 'our', 'ours', 'ourselves', 'out', 'over',
+  'own', 'per', 'same', 'shall', 'she', 'should', 'so', 'some', 'such', 'than', 'that',
+  'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', 'these', 'they', 'this',
+  'those', 'through', 'to', 'too', 'under', 'until', 'up', 'upon', 'us', 'use', 'used',
+  'using', 'very', 'was', 'we', 'were', 'what', 'when', 'where', 'whether', 'which', 'while',
+  'who', 'whom', 'why', 'will', 'with', 'within', 'without', 'would', 'you', 'your', 'yours',
+  'yourself',
+  // Job-posting boilerplate that is never a useful resume keyword
+  'ability', 'able', 'applicant', 'applicants', 'application', 'apply', 'benefits',
+  'candidate', 'candidates', 'career', 'company', 'compensation', 'employee', 'employees',
+  'employer', 'employment', 'equal', 'experience', 'experienced', 'gender', 'good', 'great',
+  'help', 'hire', 'hiring', 'identity', 'including', 'job', 'join', 'looking', 'love',
+  'opportunity', 'orientation', 'plus', 'position', 'preferred', 'proven', 'qualifications',
+  'race', 'range', 'regard', 'related', 'req', 'required', 'requirements', 'responsibilities',
+  'role', 'salary', 'seeking', 'strong', 'team', 'teams', 'want', 'well', 'work', 'working',
+  'year', 'years',
+  // Generic action verbs and filler nouns that pad out every posting
+  'background', 'build', 'building', 'built', 'create', 'creating', 'deliver', 'delivering',
+  'develop', 'developing', 'drive', 'driving', 'ensure', 'ensuring', 'excellent', 'existing',
+  'familiarity', 'familiar', 'hands', 'improve', 'improving', 'knowledge', 'maintain',
+  'maintaining', 'new', 'nice', 'operate', 'own', 'partner', 'participate', 'provide',
+  'providing', 'solid', 'support', 'supporting', 'understanding',
+]);
+
+// Multi-word phrases worth surfacing verbatim. Stored space-normalised.
+const PHRASES = [
+  'machine learning', 'deep learning', 'data science', 'data analysis', 'data modeling',
+  'data pipeline', 'data pipelines', 'data warehouse', 'data visualization', 'big data',
+  'natural language processing', 'computer vision', 'neural networks', 'feature engineering',
+  'a b testing', 'time series', 'business intelligence', 'predictive modeling',
+  'project management', 'product management', 'product strategy', 'roadmap planning',
+  'stakeholder management', 'cross functional', 'agile methodologies', 'scrum master',
+  'sprint planning', 'user research', 'user experience', 'user interface',
+  'continuous integration', 'continuous delivery', 'continuous deployment', 'ci cd',
+  'version control', 'code review', 'pair programming', 'unit testing', 'integration testing',
+  'end to end testing', 'test automation', 'test driven development', 'quality assurance',
+  'object oriented', 'functional programming', 'design patterns', 'system design',
+  'distributed systems', 'microservices', 'service oriented', 'event driven',
+  'message queue', 'load balancing', 'fault tolerance', 'high availability',
+  'rest api', 'restful api', 'api design', 'api development', 'web services',
+  'front end', 'back end', 'full stack', 'web development', 'mobile development',
+  'responsive design', 'cross browser', 'single page application',
+  'cloud computing', 'cloud native', 'infrastructure as code', 'site reliability',
+  'disaster recovery', 'capacity planning', 'cost optimization', 'performance tuning',
+  'performance optimization', 'incident response', 'root cause analysis', 'on call',
+  'security best practices', 'penetration testing', 'threat modeling', 'access control',
+  'relational database', 'query optimization', 'database design', 'schema design',
+  'problem solving', 'critical thinking', 'attention to detail', 'communication skills',
+  'written communication', 'verbal communication', 'technical writing', 'public speaking',
+  'team leadership', 'people management', 'mentoring', 'customer facing',
+];
+
+// Single tokens that are almost always a genuine skill or technology.
+const SKILL_TOKENS = new Set([
+  'python', 'java', 'javascript', 'typescript', 'golang', 'go', 'rust', 'ruby', 'php',
+  'scala', 'kotlin', 'swift', 'c', 'c++', 'c#', 'objective-c', 'perl', 'r', 'matlab',
+  'bash', 'shell', 'powershell', 'sql', 'nosql', 'html', 'css', 'sass', 'scss',
+  'react', 'angular', 'vue', 'svelte', 'next.js', 'nuxt', 'node', 'node.js', 'deno',
+  'express', 'django', 'flask', 'fastapi', 'rails', 'spring', 'laravel', 'dotnet',
+  'jquery', 'redux', 'graphql', 'grpc', 'rest', 'soap', 'webpack', 'vite', 'babel',
+  'jest', 'mocha', 'cypress', 'selenium', 'playwright', 'pytest', 'junit',
+  'aws', 'azure', 'gcp', 'lambda', 'ec2', 's3', 'rds', 'dynamodb', 'cloudformation',
+  'docker', 'kubernetes', 'helm', 'terraform', 'ansible', 'puppet', 'chef', 'vagrant',
+  'jenkins', 'gitlab', 'github', 'bitbucket', 'circleci', 'argocd', 'prometheus',
+  'grafana', 'datadog', 'splunk', 'elasticsearch', 'kibana', 'logstash',
+  'postgresql', 'postgres', 'mysql', 'mariadb', 'oracle', 'mongodb', 'cassandra',
+  'redis', 'memcached', 'sqlite', 'snowflake', 'redshift', 'bigquery', 'databricks',
+  'kafka', 'rabbitmq', 'sqs', 'airflow', 'spark', 'hadoop', 'hive', 'flink', 'dbt',
+  'pandas', 'numpy', 'scipy', 'sklearn', 'scikit-learn', 'tensorflow', 'pytorch',
+  'keras', 'huggingface', 'langchain', 'opencv', 'nltk', 'spacy',
+  'tableau', 'powerbi', 'looker', 'excel', 'sheets', 'jira', 'confluence', 'asana',
+  'notion', 'figma', 'sketch', 'photoshop', 'illustrator', 'invision',
+  'git', 'linux', 'unix', 'windows', 'macos', 'nginx', 'apache', 'kong', 'istio',
+  'agile', 'scrum', 'kanban', 'devops', 'mlops', 'sre', 'saas', 'api', 'apis',
+  'oauth', 'jwt', 'saml', 'ldap', 'ssl', 'tls', 'vpn', 'firewall',
+  'salesforce', 'hubspot', 'sap', 'workday', 'quickbooks', 'netsuite',
+  'accounting', 'auditing', 'forecasting', 'budgeting', 'reconciliation', 'payroll',
+  'recruiting', 'onboarding', 'negotiation', 'copywriting', 'seo', 'sem', 'analytics',
+]);
+
+/** Lowercase and strip punctuation, keeping the characters that live inside
+ *  real technology names (c++, c#, node.js, scikit-learn). */
+export const normalizeText = (text) =>
+  String(text || '')
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9+#.\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const tokenize = (text) =>
+  normalizeText(text)
+    .split(' ')
+    .map((t) => t.replace(/^[.+#-]+/, '').replace(/[.-]+$/, ''))
+    .filter(Boolean);
+
+/** Crude suffix stripping so "pipelines" matches "pipeline". Applied to both
+ *  sides of every comparison, so exactness matters less than consistency. */
+const stem = (word) => {
+  if (word.length <= 4) return word;
+  if (word.endsWith('ies')) return `${word.slice(0, -3)}y`;
+  if (word.endsWith('ing') && word.length > 6) return word.slice(0, -3);
+  if (word.endsWith('ed') && word.length > 5) return word.slice(0, -2);
+  if (word.endsWith('es') && word.length > 5) return word.slice(0, -2);
+  if (word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
+  return word;
+};
+
+/** Flatten every piece of resume content into one searchable string. */
+export const resumeToText = (formData) => {
+  const parts = [
+    formData.fullName, formData.professionalTitle, formData.summary, formData.skills,
+    formData.mail, formData.linkedin, formData.github, formData.other,
+  ];
+  (formData.experiences || []).forEach((e) => parts.push(e.title, e.company, e.description));
+  (formData.projects || []).forEach((p) => parts.push(p.title, p.description));
+  (formData.education || []).forEach((e) => parts.push(e.studyTitle, e.school));
+  (formData.others || []).forEach((o) => parts.push(o.title, o.description));
+  return parts.filter(Boolean).join(' ');
+};
+
+/**
+ * Compare a job description against the resume.
+ * Returns { score, matched, missing, total } where score is a weight-based
+ * coverage percentage — hitting the terms the posting repeats counts for more
+ * than hitting ones it mentions once.
+ */
+export const analyzeJobMatch = (jobDescription, formData, limit = 28) => {
+  const jdTokens = tokenize(jobDescription);
+  if (jdTokens.length < 15) {
+    return { score: 0, matched: [], missing: [], total: 0, tooShort: true };
+  }
+
+  const jdJoined = ` ${jdTokens.join(' ')} `;
+  const candidates = new Map(); // term -> { term, count, weight, isPhrase }
+
+  // Phrases first, so their component words can be suppressed afterwards.
+  const phraseWords = new Set();
+  const countOccurrences = (haystack, needle) => {
+    let count = 0;
+    let idx = haystack.indexOf(needle);
+    while (idx !== -1) {
+      count += 1;
+      idx = haystack.indexOf(needle, idx + 1);
+    }
+    return count;
+  };
+
+  PHRASES.forEach((phrase) => {
+    // "REST APIs" should still count towards the "rest api" phrase.
+    const plural = `${phrase}s`;
+    const count =
+      countOccurrences(jdJoined, ` ${phrase} `) + countOccurrences(jdJoined, ` ${plural} `);
+    if (count > 0) {
+      candidates.set(phrase, { term: phrase, count, weight: count * 4, isPhrase: true });
+      phrase.split(' ').forEach((w) => phraseWords.add(w));
+      phraseWords.add(plural.split(' ').pop());
+    }
+  });
+
+  jdTokens.forEach((token) => {
+    if (token.length < 2 || STOPWORDS.has(token)) return;
+    if (/^\d+$/.test(token)) return;
+    // Already represented by a phrase like "machine learning"
+    if (phraseWords.has(token)) return;
+
+    const isSkill = SKILL_TOKENS.has(token);
+    const existing = candidates.get(token);
+    if (existing) {
+      existing.count += 1;
+      existing.weight += isSkill ? 3 : 1;
+    } else {
+      candidates.set(token, {
+        term: token,
+        count: 1,
+        weight: isSkill ? 3 : 1,
+        isPhrase: false,
+        isSkill,
+      });
+    }
+  });
+
+  const ranked = [...candidates.values()]
+    .sort((a, b) => b.weight - a.weight || b.count - a.count || a.term.localeCompare(b.term))
+    .slice(0, limit);
+
+  // Build the resume's searchable forms once.
+  const resumeTokens = tokenize(resumeToText(formData));
+  const resumeStems = new Set(resumeTokens.map(stem));
+  const resumeJoined = ` ${resumeTokens.join(' ')} `;
+
+  const isPresent = (entry) => {
+    if (entry.isPhrase) {
+      return (
+        resumeJoined.includes(` ${entry.term} `) || resumeJoined.includes(` ${entry.term}s `)
+      );
+    }
+    if (resumeStems.has(stem(entry.term))) return true;
+    // Catch "node" inside "node.js" and similar compound spellings
+    return resumeTokens.some((t) => t.includes(entry.term) && entry.term.length >= 4);
+  };
+
+  const matched = [];
+  const missing = [];
+  let matchedWeight = 0;
+  let totalWeight = 0;
+
+  ranked.forEach((entry) => {
+    totalWeight += entry.weight;
+    if (isPresent(entry)) {
+      matchedWeight += entry.weight;
+      matched.push(entry);
+    } else {
+      missing.push(entry);
+    }
+  });
+
+  return {
+    score: totalWeight ? Math.round((matchedWeight / totalWeight) * 100) : 0,
+    matched,
+    missing,
+    total: ranked.length,
+    tooShort: false,
+  };
+};
