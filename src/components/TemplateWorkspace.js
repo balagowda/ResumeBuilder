@@ -70,12 +70,12 @@ export default function TemplateWorkspace({ templateId }) {
   // reset the section order the user had arranged.
   const sectionOrder = store.active?.sectionOrder || DEFAULT_SECTION_ORDER;
   const setSectionOrder = useCallback(
-    (order) => updateActive({ sectionOrder: order }),
+    (order, opts = { label: 'reorder sections' }) => updateActive({ sectionOrder: order }, opts),
     [updateActive]
   );
   const experienceHeading = store.active?.experienceHeading || DEFAULT_EXPERIENCE_HEADING;
   const setExperienceHeading = useCallback(
-    (heading) => updateActive({ experienceHeading: heading }),
+    (heading) => updateActive({ experienceHeading: heading }, { label: 'section heading' }),
     [updateActive]
   );
 
@@ -283,6 +283,30 @@ export default function TemplateWorkspace({ templateId }) {
     };
   }, [needsBackup]);
 
+  // Undo/redo shortcuts.
+  //
+  // Deliberately left alone while a text field has focus: the browser's own
+  // undo there is per-character and is what anyone mid-sentence expects. Taking
+  // it over would trade a good fine-grained undo for a coarse one. The toolbar
+  // buttons stay available for structural changes regardless of focus.
+  useEffect(() => {
+    const isEditing = (el) =>
+      el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+
+    const handleKeyDown = (event) => {
+      const mod = event.metaKey || event.ctrlKey;
+      if (!mod || event.key.toLowerCase() !== 'z') return;
+      if (isEditing(event.target)) return;
+
+      event.preventDefault();
+      if (event.shiftKey) store.redo();
+      else store.undo();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [store]);
+
   // Drag-and-Drop section reordering
   const handleDragStart = (e, section) => {
     if (!e.target.closest('.drag-handle')) {
@@ -324,7 +348,7 @@ export default function TemplateWorkspace({ templateId }) {
     const targetIndex = newOrder.indexOf(targetSection);
     newOrder.splice(draggedIndex, 1);
     newOrder.splice(targetIndex, 0, draggedSection);
-    setSectionOrder(newOrder);
+    setSectionOrder(newOrder, { label: 'reorder sections' });
     document.querySelectorAll('.draggable-section').forEach((el) => {
       el.classList.remove('dragging');
     });
@@ -352,17 +376,17 @@ export default function TemplateWorkspace({ templateId }) {
   const addEntry = (section) => {
     setFormData({
       ...formData,
-      [section]: [...formData[section], 
-        section === 'education' ? { studyTitle: '', school: '', date: '', score: '' } : 
-        section === 'experiences' ? { title: '', company: '', dates: '', description: '' } : 
-        section === 'projects' ? { title: '', description: '', dates: '' } : 
+      [section]: [...formData[section],
+        section === 'education' ? { studyTitle: '', school: '', date: '', score: '' } :
+        section === 'experiences' ? { title: '', company: '', dates: '', description: '' } :
+        section === 'projects' ? { title: '', description: '', dates: '' } :
         { title: '', description: '' }],
-    });
+    }, { label: `add ${section}` });
   };
 
   const deleteEntry = (section, index) => {
     const updatedSection = formData[section].filter((_, i) => i !== index);
-    setFormData({ ...formData, [section]: updatedSection });
+    setFormData({ ...formData, [section]: updatedSection }, { label: `delete ${section}` });
   };
 
   // Reorder a single entry — adding a job out of order used to mean retyping
@@ -373,7 +397,7 @@ export default function TemplateWorkspace({ templateId }) {
     if (target < 0 || target >= list.length) return;
     const updated = [...list];
     [updated[index], updated[target]] = [updated[target], updated[index]];
-    setFormData({ ...formData, [section]: updated });
+    setFormData({ ...formData, [section]: updated }, { label: `reorder ${section}` });
   };
   
   const handleDownloadPDF = async () => {
@@ -537,7 +561,7 @@ export default function TemplateWorkspace({ templateId }) {
     if (hasContent && !window.confirm('Load sample data? This will replace your current resume content.')) {
       return;
     }
-    setFormData({ ...formData, ...SAMPLE_DATA });
+    setFormData({ ...formData, ...SAMPLE_DATA }, { label: 'load sample' });
   };
 
   const handleExportJSON = () => {
@@ -562,7 +586,7 @@ export default function TemplateWorkspace({ templateId }) {
         if (typeof imported !== 'object' || imported === null || Array.isArray(imported)) {
           throw new Error('Not a resume backup file');
         }
-        setFormData((prev) => ({ ...prev, ...imported }));
+        setFormData((prev) => ({ ...prev, ...imported }), { label: 'restore backup' });
       } catch (err) {
         alert('Could not import this file. Please choose a resume backup (.json) exported from this site.');
       }
@@ -707,9 +731,29 @@ export default function TemplateWorkspace({ templateId }) {
             <Link to="/templates" className="btn-back-templates" style={{ marginBottom: 0 }}>
               <i className="fas fa-arrow-left"></i> Back to Templates
             </Link>
-            <button className="btn-clear-data" onClick={handleClearData}>
-              <i className="fas fa-trash-alt"></i> Clear Data
-            </button>
+            <div className="header-actions">
+              <button
+                className="history-btn"
+                onClick={store.undo}
+                disabled={!store.canUndo}
+                title={store.canUndo ? `Undo ${store.undoLabel}` : 'Nothing to undo'}
+                aria-label="Undo"
+              >
+                <i className="fas fa-rotate-left"></i>
+              </button>
+              <button
+                className="history-btn"
+                onClick={store.redo}
+                disabled={!store.canRedo}
+                title={store.canRedo ? `Redo ${store.redoLabel}` : 'Nothing to redo'}
+                aria-label="Redo"
+              >
+                <i className="fas fa-rotate-right"></i>
+              </button>
+              <button className="btn-clear-data" onClick={handleClearData}>
+                <i className="fas fa-trash-alt"></i> Clear Data
+              </button>
+            </div>
           </div>
           <h2>Your Details</h2>
 

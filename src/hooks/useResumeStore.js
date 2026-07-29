@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useHistoryState from './useHistoryState';
 import {
   MODE_DEVICE,
   MODE_SESSION,
@@ -30,8 +31,34 @@ export default function useResumeStore(makeEmpty) {
   });
 
   const [mode, setModeState] = useState(initial.mode);
-  const [resumes, setResumes] = useState(initial.resumes);
-  const [activeId, setActiveId] = useState(initial.activeId);
+
+  // resumes and activeId travel together through one history stack, so undoing
+  // a delete brings the resume back *and* re-selects it.
+  const history = useHistoryState(
+    { resumes: initial.resumes, activeId: initial.activeId },
+    { limit: 60 }
+  );
+  const { resumes, activeId } = history.state;
+
+  /** Commit a change to the document, recording one undo step. */
+  const commit = history.set;
+  const setResumes = useCallback(
+    (updater, opts) =>
+      commit(
+        (doc) => ({
+          ...doc,
+          resumes: typeof updater === 'function' ? updater(doc.resumes) : updater,
+        }),
+        opts
+      ),
+    [commit]
+  );
+  const setActiveId = useCallback(
+    (id, opts = { label: 'switch', coalesce: true }) =>
+      commit((doc) => ({ ...doc, activeId: id }), opts),
+    [commit]
+  );
+
   const [savedAt, setSavedAt] = useState(null);
   const [lastBackupAt, setLastBackupAt] = useState(initial.lastBackupAt);
   const [storageError, setStorageError] = useState(null);
@@ -67,40 +94,53 @@ export default function useResumeStore(makeEmpty) {
     [resumes, activeId]
   );
 
-  /** Patch the open resume. Accepts a value or an updater, like setState. */
+  /**
+   * Patch the open resume.
+   *
+   * `label` decides which undo step the change lands in. Field typing passes
+   * coalesce so a run of keystrokes collapses into one step; structural edits
+   * pass their own label so each is individually reversible.
+   */
   const updateActive = useCallback(
-    (patch) => {
-      setResumes((prev) =>
-        prev.map((r) =>
-          r.id === activeId
-            ? { ...r, ...(typeof patch === 'function' ? patch(r) : patch), updatedAt: Date.now() }
-            : r
-        )
+    (patch, opts = { label: 'edit', coalesce: true }) => {
+      setResumes(
+        (prev) =>
+          prev.map((r) =>
+            r.id === activeId
+              ? { ...r, ...(typeof patch === 'function' ? patch(r) : patch), updatedAt: Date.now() }
+              : r
+          ),
+        opts
       );
     },
-    [activeId]
+    [activeId, setResumes]
   );
 
   const setFormData = useCallback(
-    (next) => {
-      updateActive((r) => ({ data: typeof next === 'function' ? next(r.data) : next }));
+    (next, opts) => {
+      updateActive((r) => ({ data: typeof next === 'function' ? next(r.data) : next }), opts);
     },
     [updateActive]
   );
 
+  // Operations touching both the list and the selection commit once, through a
+  // single updater, so they are one undo step rather than two.
+  //
+  // Note also: no setState nested inside another setState's updater anywhere
+  // below. React re-invokes updaters (twice in StrictMode), so a setActiveId in
+  // there fires more than once and can leave activeId on a discarded record.
   const createResume = useCallback(
     (name) => {
       const record = createResumeRecord(name || 'Untitled resume', makeEmpty());
-      setResumes((prev) => [...prev, record]);
-      setActiveId(record.id);
+      commit(
+        (doc) => ({ resumes: [...doc.resumes, record], activeId: record.id }),
+        { label: 'new resume' }
+      );
       return record.id;
     },
-    [makeEmpty]
+    [makeEmpty, commit]
   );
 
-  // Note: no setState nested inside a setState updater anywhere below. React
-  // re-invokes updaters (twice in StrictMode), so a setActiveId in there fires
-  // more than once and can leave activeId pointing at a discarded record.
   const duplicateResume = useCallback(
     (id) => {
       const source = resumes.find((r) => r.id === id);
@@ -114,35 +154,48 @@ export default function useResumeStore(makeEmpty) {
           templateId: source.templateId,
         }
       );
-      setResumes((prev) => [...prev, copy]);
-      setActiveId(copy.id);
+      commit((doc) => ({ resumes: [...doc.resumes, copy], activeId: copy.id }), {
+        label: 'duplicate resume',
+      });
     },
-    [resumes]
+    [resumes, commit]
   );
 
-  const renameResume = useCallback((id, name) => {
-    const trimmed = (name || '').trim();
-    if (!trimmed) return;
-    setResumes((prev) => prev.map((r) => (r.id === id ? { ...r, name: trimmed } : r)));
-  }, []);
+  const renameResume = useCallback(
+    (id, name) => {
+      const trimmed = (name || '').trim();
+      if (!trimmed) return;
+      setResumes((prev) => prev.map((r) => (r.id === id ? { ...r, name: trimmed } : r)), {
+        label: 'rename',
+      });
+    },
+    [setResumes]
+  );
 
   /** Deleting the last resume leaves a fresh empty one rather than no resume. */
   const deleteResume = useCallback(
     (id) => {
-      const remaining = resumes.filter((r) => r.id !== id);
-      if (remaining.length === 0) {
-        const fresh = createResumeRecord('My resume', makeEmpty());
-        setResumes([fresh]);
-        setActiveId(fresh.id);
-        return;
-      }
-      setResumes(remaining);
-      if (activeId === id) setActiveId(remaining[0].id);
+      // Built out here, not in the updater: createResumeRecord generates an id,
+      // and an updater can run more than once.
+      const fresh = createResumeRecord('My resume', makeEmpty());
+      commit(
+        (doc) => {
+          const remaining = doc.resumes.filter((r) => r.id !== id);
+          if (remaining.length === 0) {
+            return { resumes: [fresh], activeId: fresh.id };
+          }
+          return {
+            resumes: remaining,
+            activeId: doc.activeId === id ? remaining[0].id : doc.activeId,
+          };
+        },
+        { label: 'delete resume' }
+      );
     },
-    [resumes, activeId, makeEmpty]
+    [makeEmpty, commit]
   );
 
-  const switchResume = useCallback((id) => setActiveId(id), []);
+  const switchResume = useCallback((id) => setActiveId(id), [setActiveId]);
 
   const changeMode = useCallback(
     async (nextMode) => {
@@ -161,13 +214,18 @@ export default function useResumeStore(makeEmpty) {
 
   const markBackedUp = useCallback(() => setLastBackupAt(Date.now()), []);
 
+  /**
+   * Clear Data is the most destructive thing in the app, so it goes through the
+   * history stack like everything else — one Ctrl+Z brings it all back. The
+   * storage keys are dropped too, but the persist effect rewrites them from
+   * whatever state the history lands on.
+   */
   const clearEverything = useCallback(() => {
     clearAll();
     const fresh = createResumeRecord('My resume', makeEmpty());
-    setResumes([fresh]);
-    setActiveId(fresh.id);
+    commit({ resumes: [fresh], activeId: fresh.id }, { label: 'clear all' });
     setLastBackupAt(null);
-  }, [makeEmpty]);
+  }, [makeEmpty, commit]);
 
   /**
    * Whether there is work that would be lost on close. Only meaningful in
@@ -201,5 +259,11 @@ export default function useResumeStore(makeEmpty) {
     markBackedUp,
     storageError,
     clearEverything,
+    undo: history.undo,
+    redo: history.redo,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
+    undoLabel: history.undoLabel,
+    redoLabel: history.redoLabel,
   };
 }
