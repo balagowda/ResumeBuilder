@@ -37,8 +37,7 @@ const JobMatch = ({ jobDescription, formData, collapsed, toggleSection, handleCh
       <div className={`section-content ${collapsed ? 'collapsed' : 'expanded'}`}>
         <div className="section-content-inner">
           <p className="job-match-intro">
-            Paste the job posting. We compare its keywords against your resume — entirely in your
-            browser, nothing is uploaded.
+            Paste the job posting. We compare its keywords against your resume.
           </p>
           <div className="ai-notice">
             <i className="fas fa-triangle-exclamation"></i>

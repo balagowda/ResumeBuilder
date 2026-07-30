@@ -46,7 +46,7 @@ const ContentReview = ({ formData, collapsed, toggleSection }) => {
         <div className="section-content-inner">
           <p className="content-review-intro">
             The checks a recruiter makes on a first read — action verbs, hard numbers, passive
-            voice, filler. Runs entirely in your browser.
+            voice, filler.
           </p>
           <div className="ai-notice">
             <i className="fas fa-triangle-exclamation"></i>
