@@ -29,6 +29,7 @@ const ContentReview = ({ formData, collapsed, toggleSection }) => {
         <h3>
           <i className="fas fa-spell-check content-review-icon"></i>
           Writing Review
+          <span className="beta-badge">BETA</span>
           {bulletCount > 0 && (
             <span className={`content-review-badge content-review-badge-${scoreTone(score)}`}>
               {score}%
@@ -41,12 +42,18 @@ const ContentReview = ({ formData, collapsed, toggleSection }) => {
         ></i>
       </div>
 
-      {!collapsed && (
-        <div>
+      <div className={`section-content ${collapsed ? 'collapsed' : 'expanded'}`}>
+        <div className="section-content-inner">
           <p className="content-review-intro">
             The checks a recruiter makes on a first read — action verbs, hard numbers, passive
             voice, filler. Runs entirely in your browser.
           </p>
+          <div className="ai-notice">
+            <i className="fas fa-triangle-exclamation"></i>
+            <div>
+              <strong>Beta Feature:</strong> This automated review may occasionally make mistakes or miss context. Don't expect 100% accuracy — use your best judgment.
+            </div>
+          </div>
 
           {bulletCount === 0 && (
             <p className="content-review-hint">
@@ -92,7 +99,7 @@ const ContentReview = ({ formData, collapsed, toggleSection }) => {
             </button>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

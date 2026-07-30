@@ -67,6 +67,11 @@ const PHRASES = [
   'problem solving', 'critical thinking', 'attention to detail', 'communication skills',
   'written communication', 'verbal communication', 'technical writing', 'public speaking',
   'team leadership', 'people management', 'mentoring', 'customer facing',
+  // Newly added
+  'generative ai', 'large language models', 'large language model', 'llm', 'llms',
+  'css in js', 'tailwind css', 'server side rendering', 'static site generation',
+  'web performance', 'accessibility', 'a11y', 'web components', 'progressive web app',
+  'search engine optimization'
 ];
 
 // Single tokens that are almost always a genuine skill or technology.
@@ -95,17 +100,46 @@ const SKILL_TOKENS = new Set([
   'salesforce', 'hubspot', 'sap', 'workday', 'quickbooks', 'netsuite',
   'accounting', 'auditing', 'forecasting', 'budgeting', 'reconciliation', 'payroll',
   'recruiting', 'onboarding', 'negotiation', 'copywriting', 'seo', 'sem', 'analytics',
+  // Newly added
+  'apollo', 'prisma', 'supabase', 'firebase', 'vercel', 'netlify', 'tailwindcss',
+  'zustand', 'recoil', 'mobx', 'vitest', 'turborepo', 'nx', 'bun', 'pnpm'
 ]);
+
+// Map common synonyms to a canonical term so "reactjs" matches "react"
+const SYNONYMS = {
+  'reactjs': 'react',
+  'react.js': 'react',
+  'node.js': 'node',
+  'nodejs': 'node',
+  'vuejs': 'vue',
+  'vue.js': 'vue',
+  'golang': 'go',
+  'k8s': 'kubernetes',
+  'aws': 'amazon web services',
+  'gcp': 'google cloud',
+  'postgres': 'postgresql',
+  'tailwindcss': 'tailwind css'
+};
 
 /** Lowercase and strip punctuation, keeping the characters that live inside
  *  real technology names (c++, c#, node.js, scikit-learn). */
-export const normalizeText = (text) =>
-  String(text || '')
+export const normalizeText = (text) => {
+  let normalized = String(text || '')
     .toLowerCase()
     .replace(/['’]/g, '')
     .replace(/[^a-z0-9+#.\s-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+    
+  // Apply synonym mapping
+  Object.entries(SYNONYMS).forEach(([synonym, canonical]) => {
+    // Replace full words only
+    const regex = new RegExp(`\\b${synonym.replace(/\./g, '\\.')}\\b`, 'g');
+    normalized = normalized.replace(regex, canonical);
+  });
+  
+  return normalized;
+};
 
 const tokenize = (text) =>
   normalizeText(text)
@@ -118,8 +152,13 @@ const tokenize = (text) =>
 const stem = (word) => {
   if (word.length <= 4) return word;
   if (word.endsWith('ies')) return `${word.slice(0, -3)}y`;
-  if (word.endsWith('ing') && word.length > 6) return word.slice(0, -3);
-  if (word.endsWith('ed') && word.length > 5) return word.slice(0, -2);
+  if (word.endsWith('ing') && word.length > 5) {
+     // e.g. "optimizing" -> "optimiz", "building" -> "build"
+     return word.slice(0, -3);
+  }
+  if (word.endsWith('ed') && word.length > 4) {
+     return word.slice(0, -2);
+  }
   if (word.endsWith('es') && word.length > 5) return word.slice(0, -2);
   if (word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
   return word;

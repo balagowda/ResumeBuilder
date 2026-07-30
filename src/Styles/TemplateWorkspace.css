@@ -181,6 +181,12 @@
   box-shadow: 0 4px 16px rgba(79, 70, 229, 0.12);
 }
 
+.draggable-section.drag-over {
+  border: 2px solid var(--primary-color);
+  background-color: #f5f7ff;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
 /* Input Fields styling */
 .input-group {
   padding: 16px 18px;
@@ -225,6 +231,21 @@
 
 .section-header:hover > i {
   color: var(--primary-color) !important;
+}
+
+/* Smooth collapse animation using grid */
+.section-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.section-content.expanded {
+  grid-template-rows: 1fr;
+}
+
+.section-content-inner {
+  overflow: hidden;
 }
 
 .drag-handle {
@@ -329,6 +350,32 @@
 .sub-group:hover {
   border-left-color: #a5b4fc;
   background: linear-gradient(135deg, #f5f7ff 0%, #f1f5f9 100%);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  color: #64748b;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 1.8rem;
+  color: #cbd5e1;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 /* ==========================================
    CONTACT FIELDS CARD
@@ -1529,11 +1576,45 @@
 
 .job-match,
 .content-review {
-  margin-bottom: 10px;
-  border-radius: 10px;
+  margin-bottom: 12px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
-  background: var(--white);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.beta-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background-color: #8b5cf6;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+}
+
+.ai-notice {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 12px 0;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ai-notice i {
+  color: #f59e0b;
+  margin-top: 2px;
 }
 
 .job-match-icon {

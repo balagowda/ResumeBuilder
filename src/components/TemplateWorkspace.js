@@ -98,6 +98,7 @@ export default function TemplateWorkspace({ templateId }) {
   const [sidebarWidth, setSidebarWidth] = useState(480);
   const [isResizing, setIsResizing] = useState(false);
   const [zoom, setZoom] = useState(100);
+  const [dragOverSection, setDragOverSection] = useState(null);
 
   // Layout height of .resume-content in CSS px, before --content-scale is
   // applied. Drives the page count and the overflow warning.
@@ -335,13 +336,17 @@ export default function TemplateWorkspace({ templateId }) {
     }
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e, section) => {
     e.preventDefault();
+    if (section !== dragOverSection) {
+      setDragOverSection(section);
+    }
   };
 
   const handleDrop = (e, targetSection) => {
     e.preventDefault();
     const draggedSection = e.dataTransfer.getData('section');
+    setDragOverSection(null);
     if (draggedSection === targetSection) return;
     const newOrder = [...sectionOrder];
     const draggedIndex = newOrder.indexOf(draggedSection);
@@ -359,6 +364,7 @@ export default function TemplateWorkspace({ templateId }) {
     if (sectionElement) {
       sectionElement.classList.remove('dragging');
     }
+    setDragOverSection(null);
   };
 
   const handleChange = (e, section, index = null) => {
@@ -864,9 +870,10 @@ export default function TemplateWorkspace({ templateId }) {
         {sectionOrder.map((section) => (
           <div
             key={section}
-            className="draggable-section"
+            className={`draggable-section ${dragOverSection === section ? 'drag-over' : ''}`}
             onDragOver={(e) => handleDragOver(e, section)}
             onDrop={(e) => handleDrop(e, section)}
+            onDragLeave={() => setDragOverSection(null)}
           >
             {section === 'summary' && (
               <Summary

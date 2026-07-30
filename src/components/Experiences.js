@@ -25,8 +25,8 @@ const Experiences = ({
         style={{ cursor: 'pointer', fontSize: '1.2rem', color: '#333' }}
       ></i>
     </div>
-    {!collapsed && (
-      <div>
+    <div className={`section-content ${collapsed ? 'collapsed' : 'expanded'}`}>
+      <div className="section-content-inner">
         <div className="heading-options">
           <button
             className={experienceHeading === 'Experience' ? 'active' : ''}
@@ -47,57 +47,64 @@ const Experiences = ({
             Experience and Internships
           </button>
         </div>
-        {experiences.map((exp, index) => (
-          <div key={index} className="sub-group">
-            <label htmlFor="title">Title</label>
-            <input
-              type="text"
-              name="title"
-              value={exp.title}
-              onChange={(e) => handleChange(e, 'experiences', index)}
-              placeholder="e.g., Software Engineer"
-              className="input-field"
-            />
-            <label htmlFor="company">Company</label>
-            <input
-              type="text"
-              name="company"
-              value={exp.company}
-              onChange={(e) => handleChange(e, 'experiences', index)}
-              placeholder="e.g., ABC Corp"
-              className="input-field"
-            />
-            <DateRangeField
-              id={`experience-dates-${index}`}
-              value={exp.dates}
-              onChange={(next) =>
-                handleChange({ target: { name: 'dates', value: next } }, 'experiences', index)
-              }
-            />
-            <label htmlFor="description">Description</label>
-            <textarea
-              name="description"
-              rows={4}
-              value={exp.description}
-              onChange={(e) => handleChange(e, 'experiences', index)}
-              placeholder="Describe your role and achievements"
-              className="input-field"
-            />
-            <EntryControls
-              section="experiences"
-              index={index}
-              total={experiences.length}
-              moveEntry={moveEntry}
-              deleteEntry={deleteEntry}
-              label="role"
-            />
+        {experiences.length === 0 ? (
+          <div className="empty-state">
+            <i className="fas fa-briefcase"></i>
+            <p>No experiences added yet.</p>
           </div>
-        ))}
+        ) : (
+          experiences.map((exp, index) => (
+            <div key={index} className="sub-group">
+              <label htmlFor="title">Title</label>
+              <input
+                type="text"
+                name="title"
+                value={exp.title}
+                onChange={(e) => handleChange(e, 'experiences', index)}
+                placeholder="e.g., Software Engineer"
+                className="input-field"
+              />
+              <label htmlFor="company">Company</label>
+              <input
+                type="text"
+                name="company"
+                value={exp.company}
+                onChange={(e) => handleChange(e, 'experiences', index)}
+                placeholder="e.g., ABC Corp"
+                className="input-field"
+              />
+              <DateRangeField
+                id={`experience-dates-${index}`}
+                value={exp.dates}
+                onChange={(next) =>
+                  handleChange({ target: { name: 'dates', value: next } }, 'experiences', index)
+                }
+              />
+              <label htmlFor="description">Description</label>
+              <textarea
+                name="description"
+                rows={4}
+                value={exp.description}
+                onChange={(e) => handleChange(e, 'experiences', index)}
+                placeholder="Describe your role and achievements"
+                className="input-field"
+              />
+              <EntryControls
+                section="experiences"
+                index={index}
+                total={experiences.length}
+                moveEntry={moveEntry}
+                deleteEntry={deleteEntry}
+                label="role"
+              />
+            </div>
+          ))
+        )}
         <button className="add-btn" onClick={() => addEntry('experiences')}>
           Add Experience
         </button>
       </div>
-    )}
+    </div>
   </div>
 );
 

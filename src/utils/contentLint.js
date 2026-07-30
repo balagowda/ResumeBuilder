@@ -38,6 +38,13 @@ const ACTION_VERBS = new Set([
   'standardized', 'streamlined', 'strengthened', 'structured', 'supervised',
   'supported', 'surveyed', 'sustained', 'tested', 'trained', 'transformed',
   'translated', 'tripled', 'troubleshot', 'unified', 'upgraded', 'validated', 'wrote',
+  // Newly added
+  'navigated', 'modernised', 'provisioned', 'conceptualized', 'conceived', 'drafted',
+  'maximized', 'minimised', 'capitalized', 'mobilized', 'moderated', 'navigated',
+  'formalized', 'fostered', 'generated', 'halted', 'illustrated', 'incorporated',
+  'masterminded', 'maximized', 'motivated', 'negotiated', 'networked', 'operated',
+  'piloted', 'pinpointed', 'spearheaded', 'steered', 'strategized', 'systematized',
+  'targeted', 'uncovered', 'united', 'visualized', 'yielded'
 ]);
 
 // Openers that bury the achievement in job-description language.
@@ -55,6 +62,11 @@ const WEAK_OPENERS = [
   'participated in',
   'part of a team',
   'my role was',
+  'accountable for',
+  'served as',
+  'worked collaboratively',
+  'collaborated with',
+  'helped design'
 ];
 
 // Self-description that asserts instead of demonstrating.
@@ -82,6 +94,13 @@ const BUZZWORDS = [
   'ninja',
   'rockstar',
   'guru',
+  'thought leader',
+  'game changer',
+  'value-add',
+  'value add',
+  'best in class',
+  'proactive',
+  'visionary'
 ];
 
 const FIRST_PERSON = /\b(i|i'm|i've|my|me|myself)\b/i;
@@ -92,8 +111,8 @@ const PASSIVE = /\b(was|were|been|being|is|are)\s+(\w+ed|written|built|made|give
 
 const HAS_NUMBER = /\d/;
 
-// Roughly two printed lines in the preview sheet.
-const LONG_BULLET = 220;
+// We measure bullet length by words to be more accurate to readability.
+const LONG_BULLET_WORDS = 35;
 
 const stripBullet = (line) => line.replace(/^[\s•\-*–—+·]+/, '').trim();
 
@@ -226,11 +245,12 @@ export const lintResume = (formData) => {
         );
       }
 
-      if (line.length > LONG_BULLET) {
+      const words = lower.match(/[a-z']+/g) || [];
+      if (words.length > LONG_BULLET_WORDS) {
         issues.push(
           issue('low', 'too-long', source,
-            `Runs to ${line.length} characters`,
-            'Split it, or cut it back to a single achievement.',
+            `Bullet is very long (${words.length} words)`,
+            'Split it, or cut it back to a single achievement (aim for under 30 words).',
             shorten(line))
         );
       }
@@ -241,6 +261,36 @@ export const lintResume = (formData) => {
           issue('low', 'buzzword', source,
             `Contains "${found}"`,
             'Show it with an example instead of claiming it.',
+            shorten(line))
+        );
+      }
+      
+      if (/^[a-z]/.test(line)) {
+        issues.push(
+          issue('low', 'lowercase-start', source,
+            'Starts with a lowercase letter',
+            'Capitalize the first letter of each bullet.',
+            shorten(line))
+        );
+      }
+
+      // Check for repeated strong verbs within the same bullet
+      const seenWords = new Set();
+      let repeated = null;
+      for (const w of words) {
+        if (w.length > 4 && ACTION_VERBS.has(w)) {
+          if (seenWords.has(w)) {
+            repeated = w;
+            break;
+          }
+          seenWords.add(w);
+        }
+      }
+      if (repeated) {
+         issues.push(
+          issue('medium', 'repeated-word', source,
+            `Repeats the verb "${repeated}"`,
+            'Use a wider variety of verbs within the same sentence to stay engaging.',
             shorten(line))
         );
       }
