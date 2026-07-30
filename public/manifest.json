@@ -1,7 +1,7 @@
 {
-  "short_name": "ResumeBuilder",
-  "name": "ResumeBuilder — Free Online Resume Builder",
-  "description": "Free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, instant PDF download.",
+  "short_name": "HatchResume",
+  "name": "HatchResume — Free Online Resume Builder",
+  "description": "HatchResume is a free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, instant PDF download.",
   "icons": [
     {
       "src": "favicon.ico",
