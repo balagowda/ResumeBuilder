@@ -21,6 +21,7 @@ const JobMatch = ({ jobDescription, formData, collapsed, toggleSection, handleCh
         <h3>
           <i className="fas fa-crosshairs job-match-icon"></i>
           Job Match
+          <span className="beta-badge">BETA</span>
           {hasInput && !result.tooShort && (
             <span className={`job-match-badge job-match-badge-${scoreTone(result.score)}`}>
               {result.score}%
@@ -33,12 +34,17 @@ const JobMatch = ({ jobDescription, formData, collapsed, toggleSection, handleCh
         ></i>
       </div>
 
-      {!collapsed && (
-        <div>
+      <div className={`section-content ${collapsed ? 'collapsed' : 'expanded'}`}>
+        <div className="section-content-inner">
           <p className="job-match-intro">
-            Paste the job posting. We compare its keywords against your resume — entirely in your
-            browser, nothing is uploaded.
+            Paste the job posting. We compare its keywords against your resume.
           </p>
+          <div className="ai-notice">
+            <i className="fas fa-triangle-exclamation"></i>
+            <div>
+              <strong>Beta Feature:</strong> This automated job match may occasionally make mistakes or miss context. Don't expect 100% accuracy — use your best judgment.
+            </div>
+          </div>
 
           <textarea
             name="jobDescription"
@@ -116,7 +122,7 @@ const JobMatch = ({ jobDescription, formData, collapsed, toggleSection, handleCh
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

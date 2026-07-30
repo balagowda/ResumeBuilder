@@ -12,16 +12,18 @@ const Skills = ({ skills, collapsed, toggleSection, handleChange, dragHandle }) 
         style={{ cursor: 'pointer', fontSize: '1.2rem', color: '#333' }}
       ></i>
     </div>
-    {!collapsed && (
-      <textarea
-        name="skills"
-        rows={4}
-        value={skills}
-        onChange={(e) => handleChange(e, 'skills')}
-        placeholder="Enter your skills..."
-        className="input-field"
-      />
-    )}
+    <div className={`section-content ${collapsed ? 'collapsed' : 'expanded'}`}>
+      <div className="section-content-inner">
+        <textarea
+          name="skills"
+          rows={4}
+          value={skills}
+          onChange={(e) => handleChange(e, 'skills')}
+          placeholder="Enter your skills..."
+          className="input-field"
+        />
+      </div>
+    </div>
   </div>
 );
 
