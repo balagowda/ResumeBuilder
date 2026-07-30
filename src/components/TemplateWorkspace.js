@@ -848,14 +848,13 @@ export default function TemplateWorkspace({ templateId }) {
         <ContactFields formData={formData} handleChange={handleChange} />
         
         {templateId === 1 && (
-          <div className="input-group" style={{ paddingTop: '0', paddingBottom: '20px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem', color: '#1e293b', fontWeight: '500' }}>
+          <div className="input-group" style={{ paddingTop: '0', paddingBottom: '16px', backgroundColor: 'transparent' }}>
+            <label>
               <input
                 type="checkbox"
                 name="addHeaderLine"
                 checked={formData.addHeaderLine || false}
                 onChange={handleChange}
-                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--primary-color)' }}
               />
               Add Line under Contact Info
             </label>
