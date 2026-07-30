@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TEMPLATES, SAMPLE_DATA, DEFAULT_SECTION_ORDER, renderResumeTemplate, formatTextToList } from './ResumeTemplates';
+import useDocumentMeta from '../seo/useDocumentMeta';
 import '../Styles/HomePage.css';
 
 const CATEGORIES = ['All', 'ATS-Optimized', 'Professional', 'Creative'];
@@ -19,6 +20,13 @@ const sampleCtx = {
 };
 
 const HomePage = () => {
+  // Mirrors the pre-rendered /templates/ document head for in-app navigation.
+  useDocumentMeta({
+    title: `Free Resume Templates — ${TEMPLATES.length}+ ATS-Friendly Designs | HatchResume`,
+    description: `Browse ${TEMPLATES.length}+ free professional resume templates on HatchResume. All designs are ATS-friendly and download as PDF — no sign-up, no watermark, 100% private.`,
+    path: '/templates',
+  });
+
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [selectedLayout, setSelectedLayout] = useState('Any layout');
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,7 +73,9 @@ const HomePage = () => {
       {/* Header section */}
       <section className="templates-header">
         <span className="templates-tagline">✨ {TEMPLATES.length} Professional Templates</span>
-        <h1>Select a Resume Template</h1>
+        {/* Wording matches the pre-rendered /templates/ page so crawlers and
+            visitors see the same heading. */}
+        <h1>Free Resume Templates — {TEMPLATES.length} ATS-Friendly Designs</h1>
         <p>Every layout is recruiter-approved. ATS-Optimized templates follow the single-column standard preferred by FAANG and top MNC recruiting systems. You can switch templates at any time without losing your data.</p>
       </section>
 

@@ -126,6 +126,32 @@ body {
   text-decoration: underline;
 }
 
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 24px;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+}
+
+.footer-nav a {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.footer-nav a:hover {
+  color: var(--white);
+}
+
+/* Scoped to .App-footer so it outweighs `.App-footer p`, which would
+   otherwise reset the auto side margins and pin the block to the left. */
+.App-footer .footer-blurb {
+  max-width: 620px;
+  margin: 0 auto 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .header-container {

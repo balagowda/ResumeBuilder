@@ -69,10 +69,10 @@ const LandingPage = () => {
           <div className="hero-content">
             <span className="badge-intro">🚀 Create Resumes Instantly</span>
             <h1 className="hero-title">
-              Build your dream career with <span className="gradient-text">resumebuilder</span>
+              Build your dream career with <span className="gradient-text">HatchResume</span>
             </h1>
             <p className="hero-description">
-              Create recruiter-approved resumes in minutes. Completely free, no login required, and absolute data privacy. Simply choose a template, enter your details, and download your PDF.
+              HatchResume is a free online resume builder that creates recruiter-approved resumes in minutes — no login required and absolute data privacy. Simply choose a template, enter your details, and download your PDF.
             </p>
             <div className="hero-ctas">
               <Link to="/templates" className="btn-primary-large">
@@ -194,7 +194,7 @@ const LandingPage = () => {
       {/* Features Section */}
       <section className="features-section">
         <div className="landing-section-inner">
-          <h2 className="section-title">Why use <span className="gradient-text">resumebuilder</span>?</h2>
+          <h2 className="section-title">Why use <span className="gradient-text">HatchResume</span>?</h2>
           <div className="features-grid">
             <div className="feature-item">
               <div className="feature-icon-wrapper">
@@ -240,6 +240,28 @@ const LandingPage = () => {
               <h3>Precision Print Layouts</h3>
               <p>Templates are styled precisely to fit standard A4 specifications, preventing broken bullet points or formatting issues.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Plain-language summary of the product plus links into the content
+          pages. It states the brand name in prose (search engines have no
+          other way to connect the query "hatchresume" to this site) and gives
+          crawlers a path to /about, /faq and /alternatives. */}
+      <section className="about-strip">
+        <div className="landing-section-inner">
+          <h2 className="section-title">What is <span className="gradient-text">HatchResume</span>?</h2>
+          <p className="about-strip-text">
+            HatchResume is a free online resume builder at hatchresume.com. Pick
+            one of 25+ professional, ATS-friendly templates, fill in your
+            details, and download a print-ready PDF — with no account, no
+            watermark, and no payment at the download step. Everything runs in
+            your browser, so your work history is never uploaded to a server.
+          </p>
+          <div className="about-strip-links">
+            <Link to="/about">About HatchResume</Link>
+            <Link to="/faq">Is HatchResume free and private?</Link>
+            <Link to="/alternatives">A free alternative to paid resume builders</Link>
           </div>
         </div>
       </section>

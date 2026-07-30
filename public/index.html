@@ -8,45 +8,86 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
-    <title>Free Resume Builder — Create an ATS-Friendly Resume Online | ResumeBuilder</title>
+    <title>HatchResume — Free Online Resume Builder, ATS-Friendly, No Sign-Up</title>
     <meta name="theme-color" content="#2563eb" />
-    <meta name="description" content="Free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, no watermark, 100% private — your data never leaves your browser. Download as PDF in minutes." />
-    <meta name="robots" content="index, follow" />
+    <meta name="description" content="HatchResume is a free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, no watermark, 100% private — your data never leaves your browser. Download as PDF in minutes." />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="application-name" content="HatchResume" />
+    <meta name="author" content="HatchResume" />
     <meta name="google-site-verification" content="19pVQhz7rRVe_7PjwXUp_3oOVBAYTd6zk_-W46n6X1A" />
     <link rel="canonical" href="https://hatchresume.com/" />
 
-    <meta property="og:site_name" content="ResumeBuilder" />
-    <meta property="og:title" content="Free Resume Builder — Create an ATS-Friendly Resume Online" />
-    <meta property="og:description" content="Free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, no watermark, 100% private. Download as PDF in minutes." />
+    <meta property="og:site_name" content="HatchResume" />
+    <meta property="og:title" content="HatchResume — Free Online Resume Builder, ATS-Friendly, No Sign-Up" />
+    <meta property="og:description" content="HatchResume is a free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, no watermark, 100% private. Download as PDF in minutes." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://hatchresume.com/" />
     <meta property="og:image" content="https://hatchresume.com/logo512.png" />
+    <meta property="og:image:alt" content="HatchResume — free online resume builder" />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Free Resume Builder — Create an ATS-Friendly Resume Online" />
-    <meta name="twitter:description" content="Free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, no watermark, 100% private. Download as PDF in minutes." />
+    <meta name="twitter:title" content="HatchResume — Free Online Resume Builder, ATS-Friendly, No Sign-Up" />
+    <meta name="twitter:description" content="HatchResume is a free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, no watermark, 100% private. Download as PDF in minutes." />
     <meta name="twitter:image" content="https://hatchresume.com/logo512.png" />
 
+    <!-- One @graph so the brand ("HatchResume"), the site, and the app are
+         linked as a single entity. Without an explicit name, search engines
+         have nothing to match the query "hatchresume" against. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "ResumeBuilder",
-      "url": "https://hatchresume.com/",
-      "description": "Free online resume builder with 25+ professional, ATS-friendly templates. No sign-up required and fully private — resumes are built entirely in your browser and downloaded as PDF.",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Any",
-      "browserRequirements": "Requires JavaScript",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "featureList": [
-        "25+ free professional resume templates",
-        "ATS-friendly layouts",
-        "No sign-up or login required",
-        "PDF download",
-        "Data stays in your browser — nothing stored online"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://hatchresume.com/#organization",
+          "name": "HatchResume",
+          "alternateName": ["Hatch Resume", "hatchresume", "hatchresume.com"],
+          "url": "https://hatchresume.com/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://hatchresume.com/logo512.png",
+            "width": 512,
+            "height": 512
+          },
+          "description": "HatchResume is a free, privacy-first online resume builder. Resumes are created in the browser and downloaded as PDF — no account, no watermark, no subscription.",
+          "sameAs": ["https://github.com/balagowda/ResumeBuilder"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://hatchresume.com/#website",
+          "name": "HatchResume",
+          "alternateName": ["Hatch Resume", "hatchresume.com"],
+          "url": "https://hatchresume.com/",
+          "inLanguage": "en",
+          "publisher": { "@id": "https://hatchresume.com/#organization" }
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://hatchresume.com/#webapp",
+          "name": "HatchResume",
+          "alternateName": "HatchResume Free Resume Builder",
+          "url": "https://hatchresume.com/",
+          "description": "Free online resume builder with 25+ professional, ATS-friendly templates. No sign-up required and fully private — resumes are built entirely in your browser and downloaded as PDF.",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "isAccessibleForFree": true,
+          "publisher": { "@id": "https://hatchresume.com/#organization" },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "featureList": [
+            "25+ free professional resume templates",
+            "ATS-friendly layouts",
+            "Job description keyword matching",
+            "One-click fit-to-one-page sizing",
+            "No sign-up or login required",
+            "PDF download",
+            "Data stays in your browser — nothing stored online"
+          ]
+        }
       ]
     }
     </script>
@@ -71,23 +112,28 @@
   </head>
   <body>
     <noscript>
-      <h1>Free Resume Builder — Create an ATS-Friendly Resume Online</h1>
+      <h1>HatchResume — Free Resume Builder, ATS-Friendly, No Sign-Up</h1>
       <p>
-        ResumeBuilder is a 100% free online resume builder with 25+ professional,
+        HatchResume is a 100% free online resume builder with 25+ professional,
         ATS-friendly templates. No sign-up, no watermark, and complete privacy —
         your data never leaves your browser. Please enable JavaScript to build
         and download your resume as a PDF.
       </p>
     </noscript>
     <div id="root">
-      <!-- Static content for search engines; replaced when the app loads -->
-      <div style="max-width:720px;margin:48px auto;padding:0 24px;font-family:Inter,system-ui,sans-serif">
-        <h1>Free Resume Builder — Create a Professional, ATS-Friendly Resume Online</h1>
+      <!-- Static content for crawlers that do not run JavaScript (Googlebot's
+           first pass, GPTBot, PerplexityBot, link unfurlers). React replaces it
+           on load. scripts/seo-postbuild.js rewrites the inside of
+           #seo-static with route-specific copy on each pre-rendered page, so
+           this block must stay a single <div> with no nested <div>s (the build
+           strips HTML comments, hence an id rather than comment markers). -->
+      <div id="seo-static" style="max-width:820px;margin:48px auto;padding:0 24px;font-family:Inter,system-ui,sans-serif">
+        <h1>HatchResume — Free Resume Builder for a Professional, ATS-Friendly Resume</h1>
         <p>
-          Build a recruiter-approved resume in minutes with ResumeBuilder.
-          Choose from 25+ free professional templates, fill in your details,
-          and download your resume as a PDF — no sign-up, no watermark, and
-          100% private: your data never leaves your browser.
+          HatchResume (hatchresume.com) is a free online resume builder. Choose
+          from 25+ free professional templates, fill in your details, and
+          download your resume as a PDF — no sign-up, no watermark, and 100%
+          private: your data never leaves your browser.
         </p>
         <ul>
           <li>25+ free, ATS-friendly resume templates</li>
@@ -98,6 +144,11 @@
           <li>Complete data privacy — nothing is stored online</li>
         </ul>
         <p><a href="%PUBLIC_URL%/templates/">Browse free resume templates</a></p>
+        <p>
+          <a href="%PUBLIC_URL%/about/">About HatchResume</a> ·
+          <a href="%PUBLIC_URL%/faq/">HatchResume FAQ</a> ·
+          <a href="%PUBLIC_URL%/alternatives/">Free alternative to paid resume builders</a>
+        </p>
       </div>
     </div>
     <!--
