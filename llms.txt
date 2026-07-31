@@ -15,34 +15,42 @@
 
 - [Home — free resume builder](https://hatchresume.com/): overview and the entry point to the editor
 - [Resume templates](https://hatchresume.com/templates/): the full 25-template gallery
+- [ATS resume checker](https://hatchresume.com/ats-resume-checker/): Paste your resume and get an instant ATS score: missing sections, unreadable formatting, weak bullet points, and the keywords a job posting expects. Free, no sign-up, and your resume never leaves your browser.
+- [Resume examples](https://hatchresume.com/examples/): Complete resume examples you can open in a free editor and make your own — real bullet points, ATS-safe formatting, no sign-up and no watermark.
 - [About](https://hatchresume.com/about/): HatchResume is a free online resume builder with 25+ ATS-friendly templates. No sign-up, no watermark, no subscription — and your resume never leaves your browser.
 - [FAQ](https://hatchresume.com/faq/): Answers to common questions about HatchResume: pricing, sign-up, data privacy, ATS compatibility, PDF downloads, and mobile support.
 - [Alternatives](https://hatchresume.com/alternatives/): Looking for a free alternative to Zety, Resume.io, Novoresume, Enhancv, Kickresume, Resume Genius or Canva? HatchResume builds ATS-friendly resumes and exports PDFs free, with no sign-up and no watermark.
 
+## Resume examples
+
+- [Software Engineer resume example](https://hatchresume.com/examples/software-engineer/): Five years of backend and full-stack work, written the way engineering recruiters scan it.
+- [Data Analyst resume example](https://hatchresume.com/examples/data-analyst/): Analytics work framed as decisions changed, not dashboards produced.
+- [Product Manager resume example](https://hatchresume.com/examples/product-manager/): Outcomes and trade-offs rather than a list of features shipped.
+
 ## Templates
 
-- Professional Executive (Professional): A classic, clean single-column layout optimized for corporate and executive jobs. Recommended for traditional industries.
-- Modern Creative (Creative): A split-column layout designed to maximize space and readability. Best suited for tech, design, and marketing roles.
-- Executive Centered (Professional): A pristine, center-aligned corporate structure with full-width section borders. Highly professional.
-- Bold Tech Header (Creative): Featuring a high-contrast dark indigo top header band and tech-oriented grid layouts. Best for engineering and developers.
-- Modern Professional (Professional): A sleek two-column header with heavy section borders in a strict black-and-white aesthetic.
-- FAANG Engineer (ATS-Optimized): The single-column engineering standard used for Google, Meta and Amazon applications. Dense, scannable, and 100% ATS-parseable with full URLs in plain text.
-- ATS Pro Plain (ATS-Optimized): Maximum parser compatibility: no lines, no columns, no graphics. Bold uppercase headers and plain text designed to pass every applicant tracking system.
-- Harvard Classic (ATS-Optimized): The timeless Harvard-style format trusted by consulting, finance, and MBA applicants. Centered small-caps name with full-width ruled section headers.
-- Compact One-Page (ATS-Optimized): A dense, space-efficient layout that fits senior careers on a single page. Navy accents and compact skill pills keep it modern yet parseable.
-- Modern Accent (Professional): A contemporary single-column design with indigo accent bars on section headers. ATS-safe structure with just enough color to stand out.
-- Executive Slate (Professional): A stately gray header band with wide-tracked section headings. Designed for directors, VPs, and senior management applications at top MNCs.
-- Elegant Minimal (Creative): Light, airy typography with hairline rules and wide letter-spacing. A refined minimal look that stays fully single-column and parser-friendly.
-- Right Rail Modern (Professional): The balanced two-column standard used by leading resume builders: experience on the left, a light-gray rail on the right for contact, skills, and education.
-- Timeline Professional (Professional): Your career path drawn as a vertical timeline with connected milestones. A favorite modern style for showing steady progression.
-- Classic Serif (ATS-Optimized): The timeless Times-style resume trusted for decades in law, government, and academia. Understated serif typography, fully single-column and ATS-safe.
-- Corporate Blue (Professional): A solid blue header band over a clean single-column body — the most widely used corporate style at banks, consultancies, and Fortune 500 companies.
-- Monogram Modern (Creative): A personal-brand favorite: your initials in a badge beside your name, followed by a clean modern layout.
-- Teal Graduate (Creative): A fresh, approachable layout with teal accents — the go-to standard for students, internships, and first jobs.
-- Swiss Minimal (Creative): Design-led Swiss typography: an oversized name, generous whitespace, and a single red rule. Popular for design, media, and marketing portfolios.
-- Boxed Headers Classic (ATS-Optimized): The classic office-document style with shaded section header bars — instantly familiar to recruiters and cleanly parsed by tracking systems.
-- Deedy Two-Column (Professional): The famous Deedy format loved by CS students and new grads: a narrow left column for education, skills, and links beside a wide experience column — all on clean white.
-- Spearmint Fresh (ATS-Optimized): Modeled on the ever-popular Spearmint document style: crisp green rules over a plain single-column body. Familiar, friendly, and fully parseable.
-- Coral Warm (Creative): A warm, approachable single-column layout with coral headings — a widely used standard for customer-facing, HR, and communications roles.
-- Developer Mono (Creative): A monospace, terminal-inspired resume for developers — section headers with prompt markers and code-style typography, still strictly single-column.
-- Oxford Side-Headings (Professional): The academic CV standard with section headings set in a left gutter beside the content — the layout used by Oxford-style and moderncv LaTeX resumes.
+- [Professional Executive](https://hatchresume.com/templates/professional-executive/) (Professional, single column): A classic, clean single-column layout optimized for corporate and executive jobs. Recommended for traditional industries.
+- [Modern Creative](https://hatchresume.com/templates/modern-creative/) (Creative, two column): A split-column layout designed to maximize space and readability. Best suited for tech, design, and marketing roles.
+- [Executive Centered](https://hatchresume.com/templates/executive-centered/) (Professional, single column): A pristine, center-aligned corporate structure with full-width section borders. Highly professional.
+- [Bold Tech Header](https://hatchresume.com/templates/bold-tech-header/) (Creative, two column): Featuring a high-contrast dark indigo top header band and tech-oriented grid layouts. Best for engineering and developers.
+- [Modern Professional](https://hatchresume.com/templates/modern-professional/) (Professional, single column): A sleek two-column header with heavy section borders in a strict black-and-white aesthetic.
+- [FAANG Engineer](https://hatchresume.com/templates/faang-engineer/) (ATS-Optimized, single column): The single-column engineering standard used for Google, Meta and Amazon applications. Dense, scannable, and 100% ATS-parseable with full URLs in plain text.
+- [ATS Pro Plain](https://hatchresume.com/templates/ats-pro-plain/) (ATS-Optimized, single column): Maximum parser compatibility: no lines, no columns, no graphics. Bold uppercase headers and plain text designed to pass every applicant tracking system.
+- [Harvard Classic](https://hatchresume.com/templates/harvard-classic/) (ATS-Optimized, single column): The timeless Harvard-style format trusted by consulting, finance, and MBA applicants. Centered small-caps name with full-width ruled section headers.
+- [Compact One-Page](https://hatchresume.com/templates/compact-one-page/) (ATS-Optimized, single column): A dense, space-efficient layout that fits senior careers on a single page. Navy accents and compact skill pills keep it modern yet parseable.
+- [Modern Accent](https://hatchresume.com/templates/modern-accent/) (Professional, single column): A contemporary single-column design with indigo accent bars on section headers. ATS-safe structure with just enough color to stand out.
+- [Executive Slate](https://hatchresume.com/templates/executive-slate/) (Professional, single column): A stately gray header band with wide-tracked section headings. Designed for directors, VPs, and senior management applications at top MNCs.
+- [Elegant Minimal](https://hatchresume.com/templates/elegant-minimal/) (Creative, single column): Light, airy typography with hairline rules and wide letter-spacing. A refined minimal look that stays fully single-column and parser-friendly.
+- [Right Rail Modern](https://hatchresume.com/templates/right-rail-modern/) (Professional, two column): The balanced two-column standard used by leading resume builders: experience on the left, a light-gray rail on the right for contact, skills, and education.
+- [Timeline Professional](https://hatchresume.com/templates/timeline-professional/) (Professional, single column): Your career path drawn as a vertical timeline with connected milestones. A favorite modern style for showing steady progression.
+- [Classic Serif](https://hatchresume.com/templates/classic-serif/) (ATS-Optimized, single column): The timeless Times-style resume trusted for decades in law, government, and academia. Understated serif typography, fully single-column and ATS-safe.
+- [Corporate Blue](https://hatchresume.com/templates/corporate-blue/) (Professional, single column): A solid blue header band over a clean single-column body — the most widely used corporate style at banks, consultancies, and Fortune 500 companies.
+- [Monogram Modern](https://hatchresume.com/templates/monogram-modern/) (Creative, single column): A personal-brand favorite: your initials in a badge beside your name, followed by a clean modern layout.
+- [Teal Graduate](https://hatchresume.com/templates/teal-graduate/) (Creative, single column): A fresh, approachable layout with teal accents — the go-to standard for students, internships, and first jobs.
+- [Swiss Minimal](https://hatchresume.com/templates/swiss-minimal/) (Creative, single column): Design-led Swiss typography: an oversized name, generous whitespace, and a single red rule. Popular for design, media, and marketing portfolios.
+- [Boxed Headers Classic](https://hatchresume.com/templates/boxed-headers-classic/) (ATS-Optimized, single column): The classic office-document style with shaded section header bars — instantly familiar to recruiters and cleanly parsed by tracking systems.
+- [Deedy Two-Column](https://hatchresume.com/templates/deedy-two-column/) (Professional, two column): The famous Deedy format loved by CS students and new grads: a narrow left column for education, skills, and links beside a wide experience column — all on clean white.
+- [Spearmint Fresh](https://hatchresume.com/templates/spearmint-fresh/) (ATS-Optimized, single column): Modeled on the ever-popular Spearmint document style: crisp green rules over a plain single-column body. Familiar, friendly, and fully parseable.
+- [Coral Warm](https://hatchresume.com/templates/coral-warm/) (Creative, single column): A warm, approachable single-column layout with coral headings — a widely used standard for customer-facing, HR, and communications roles.
+- [Developer Mono](https://hatchresume.com/templates/developer-mono/) (Creative, single column): A monospace, terminal-inspired resume for developers — section headers with prompt markers and code-style typography, still strictly single-column.
+- [Oxford Side-Headings](https://hatchresume.com/templates/oxford-side-headings/) (Professional, single column): The academic CV standard with section headings set in a left gutter beside the content — the layout used by Oxford-style and moderncv LaTeX resumes.
