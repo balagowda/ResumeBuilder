@@ -183,11 +183,20 @@ const shorten = (line) => (line.length > 90 ? `${line.slice(0, 90)}…` : line);
  * misleading 100, since there is nothing there to be good.
  */
 export const lintResume = (formData) => {
-  issueSeq = 0;
   if (!formData) return { score: 0, issues: [], bulletCount: 0 };
+  return lintSources(collectSources(formData), formData.summary);
+};
+
+/**
+ * The rules themselves, over any list of {section, label, text} sources.
+ *
+ * Exported separately so the standalone ATS checker can lint pasted text,
+ * which has no form structure for collectSources to walk.
+ */
+export const lintSources = (sources, summaryText = null) => {
+  issueSeq = 0;
 
   const issues = [];
-  const sources = collectSources(formData);
   const verbCounts = new Map();
   let bulletCount = 0;
 
@@ -314,7 +323,7 @@ export const lintResume = (formData) => {
     }
   });
 
-  if (formData.summary && formData.summary.trim().split(/\s+/).length < 20) {
+  if (summaryText && summaryText.trim().split(/\s+/).length < 20) {
     issues.push(
       issue('low', 'thin-summary', { section: 'summary', label: 'Summary' },
         'Summary is very short',

@@ -16,6 +16,7 @@ import ResumeVersions from './ResumeVersions';
 import StorageNotice from './StorageNotice';
 import ContentReview from './ContentReview';
 import useResumeStore from '../hooks/useResumeStore';
+import { takePendingExample } from '../utils/pendingExample';
 import '../Styles/TemplateWorkspace.css';
 
 // Preview sheet geometry. The sheet is 560x794 CSS px (A4 at the preview's
@@ -262,6 +263,16 @@ export default function TemplateWorkspace({ templateId }) {
   }, [isResizing]);
 
   // Persistence itself now lives in useResumeStore.
+
+  // An example page can hand over a finished resume on its way here. It arrives
+  // as a new resume rather than overwriting the open one, so nothing the user
+  // already typed is lost, and it lands as a single undo step.
+  useEffect(() => {
+    const pending = takePendingExample();
+    if (!pending) return;
+    store.createResumeFrom(pending.name, pending.data, { templateId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Warn before the tab closes, but only when closing would actually cost the
   // user something: there is real content, it has not been backed up, and the

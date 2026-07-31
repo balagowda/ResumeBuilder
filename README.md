@@ -6,9 +6,13 @@ A 100% free, privacy-first resume builder. Pick one of 25+ professional, ATS-fri
 
 ## Features
 
-- **25+ free professional templates** — browse them at [/templates](https://hatchresume.com/templates/)
+- **25+ free professional templates** — browse them at [/templates](https://hatchresume.com/templates/), one page per design
 - **ATS-friendly layouts** that parse cleanly in applicant tracking systems
+- **Standalone ATS checker** at [/ats-resume-checker](https://hatchresume.com/ats-resume-checker/) — paste any resume for a structural and writing score, no account
+- **Resume examples by role** at [/examples](https://hatchresume.com/examples/) — complete resumes that load straight into the editor
 - **Job description matching** — paste a posting and see which of its keywords your resume is missing, scored and ranked, entirely in-browser
+- **Writing review** — flags weak openers, passive voice, unquantified claims and repeated verbs as you type
+- **Two PDF exports** — a text-based one an ATS can read, and a pixel-exact image one for printing
 - **Page overflow protection** — warns when content runs onto a second page, with one-click "fit to one page" resizing and multi-page PDF export
 - **No login required** — start building immediately
 - **Instant PDF download** via html2pdf/jsPDF
@@ -39,6 +43,7 @@ The dev server runs at [http://localhost:3000](http://localhost:3000).
 | `npm run build` | Production build into `build/`, then runs `scripts/seo-postbuild.js` |
 | `npm run deploy` | Build and publish `build/` to the `gh-pages` branch (GitHub Pages), then ping IndexNow |
 | `npm run indexnow` | Tell Bing/Yandex/Seznam that the URLs changed (Google is notified via Search Console) |
+| `npm run og:image` | Re-render `public/og-image.png` from `scripts/og-image.html` (needs Chrome) |
 | `npm test` | Run the test suite |
 
 ## SEO and discoverability
@@ -54,11 +59,18 @@ crawlers need help seeing it:
   title, description, canonical, JSON-LD, and the page's actual text inside
   `<div id="seo-static">`. Crawlers that never run JavaScript — Googlebot's
   first pass, GPTBot, PerplexityBot, link unfurlers — read that copy, and
-  GitHub Pages serves those URLs with HTTP 200 instead of the 404 shim.
-- **One source of content.** The text for `/about`, `/faq` and `/alternatives`
-  lives in `src/seo/contentPages.mjs` and is rendered both by
-  `src/components/ContentPage.js` (for visitors) and by the pre-render script
-  (for crawlers), so the two cannot drift apart.
+  GitHub Pages serves those URLs with HTTP 200 instead of the 404 shim. That is
+  35 URLs: the home page, the gallery, one page per template, the examples, the
+  ATS checker and the content pages.
+- **One source of content.** Page copy lives in `src/seo/` — `contentPages.mjs`
+  (/about, /faq, /alternatives), `exampleResumes.mjs` (the role examples) and
+  `pageMeta.mjs` (titles, descriptions, per-template copy) — and is rendered
+  both by the React components and by the pre-render script, so what a crawler
+  reads and what a visitor sees cannot drift apart. Adding a template or an
+  example gives you a page, a sitemap entry and internal links from one edit.
+- **The landing page is small.** Routes below it are `React.lazy`, so the first
+  visit no longer downloads all 25 template renderers plus jsPDF and
+  html2canvas: the main bundle is ~89 kB gzipped rather than ~282 kB.
 - **`sitemap.xml` and `llms.txt` are generated at build time** from the same
   route list, so they never go stale. Neither is checked into `public/`.
 - **`robots.txt` names the AI crawlers explicitly** — a bot that matches its own
@@ -67,6 +79,29 @@ crawlers need help seeing it:
 After deploying a change worth indexing: submit the sitemap in Google Search
 Console (Google ignores IndexNow) and let `postdeploy` handle Bing.
 
+## Tests
+
+```bash
+npm test
+```
+
+Three suites: an App shell smoke test (landing page renders, footer links, a
+content route and its document title), the ATS checker rules, and the route
+data that feeds the pre-render script and the sitemap — a duplicate template
+slug or a malformed path would otherwise publish a broken URL silently.
+
+Two workarounds live in config because React Router 7 is newer than the Jest
+that Create React App 5 ships:
+
+- `package.json` maps `react-router-dom` and `react-router/dom` straight to
+  their `dist` files. The package declares a `main` that does not exist and
+  relies on its `exports` map, which this Jest does not read. **If you upgrade
+  React Router, check those paths still exist.**
+- `src/setupTests.js` polyfills `TextEncoder`/`TextDecoder` from Node, which
+  Router 7 uses at import time and this jsdom does not provide.
+
+Neither affects the build: webpack resolves both correctly on its own.
+
 ## Project Structure
 
 ```
@@ -74,17 +109,28 @@ public/
   index.html            # SEO meta tags, structured data, #seo-static crawler content
   404.html              # SPA redirect shim for GitHub Pages (noindex)
   robots.txt            # Crawl rules, including explicit AI-crawler groups
+  og-image.png          # 1200x630 share card (generated, see scripts/og-image.html)
   <indexnow-key>.txt    # IndexNow ownership proof — must stay at the site root
   templates/            # Template preview images
 scripts/
   seo-postbuild.js      # Pre-renders each route, generates sitemap.xml and llms.txt
   ping-indexnow.js      # Pushes changed URLs to IndexNow after deploy
+  og-image.html         # Source for the share card — npm run og:image to rebuild
 src/
   components/           # LandingPage, HomePage, TemplateWorkspace, ContentPage, JobMatch
+    TemplateDetail.js   # One landing page per template (/templates/<slug>)
+    ResumeExamples.js   # /examples hub and per-role example pages
+    AtsChecker.js       # /ats-resume-checker
     templateMeta.mjs    # Template catalogue metadata, shared with the build scripts
   seo/
     contentPages.mjs    # Copy for /about, /faq, /alternatives (app + pre-render)
+    exampleResumes.mjs  # Full resume examples, in the editor's own data shape
+    pageMeta.mjs        # Titles, descriptions and shared copy for generated pages
+    useDocumentMeta.js  # Keeps title/description/canonical in sync on SPA navigation
   utils/
     keywordMatch.js     # Job-description keyword extraction and resume matching
+    contentLint.js      # Writing rules, shared by the editor and the ATS checker
+    atsCheck.js         # Structural ATS checks over pasted resume text
+    pendingExample.js   # Hand-off from an example page into the editor
   Styles/               # Component styles
 ```

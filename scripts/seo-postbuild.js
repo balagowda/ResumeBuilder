@@ -73,9 +73,20 @@ async function main() {
   const { CONTENT_PAGES, SITE_URL, BRAND } = await import(
     pathToFileURL(path.join(__dirname, '..', 'src', 'seo', 'contentPages.mjs')).href
   );
-  const { TEMPLATES } = await import(
+  const { TEMPLATES, TEMPLATE_PAGES } = await import(
     pathToFileURL(path.join(__dirname, '..', 'src', 'components', 'templateMeta.mjs')).href
   );
+  const { EXAMPLE_RESUMES, exampleSections } = await import(
+    pathToFileURL(path.join(__dirname, '..', 'src', 'seo', 'exampleResumes.mjs')).href
+  );
+  const {
+    templatePageMeta,
+    templateCopy,
+    examplePageMeta,
+    EXAMPLES_HUB_META,
+    ATS_CHECKER_META,
+    ATS_CHECKER_COPY,
+  } = await import(pathToFileURL(path.join(__dirname, '..', 'src', 'seo', 'pageMeta.mjs')).href);
 
   const indexHtml = fs.readFileSync(path.join(BUILD_DIR, 'index.html'), 'utf8');
   const today = new Date().toISOString().slice(0, 10);
@@ -98,14 +109,17 @@ async function main() {
     `<h1>Free Resume Templates — ${TEMPLATES.length} ATS-Friendly Designs</h1>`,
     `<p>Every ${BRAND} template is free to use and free to download as a PDF — no account, no watermark, and no payment at the download step. Templates in the ATS-Optimized category use the single-column structure applicant tracking systems parse most reliably.</p>`,
     '<ul>',
-    ...TEMPLATES.map(
+    // Linked, so a crawler reaches all 25 template pages from here.
+    ...TEMPLATE_PAGES.map(
       (t) =>
-        `  <li><strong>${escapeHtml(t.name)}</strong> (${escapeHtml(t.category)}) — ${escapeHtml(
-          t.description
-        )} <em>${escapeHtml(t.tags.join(', '))}</em></li>`
+        `  <li><a href="${SITE_URL}${t.path}/"><strong>${escapeHtml(t.name)}</strong></a> (${escapeHtml(
+          t.category
+        )}, ${escapeHtml(t.layout.toLowerCase())}) — ${escapeHtml(t.description)} <em>${escapeHtml(
+          t.tags.join(', ')
+        )}</em></li>`
     ),
     '</ul>',
-    `<p><a href="${SITE_URL}/">${BRAND} home</a> · <a href="${SITE_URL}/faq/">FAQ</a> · <a href="${SITE_URL}/about/">About ${BRAND}</a></p>`,
+    `<p><a href="${SITE_URL}/">${BRAND} home</a> · <a href="${SITE_URL}/examples/">Resume examples</a> · <a href="${SITE_URL}/ats-resume-checker/">Free ATS checker</a> · <a href="${SITE_URL}/faq/">FAQ</a></p>`,
   ].join('\n');
 
   const routes = [
@@ -232,6 +246,228 @@ async function main() {
         jsonLd: { '@context': 'https://schema.org', '@graph': graph },
       };
     }),
+
+    // One page per template: /templates/<slug>/.
+    ...TEMPLATE_PAGES.map((template) => {
+      const url = `${SITE_URL}${template.path}/`;
+      const meta = templatePageMeta(template);
+      const copy = templateCopy(template);
+      const related = TEMPLATE_PAGES.filter((t) => t.id !== template.id).slice(0, 4);
+
+      return {
+        dir: template.path.replace(/^\//, ''),
+        url,
+        title: meta.title,
+        description: meta.description,
+        priority: '0.7',
+        body: [
+          `<h1>${escapeHtml(template.name)} Resume Template</h1>`,
+          `<p>${escapeHtml(template.description)}</p>`,
+          '<ul>',
+          `  <li>Layout: ${escapeHtml(template.layout)}</li>`,
+          `  <li>Style: ${escapeHtml(template.category)}</li>`,
+          `  <li>ATS parsing: ${template.atsFirst ? 'built for ATS first' : 'ATS-safe structure'}</li>`,
+          `  <li>Price: free — no account, no watermark</li>`,
+          `  <li>Tags: ${escapeHtml(template.tags.join(', '))}</li>`,
+          '</ul>',
+          `<h2>Is the ${escapeHtml(template.name)} template right for you?</h2>`,
+          `<p>${escapeHtml(copy.layout)}</p>`,
+          `<p>${escapeHtml(copy.ats)}</p>`,
+          `<p><a href="${SITE_URL}/template${template.id}">Use the ${escapeHtml(
+            template.name
+          )} template</a></p>`,
+          '<h2>Other free templates</h2>',
+          '<ul>',
+          ...related.map(
+            (t) =>
+              `  <li><a href="${SITE_URL}${t.path}/">${escapeHtml(t.name)}</a> — ${escapeHtml(
+                t.category
+              )}, ${escapeHtml(t.layout.toLowerCase())}</li>`
+          ),
+          '</ul>',
+          `<p><a href="${SITE_URL}/templates/">All ${TEMPLATE_PAGES.length} free resume templates</a> · <a href="${SITE_URL}/examples/">Resume examples</a></p>`,
+        ].join('\n'),
+        jsonLd: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebPage',
+              '@id': `${url}#webpage`,
+              url,
+              name: meta.title,
+              description: meta.description,
+              isPartOf: siteRef,
+              publisher: brandRef,
+              inLanguage: 'en',
+            },
+            {
+              '@type': 'CreativeWork',
+              '@id': `${url}#template`,
+              name: `${template.name} resume template`,
+              description: template.description,
+              genre: 'Resume template',
+              keywords: template.tags.join(', '),
+              isAccessibleForFree: true,
+              creator: brandRef,
+              offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+            },
+            breadcrumb(template.name, url),
+          ],
+        },
+      };
+    }),
+
+    // Resume examples: the hub and one page per role.
+    {
+      dir: 'examples',
+      url: `${SITE_URL}/examples/`,
+      title: EXAMPLES_HUB_META.title,
+      description: EXAMPLES_HUB_META.description,
+      priority: '0.8',
+      body: [
+        '<h1>Resume Examples by Job Title</h1>',
+        `<p>Complete resumes, not fragments — written the way recruiters in each field actually read them. Open one in the ${BRAND} editor, replace the content with your own, and download a PDF. Free, no sign-up, and nothing you type leaves your browser.</p>`,
+        '<ul>',
+        ...EXAMPLE_RESUMES.map(
+          (example) =>
+            `  <li><a href="${SITE_URL}/examples/${example.slug}/">${escapeHtml(
+              example.role
+            )} Resume Example</a> — ${escapeHtml(example.summaryLine)}</li>`
+        ),
+        '</ul>',
+        `<p><a href="${SITE_URL}/templates/">All ${TEMPLATE_PAGES.length} free resume templates</a> · <a href="${SITE_URL}/ats-resume-checker/">Free ATS resume checker</a></p>`,
+      ].join('\n'),
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'CollectionPage',
+            '@id': `${SITE_URL}/examples/#webpage`,
+            url: `${SITE_URL}/examples/`,
+            name: EXAMPLES_HUB_META.title,
+            description: EXAMPLES_HUB_META.description,
+            isPartOf: siteRef,
+            publisher: brandRef,
+          },
+          {
+            '@type': 'ItemList',
+            numberOfItems: EXAMPLE_RESUMES.length,
+            itemListElement: EXAMPLE_RESUMES.map((example, i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              name: `${example.role} Resume Example`,
+              url: `${SITE_URL}/examples/${example.slug}/`,
+            })),
+          },
+          breadcrumb('Resume examples', `${SITE_URL}/examples/`),
+        ],
+      },
+    },
+
+    ...EXAMPLE_RESUMES.map((example) => {
+      const url = `${SITE_URL}/examples/${example.slug}/`;
+      const meta = examplePageMeta(example);
+
+      // The example itself is the page's reason to exist — a resume example
+      // page with no resume on it has nothing for a crawler to rank.
+      const resumeText = exampleSections(example).flatMap((section) => [
+        `<h3>${escapeHtml(section.heading)}</h3>`,
+        '<ul>',
+        ...section.lines.filter(Boolean).map((line) => `  <li>${escapeHtml(line)}</li>`),
+        '</ul>',
+      ]);
+
+      return {
+        dir: `examples/${example.slug}`,
+        url,
+        title: meta.title,
+        description: meta.description,
+        priority: '0.8',
+        body: [
+          `<h1>${escapeHtml(example.role)} Resume Example (${escapeHtml(example.year)})</h1>`,
+          `<p>${escapeHtml(example.intro)}</p>`,
+          `<h2>Why this ${escapeHtml(example.role.toLowerCase())} resume works</h2>`,
+          '<ul>',
+          ...example.whatWorks.map((point) => `  <li>${escapeHtml(point)}</li>`),
+          '</ul>',
+          `<h2>${escapeHtml(example.data.fullName)} — ${escapeHtml(
+            example.data.professionalTitle
+          )}</h2>`,
+          `<p>${escapeHtml(example.data.mail)} · ${escapeHtml(example.data.mobile)}${
+            example.data.linkedin ? ` · ${escapeHtml(example.data.linkedin)}` : ''
+          }</p>`,
+          ...resumeText,
+          `<p><a href="${SITE_URL}/template${example.templateId}">Build your own with this template</a></p>`,
+          `<p><a href="${SITE_URL}/examples/">All resume examples</a> · <a href="${SITE_URL}/templates/">All free templates</a> · <a href="${SITE_URL}/ats-resume-checker/">Free ATS checker</a></p>`,
+        ].join('\n'),
+        jsonLd: {
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'Article',
+              '@id': `${url}#article`,
+              headline: `${example.role} Resume Example`,
+              description: meta.description,
+              url,
+              isPartOf: siteRef,
+              publisher: brandRef,
+              author: brandRef,
+              inLanguage: 'en',
+            },
+            breadcrumb(`${example.role} resume example`, url),
+          ],
+        },
+      };
+    }),
+
+    // The ATS checker: the tool needs JavaScript, but what it checks and why
+    // does not, and that is what the page has to rank on.
+    {
+      dir: 'ats-resume-checker',
+      url: `${SITE_URL}/ats-resume-checker/`,
+      title: ATS_CHECKER_META.title,
+      description: ATS_CHECKER_META.description,
+      priority: '0.9',
+      body: [
+        `<h1>${escapeHtml(ATS_CHECKER_COPY.h1)}</h1>`,
+        `<p>${escapeHtml(ATS_CHECKER_COPY.lead)}</p>`,
+        `<p>${escapeHtml(ATS_CHECKER_COPY.privacy)}</p>`,
+        '<h2>What this checker looks at</h2>',
+        '<ul>',
+        ...ATS_CHECKER_COPY.checks.map((item) => `  <li>${escapeHtml(item)}</li>`),
+        '</ul>',
+        '<h2>What an ATS actually does</h2>',
+        ...ATS_CHECKER_COPY.explainer.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
+        `<p><a href="${SITE_URL}/templates/">Start from a free ATS-friendly template</a> · <a href="${SITE_URL}/examples/">See a complete example</a></p>`,
+      ].join('\n'),
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'WebPage',
+            '@id': `${SITE_URL}/ats-resume-checker/#webpage`,
+            url: `${SITE_URL}/ats-resume-checker/`,
+            name: ATS_CHECKER_META.title,
+            description: ATS_CHECKER_META.description,
+            isPartOf: siteRef,
+            publisher: brandRef,
+            inLanguage: 'en',
+          },
+          {
+            '@type': 'WebApplication',
+            '@id': `${SITE_URL}/ats-resume-checker/#app`,
+            name: `${BRAND} ATS Resume Checker`,
+            url: `${SITE_URL}/ats-resume-checker/`,
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'Any',
+            isAccessibleForFree: true,
+            publisher: brandRef,
+            offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+          },
+          breadcrumb('ATS resume checker', `${SITE_URL}/ats-resume-checker/`),
+        ],
+      },
+    },
   ];
 
   // ---------------------------------------------------------------------
@@ -302,13 +538,25 @@ async function main() {
     '',
     `- [Home — free resume builder](${SITE_URL}/): overview and the entry point to the editor`,
     `- [Resume templates](${SITE_URL}/templates/): the full ${TEMPLATES.length}-template gallery`,
+    `- [ATS resume checker](${SITE_URL}/ats-resume-checker/): ${ATS_CHECKER_META.description}`,
+    `- [Resume examples](${SITE_URL}/examples/): ${EXAMPLES_HUB_META.description}`,
     ...CONTENT_PAGES.map(
       (page) => `- [${page.navLabel}](${SITE_URL}${page.path}/): ${page.description}`
     ),
     '',
+    '## Resume examples',
+    '',
+    ...EXAMPLE_RESUMES.map(
+      (example) =>
+        `- [${example.role} resume example](${SITE_URL}/examples/${example.slug}/): ${example.summaryLine}`
+    ),
+    '',
     '## Templates',
     '',
-    ...TEMPLATES.map((t) => `- ${t.name} (${t.category}): ${t.description}`),
+    ...TEMPLATE_PAGES.map(
+      (t) =>
+        `- [${t.name}](${SITE_URL}${t.path}/) (${t.category}, ${t.layout.toLowerCase()}): ${t.description}`
+    ),
     '',
   ].join('\n');
 

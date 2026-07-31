@@ -29,13 +29,20 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "postdeploy": "node scripts/ping-indexnow.js",
-    "indexnow": "node scripts/ping-indexnow.js"
+    "indexnow": "node scripts/ping-indexnow.js",
+    "og:image": "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless=new --disable-gpu --hide-scrollbars --screenshot=public/og-image.png --window-size=1200,630 \"file://$PWD/scripts/og-image.html\""
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js",
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js"
+    }
   },
   "browserslist": {
     "production": [

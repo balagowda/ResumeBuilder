@@ -22,13 +22,16 @@
     <meta property="og:description" content="HatchResume is a free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, no watermark, 100% private. Download as PDF in minutes." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://hatchresume.com/" />
-    <meta property="og:image" content="https://hatchresume.com/logo512.png" />
-    <meta property="og:image:alt" content="HatchResume — free online resume builder" />
+    <!-- 1200x630 share card. Source: scripts/og-image.html (npm run og:image). -->
+    <meta property="og:image" content="https://hatchresume.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="HatchResume — free resume builder, no sign-up" />
     <meta property="og:locale" content="en_US" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="HatchResume — Free Online Resume Builder, ATS-Friendly, No Sign-Up" />
     <meta name="twitter:description" content="HatchResume is a free online resume builder with 25+ professional, ATS-friendly templates. No sign-up, no watermark, 100% private. Download as PDF in minutes." />
-    <meta name="twitter:image" content="https://hatchresume.com/logo512.png" />
+    <meta name="twitter:image" content="https://hatchresume.com/og-image.png" />
 
     <!-- One @graph so the brand ("HatchResume"), the site, and the app are
          linked as a single entity. Without an explicit name, search engines
@@ -145,6 +148,8 @@
         </ul>
         <p><a href="%PUBLIC_URL%/templates/">Browse free resume templates</a></p>
         <p>
+          <a href="%PUBLIC_URL%/examples/">Resume examples by job title</a> ·
+          <a href="%PUBLIC_URL%/ats-resume-checker/">Free ATS resume checker</a> ·
           <a href="%PUBLIC_URL%/about/">About HatchResume</a> ·
           <a href="%PUBLIC_URL%/faq/">HatchResume FAQ</a> ·
           <a href="%PUBLIC_URL%/alternatives/">Free alternative to paid resume builders</a>

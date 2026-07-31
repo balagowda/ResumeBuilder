@@ -181,3 +181,34 @@ export const TEMPLATES = [
     tags: ['Side Headings', 'Academic CV', 'LaTeX Style'],
   },
 ];
+
+/** Which templates use a two-column page layout (everything else is single
+ *  column). Single column is what ATS parsers read most reliably, so this
+ *  drives both the gallery filter and the copy on each template page. */
+export const TWO_COLUMN_IDS = [2, 4, 13, 21];
+
+/** Stable, human-readable URL segment for a template. Derived from the name,
+ *  so renaming a template changes its URL — update the redirect story before
+ *  doing that once the pages are indexed. */
+export const templateSlug = (template) =>
+  template.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+/**
+ * The catalogue as the landing pages need it: slug, URL path, layout, and
+ * whether the design is one of the ATS-first ones. Shared by the React routes
+ * and by scripts/seo-postbuild.js, so a new template gets a page, a sitemap
+ * entry and a gallery card from one edit.
+ */
+export const TEMPLATE_PAGES = TEMPLATES.map((template) => ({
+  ...template,
+  slug: templateSlug(template),
+  path: `/templates/${templateSlug(template)}`,
+  layout: TWO_COLUMN_IDS.includes(template.id) ? 'Two column' : 'Single column',
+  atsFirst: template.category === 'ATS-Optimized',
+}));
+
+export const findTemplatePage = (slug) =>
+  TEMPLATE_PAGES.find((template) => template.slug === String(slug || '').toLowerCase());

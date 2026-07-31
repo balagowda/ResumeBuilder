@@ -183,7 +183,14 @@ export const resumeToText = (formData) => {
  * coverage percentage — hitting the terms the posting repeats counts for more
  * than hitting ones it mentions once.
  */
-export const analyzeJobMatch = (jobDescription, formData, limit = 28) => {
+export const analyzeJobMatch = (jobDescription, formData, limit = 28) =>
+  analyzeJobMatchText(jobDescription, resumeToText(formData), limit);
+
+/**
+ * Same comparison against resume text that did not come from the form — what
+ * the standalone ATS checker has, since its input is a pasted document.
+ */
+export const analyzeJobMatchText = (jobDescription, resumeText, limit = 28) => {
   const jdTokens = tokenize(jobDescription);
   if (jdTokens.length < 15) {
     return { score: 0, matched: [], missing: [], total: 0, tooShort: true };
@@ -243,7 +250,7 @@ export const analyzeJobMatch = (jobDescription, formData, limit = 28) => {
     .slice(0, limit);
 
   // Build the resume's searchable forms once.
-  const resumeTokens = tokenize(resumeToText(formData));
+  const resumeTokens = tokenize(resumeText);
   const resumeStems = new Set(resumeTokens.map(stem));
   const resumeJoined = ` ${resumeTokens.join(' ')} `;
 
