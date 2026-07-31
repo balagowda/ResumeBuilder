@@ -1305,7 +1305,15 @@
   border-radius: 16px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   padding: 32px;
-  transform: scale(1);
+  /* Scaled from the top so the modal can shrink the sheet to fit a narrow
+     screen without reflowing it. The factor is set inline. */
+  transform-origin: top center;
+}
+
+/* Reserves the scaled height, since a transform does not affect layout. */
+.preview-scaler {
+  display: flex;
+  justify-content: center;
 }
 
 .preview-content .close-btn {
@@ -1369,34 +1377,15 @@
 }
 
 @media (max-width: 600px) {
-  /* The sheet gets an inline pixel height from the page-count logic; on narrow
-     screens let it hug its content instead so it never leaves a tall gap. */
-  .resume,
-  .preview-resume {
-    width: 100%;
-    height: auto !important;
-    min-height: 0;
-    padding: 20px;
-  }
-
-  .resume-content {
-    font-size: 0.55rem;
-  }
-
+  /* The sheet keeps its true 560px geometry here rather than reflowing to the
+     viewport, which is what it used to do. Reflowing made the preview a
+     different document from the export: pagination, the overflow warning and
+     "fit to one page" all measured a layout the PDF never uses, the templates
+     that place side columns at hard-coded 560px offsets came apart, and the
+     image export captured the narrow sheet and stretched it onto A4. It is
+     scaled down to fit instead — see fitScale in TemplateWorkspace. */
   .download-btn {
     width: 100%;
-  }
-
-  .resume-fit {
-    height: auto;
-  }
-
-  .resume-zoom-wrapper {
-    height: auto !important;
-  }
-
-  .page-guides {
-    display: none;
   }
 
   .overflow-banner {

@@ -22,8 +22,22 @@ import '../Styles/TemplateWorkspace.css';
 // Preview sheet geometry. The sheet is 560x794 CSS px (A4 at the preview's
 // scale) with 32px padding, and grows in whole-page increments.
 const PAGE_H = 794;
+const SHEET_W = 560;
 const SHEET_PAD = 64; // 32px top + 32px bottom
 const MIN_SCALE = 0.7;
+const SCROLLBAR_GUTTER = 16;
+
+/**
+ * How far the sheet has to shrink to fit `available` px of width.
+ *
+ * The sheet is never allowed to reflow to the viewport: every measurement that
+ * matters — content height, page count, where the page breaks land, what
+ * html2canvas captures — is only meaningful at the real 560px width. A narrow
+ * screen therefore gets a scaled-down copy of the actual page rather than a
+ * differently-shaped one, and never scales up past 1:1.
+ */
+const fitScaleFor = (available) =>
+  available >= SHEET_W ? 1 : Math.max(0.3, available / SHEET_W);
 
 // Single source of truth for a pristine resume, so "Clear Data" lands on
 // exactly the same state as a first visit — including typography, which used
@@ -94,12 +108,16 @@ export default function TemplateWorkspace({ templateId }) {
 
   const resumeRef = useRef();
   const importInputRef = useRef();
+  const panelRef = useRef();
   const navigate = useNavigate();
 
   const [sidebarWidth, setSidebarWidth] = useState(480);
   const [isResizing, setIsResizing] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [dragOverSection, setDragOverSection] = useState(null);
+  // Shrink-to-fit factor for screens too narrow to show the sheet at 1:1.
+  const [fitScale, setFitScale] = useState(1);
+  const [previewFitScale, setPreviewFitScale] = useState(1);
 
   // Layout height of .resume-content in CSS px, before --content-scale is
   // applied. Drives the page count and the overflow warning.
@@ -109,6 +127,10 @@ export default function TemplateWorkspace({ templateId }) {
   const [fitFailed, setFitFailed] = useState(false);
 
   const contentScale = formData.contentScale || 1;
+  // What the sheet is displayed at: the user's zoom, then shrunk again if the
+  // screen is too narrow for 1:1. Export does not go through this — see
+  // handleDownloadPDF — so nothing here moves while a PDF is being made.
+  const displayScale = (zoom / 100) * fitScale;
   const scaledHeight = contentHeight * contentScale;
   const pageCount = Math.max(1, Math.ceil((scaledHeight + SHEET_PAD) / PAGE_H));
   const sheetHeight = pageCount * PAGE_H;
@@ -224,6 +246,50 @@ export default function TemplateWorkspace({ templateId }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, [templateId, measureContent]);
+
+  // How much width the preview panel can actually give the sheet.
+  const measureFit = useCallback(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    const styles = window.getComputedStyle(el);
+    // Deliberately the border-box width rather than clientWidth: clientWidth
+    // excludes the panel's vertical scrollbar, and scaling the sheet changes
+    // how tall it is, which can make that scrollbar appear or disappear. At one
+    // specific window width the two would chase each other every frame, so the
+    // gutter is reserved as a constant instead of measured.
+    const available =
+      el.getBoundingClientRect().width -
+      (parseFloat(styles.paddingLeft) || 0) -
+      (parseFloat(styles.paddingRight) || 0) -
+      SCROLLBAR_GUTTER;
+    // The panel has no width yet (first paint, or the editor rendered while
+    // hidden). Keep whatever scale we had rather than collapsing to the floor.
+    if (!(available > 0)) return;
+    const next = fitScaleFor(available);
+    setFitScale((prev) => (prev === next ? prev : next));
+  }, []);
+
+  // Same arrangement as measureContent above: run it after every render, and
+  // separately on resize, which changes the panel without re-rendering.
+  // ResizeObserver alone would be neater but is not universally reliable.
+  useLayoutEffect(measureFit);
+
+  useEffect(() => {
+    window.addEventListener('resize', measureFit);
+    return () => window.removeEventListener('resize', measureFit);
+  }, [measureFit]);
+
+  // The modal sizes itself off the viewport rather than the panel, so it needs
+  // its own factor. Only tracked while it is open.
+  useEffect(() => {
+    if (!isPreviewOpen) return undefined;
+    // .preview-modal has 20px of side padding; .preview-content caps at 620px.
+    const update = () =>
+      setPreviewFitScale(fitScaleFor(Math.min(620, window.innerWidth - 40)));
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [isPreviewOpen]);
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -421,34 +487,42 @@ export default function TemplateWorkspace({ templateId }) {
     const originalElement = resumeRef.current;
     if (!originalElement) return;
 
-    // Capture must happen at 100% zoom or coordinates come out scaled
-    const prevZoom = zoom;
-    if (prevZoom !== 100) {
-      setZoom(100);
-      await new Promise(resolve => setTimeout(resolve, 150));
-    }
-
     try {
-      // Find the scrolling container to temporarily reset its scroll
-      // This prevents html2canvas from capturing a blank or offset canvas
-      const panel = originalElement.closest('.resume-panel');
-      const oldScrollTop = panel ? panel.scrollTop : 0;
-      const oldScrollLeft = panel ? panel.scrollLeft : 0;
-      
-      if (panel) {
-        panel.scrollTop = 0;
-        panel.scrollLeft = 0;
-      }
-      
-      // Wait a tiny bit for the browser to register the scroll reset
-      await new Promise(resolve => setTimeout(resolve, 50));
-
-      // Capture the element precisely as it appears on screen
+      // The sheet on screen is scaled — by the user's zoom, and on a narrow
+      // screen by the shrink-to-fit factor — and html2canvas takes its bounds
+      // from getBoundingClientRect, so left alone it would capture the sheet at
+      // whatever size it is currently displayed at and stretch that onto A4.
+      //
+      // Undoing the scale on the real element works, but the preview visibly
+      // jumps while the capture runs. html2canvas renders its own copy of the
+      // document instead of the pixels on screen, so the same thing can be done
+      // there, where nobody sees it: onclone lifts the sheet out of the scaled
+      // wrapper, drops it at the origin on its own, and the explicit bounds
+      // below crop exactly that. Nothing on screen moves.
       const canvas = await html2canvas(originalElement, {
         scale: 3, // 3x scale guarantees retina-quality crisp text when stretched
         useCORS: true,
+        backgroundColor: '#ffffff',
         scrollX: 0,
         scrollY: 0,
+        x: 0,
+        y: 0,
+        width: SHEET_W,
+        height: sheetHeight,
+        onclone: (clonedDoc, clonedSheet) => {
+          const body = clonedDoc.body;
+          body.appendChild(clonedSheet);
+          // Everything else would still paint at the origin underneath it.
+          Array.from(body.children).forEach((child) => {
+            if (child !== clonedSheet) child.remove();
+          });
+          body.style.margin = '0';
+          body.style.padding = '0';
+          clonedSheet.style.position = 'absolute';
+          clonedSheet.style.left = '0';
+          clonedSheet.style.top = '0';
+          clonedSheet.style.margin = '0';
+        },
         ignoreElements: (element) => {
           // Check if classList exists and contains is a function (SVG elements can break this)
           if (element.classList && typeof element.classList.contains === 'function') {
@@ -498,6 +572,11 @@ export default function TemplateWorkspace({ templateId }) {
 
       // --- INJECT CLICKABLE LINKS ---
       // Since html2canvas outputs a flat image, we must manually map HTML <a> tags to PDF link boxes
+      //
+      // These rects come from the live sheet, so they carry whatever scale it
+      // is displayed at. That is harmless: every one of them below is divided
+      // by origRect, so a uniform scale cancels out and the ratios are the same
+      // at any zoom.
       const origRect = originalElement.getBoundingClientRect();
       const cssPageHeight = origRect.height / pageCount;
       const links = originalElement.querySelectorAll('a');
@@ -529,17 +608,9 @@ export default function TemplateWorkspace({ templateId }) {
 
       const filename = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'Resume'}.pdf`;
       pdf.save(filename);
-
-      // Restore user's previous scroll position
-      if (panel) {
-        panel.scrollTop = oldScrollTop;
-        panel.scrollLeft = oldScrollLeft;
-      }
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(`Failed to download PDF. Error: ${error.message}`);
-    } finally {
-      if (prevZoom !== 100) setZoom(prevZoom);
     }
   };
 
@@ -1036,7 +1107,7 @@ export default function TemplateWorkspace({ templateId }) {
             <i className="fas fa-arrows-alt-h"></i>
           </div>
         </div>
-        <div className="resume-panel">
+        <div className="resume-panel" ref={panelRef}>
           <div className="zoom-toolbar">
             <button className="zoom-btn" onClick={() => setZoom((z) => Math.max(50, z - 10))} title="Zoom out">
               <i className="fas fa-search-minus"></i>
@@ -1093,9 +1164,16 @@ export default function TemplateWorkspace({ templateId }) {
           <div
             className="resume-zoom-wrapper"
             style={{
-              transform: `scale(${zoom / 100})`,
-              transformOrigin: 'top center',
-              height: `${Math.round((sheetHeight + 20) * (zoom / 100))}px`,
+              transform: `scale(${displayScale})`,
+              // Scaled from the top-left, with the box sized to match, so the
+              // wrapper occupies exactly the space the sheet paints in. A
+              // transform does not affect layout, so without this the panel
+              // reserves the full 560px and shows a horizontal scrollbar over
+              // empty space — and a centre origin would push the sheet off the
+              // left edge, where it cannot be scrolled back into view.
+              transformOrigin: 'top left',
+              width: `${Math.round(SHEET_W * displayScale)}px`,
+              height: `${Math.round((sheetHeight + 20) * displayScale)}px`,
             }}
           >
             <div
@@ -1153,20 +1231,26 @@ export default function TemplateWorkspace({ templateId }) {
               <i className="fas fa-times"></i>
             </button>
             <div
-              className="resume preview-resume"
-              data-accent={formData.accentColor ? 'on' : undefined}
-              style={{
-                height: `${sheetHeight}px`,
-                '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
-                '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
-                '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
-                '--line-height': formData.lineHeight || 1.4,
-                '--content-scale': contentScale,
-                '--accent': formData.accentColor || undefined,
-              }}
+              className="preview-scaler"
+              style={{ height: `${Math.round(sheetHeight * previewFitScale)}px` }}
             >
-              <div className="resume-fit">
-                {renderResumeContent()}
+              <div
+                className="resume preview-resume"
+                data-accent={formData.accentColor ? 'on' : undefined}
+                style={{
+                  transform: `scale(${previewFitScale})`,
+                  height: `${sheetHeight}px`,
+                  '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
+                  '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
+                  '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
+                  '--line-height': formData.lineHeight || 1.4,
+                  '--content-scale': contentScale,
+                  '--accent': formData.accentColor || undefined,
+                }}
+              >
+                <div className="resume-fit">
+                  {renderResumeContent()}
+                </div>
               </div>
             </div>
           </div>
