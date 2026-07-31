@@ -1,0 +1,55 @@
+/* Read-only A4 resume preview, shared by the template pages and the example
+   pages. The sheet is the same 560x794 with 32px padding the editor and the
+   gallery cards use — the templates' type sizes are tuned against it. */
+
+.sheet-frame {
+  background: #eef0f6;
+  border: 1px solid #e2e5ee;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+/* A transform does not change layout size, so this element carries the scaled
+   height and clips whatever the sheet cannot fit. */
+.sheet-clip {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  /* Until the width is measured the height is unknown; hold roughly one A4 so
+     the page does not jump when the real value lands. */
+  min-height: 120px;
+  aspect-ratio: 560 / 794;
+}
+
+/* Once the height is set explicitly the ratio placeholder must not fight it. */
+.sheet-clip[style*='height'] {
+  aspect-ratio: auto;
+}
+
+.sheet-page {
+  width: 560px;
+  height: 794px;
+  padding: 32px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  transform-origin: top left;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Shrink-to-fit wrapper: lay out at 1/scale and scale down, so the template's
+   rem-based type shrinks proportionally instead of re-wrapping into a mess. */
+.sheet-fit {
+  width: calc(100% / var(--content-scale, 1));
+  height: calc(100% / var(--content-scale, 1));
+  transform: scale(var(--content-scale, 1));
+  transform-origin: top left;
+}
+
+@media (max-width: 560px) {
+  .sheet-frame {
+    padding: 14px;
+  }
+}

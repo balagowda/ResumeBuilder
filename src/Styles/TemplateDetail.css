@@ -117,26 +117,9 @@
 }
 
 /* Live preview of the actual template, scaled down to fit the column. */
-/* A transform does not change layout size, so the frame carries the scaled
-   height (1123px A4 x 0.478 + padding) and clips the full-size sheet inside. */
+/* The sheet itself is ResumeSheetPreview; this column only sets its width. */
 .template-detail-preview {
-  background: #eef0f6;
-  border: 1px solid #e2e5ee;
-  border-radius: 16px;
-  padding: 20px;
-  height: 578px;
-  overflow: hidden;
-}
-
-.template-detail-sheet {
-  width: 794px;
-  height: 1123px;
-  transform: scale(0.478);
-  transform-origin: top left;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-  overflow: hidden;
-  pointer-events: none;
+  width: 100%;
 }
 
 .template-detail-section {
@@ -202,13 +185,7 @@
     grid-template-columns: 1fr;
   }
 
-  /* Keep the A4 sheet proportional on a narrow screen. */
-  .template-detail-sheet {
-    transform: scale(0.38);
-  }
-
   .template-detail-preview {
-    padding: 14px;
-    height: 455px; /* 1123px x 0.38 + padding */
+    max-width: 100%;
   }
 }

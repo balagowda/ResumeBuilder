@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EXAMPLE_RESUMES, findExample, exampleSections } from '../seo/exampleResumes.mjs';
 import { examplePageMeta, EXAMPLES_HUB_META } from '../seo/pageMeta.mjs';
-import { DEFAULT_SECTION_ORDER, renderResumeTemplate, formatTextToList } from './ResumeTemplates';
+import ResumeSheetPreview from './ResumeSheetPreview';
 import { stageExample } from '../utils/pendingExample';
 import useDocumentMeta from '../seo/useDocumentMeta';
 import '../Styles/ResumeExamples.css';
@@ -77,13 +77,6 @@ export const ExampleDetail = () => {
     navigate(`/template${example.templateId}`);
   };
 
-  const previewCtx = {
-    formData: example.data,
-    sectionOrder: DEFAULT_SECTION_ORDER,
-    experienceHeading: 'Experience',
-    formatTextToList,
-  };
-
   return (
     <div className="examples-page">
       <div className="examples-inner">
@@ -106,10 +99,12 @@ export const ExampleDetail = () => {
         </div>
 
         <div className="example-layout">
-          <div className="example-preview" aria-label={`${example.role} resume preview`}>
-            <div className="example-sheet">
-              {renderResumeTemplate(example.templateId, previewCtx)}
-            </div>
+          <div className="example-preview">
+            <ResumeSheetPreview
+              templateId={example.templateId}
+              formData={example.data}
+              label={`${example.role} resume example preview`}
+            />
           </div>
 
           <div className="example-copy">

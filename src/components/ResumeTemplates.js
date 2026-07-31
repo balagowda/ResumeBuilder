@@ -1,4 +1,10 @@
 import React from 'react';
+// The template designs are styled here rather than by whoever renders them.
+// The rules used to ride along in the single bundle via TemplateWorkspace's
+// import; once the editor became a lazy chunk, every other page that renders a
+// preview — the gallery, the template pages, the examples — would have shown
+// unstyled resumes until the editor happened to load.
+import '../Styles/TemplateWorkspace.css';
 
 /* ==========================================================================
    Shared resume template registry.

@@ -135,28 +135,11 @@
   align-items: start;
 }
 
-/* A transform does not change layout size, so the frame carries the scaled
-   height (1123px A4 x 0.478 + padding) and clips the full-size sheet inside. */
+/* The sheet itself is ResumeSheetPreview; this column positions it. */
 .example-preview {
-  background: #eef0f6;
-  border: 1px solid #e2e5ee;
-  border-radius: 16px;
-  padding: 20px;
-  height: 578px;
-  overflow: hidden;
+  width: 100%;
   position: sticky;
   top: 96px;
-}
-
-.example-sheet {
-  width: 794px;
-  height: 1123px;
-  transform: scale(0.478);
-  transform-origin: top left;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-  overflow: hidden;
-  pointer-events: none;
 }
 
 .example-copy section {
@@ -228,12 +211,7 @@
     font-size: 1.8rem;
   }
 
-  .example-sheet {
-    transform: scale(0.38);
-  }
-
   .example-preview {
-    padding: 14px;
-    height: 455px; /* 1123px x 0.38 + padding */
+    max-width: 100%;
   }
 }

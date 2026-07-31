@@ -1,17 +1,11 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { TEMPLATE_PAGES, findTemplatePage } from './templateMeta.mjs';
-import { SAMPLE_DATA, DEFAULT_SECTION_ORDER, renderResumeTemplate, formatTextToList } from './ResumeTemplates';
+import { SAMPLE_DATA } from './ResumeTemplates';
+import ResumeSheetPreview from './ResumeSheetPreview';
 import useDocumentMeta from '../seo/useDocumentMeta';
 import { templatePageMeta, templateCopy } from '../seo/pageMeta.mjs';
 import '../Styles/TemplateDetail.css';
-
-const sampleCtx = {
-  formData: SAMPLE_DATA,
-  sectionOrder: DEFAULT_SECTION_ORDER,
-  experienceHeading: 'Experience',
-  formatTextToList,
-};
 
 // A page per template. Each one is a real, indexable URL for a query like
 // "faang engineer resume template" — the gallery alone gave search engines a
@@ -99,10 +93,12 @@ const TemplateDetail = () => {
             </p>
           </div>
 
-          <div className="template-detail-preview" aria-label={`${template.name} preview`}>
-            <div className="template-detail-sheet">
-              {renderResumeTemplate(template.id, sampleCtx)}
-            </div>
+          <div className="template-detail-preview">
+            <ResumeSheetPreview
+              templateId={template.id}
+              formData={SAMPLE_DATA}
+              label={`${template.name} resume template preview`}
+            />
           </div>
         </div>
 
