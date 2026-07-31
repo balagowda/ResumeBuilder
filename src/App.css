@@ -104,50 +104,84 @@ body {
 }
 
 /* Footer */
+/* Footer: a left-aligned brand block plus link columns, the arrangement people
+   are used to scanning. Everything used to be centred in one stack, which read
+   as an afterthought and gave the links no grouping. */
 .App-footer {
   background-color: var(--background-dark);
+  color: rgba(255, 255, 255, 0.72);
+  padding: 56px 24px 24px;
+  text-align: left;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.7fr repeat(3, minmax(0, 1fr));
+  gap: 40px;
+}
+
+.footer-logo {
+  font-size: 1.15rem;
+  font-weight: 800;
   color: var(--white);
-  padding: 24px;
-  text-align: center;
+  margin-bottom: 12px;
 }
 
-.App-footer p {
-  margin: 8px 0;
+.footer-blurb {
+  max-width: 340px;
+  margin: 0;
   font-size: 0.9rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.6);
 }
 
-.App-footer a {
-  color: var(--primary-color);
+.footer-col-title {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 14px;
+}
+
+.footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.footer-col a {
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
-  font-weight: 500;
+  font-size: 0.92rem;
 }
 
-.App-footer a:hover {
+.footer-col a:hover {
+  color: var(--white);
   text-decoration: underline;
 }
 
-.footer-nav {
+.footer-bottom {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-between;
   gap: 8px 24px;
-  margin-bottom: 14px;
-  font-size: 0.9rem;
-}
-
-.footer-nav a {
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
-}
-
-.footer-nav-secondary {
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
   font-size: 0.85rem;
-  margin-bottom: 18px;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.footer-nav-secondary a {
-  color: rgba(255, 255, 255, 0.62);
-  font-weight: 400;
+.footer-bottom p {
+  margin: 0;
 }
 
 /* Route-level lazy loading placeholder. */
@@ -187,14 +221,6 @@ body {
   color: var(--white);
 }
 
-/* Scoped to .App-footer so it outweighs `.App-footer p`, which would
-   otherwise reset the auto side margins and pin the block to the left. */
-.App-footer .footer-blurb {
-  max-width: 620px;
-  margin: 0 auto 12px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .header-container {
@@ -208,6 +234,16 @@ body {
 
   .App-main {
     padding: 24px 16px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  /* The brand block spans the row above the link columns. */
+  .footer-brand {
+    grid-column: 1 / -1;
   }
 }
 
@@ -231,5 +267,18 @@ body {
 
   .logo {
     font-size: 1.25rem;
+  }
+
+  .App-footer {
+    padding: 40px 20px 20px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footer-blurb {
+    max-width: none;
   }
 }

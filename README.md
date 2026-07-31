@@ -71,8 +71,15 @@ crawlers need help seeing it:
 - **The landing page is small.** Routes below it are `React.lazy`, so the first
   visit no longer downloads all 25 template renderers plus jsPDF and
   html2canvas: the main bundle is ~89 kB gzipped rather than ~282 kB.
+- **The editor routes get a shell too.** `/template<id>` is pre-rendered as a
+  `noindex, follow` document so the "use this template" links resolve to a real
+  200 instead of the 404-plus-JavaScript-redirect the SPA shim used to serve.
+  The indexable version of a template is its own `/templates/<slug>/` page.
 - **`sitemap.xml` and `llms.txt` are generated at build time** from the same
   route list, so they never go stale. Neither is checked into `public/`.
+  `lastmod` comes from `CONTENT_UPDATED` in `src/seo/pageMeta.mjs` (or a page's
+  own `updated` field) — **bump it when you change page copy**, rather than
+  letting every deploy claim every page changed.
 - **`robots.txt` names the AI crawlers explicitly** — a bot that matches its own
   user-agent group obeys only that group.
 
@@ -85,10 +92,13 @@ Console (Google ignores IndexNow) and let `postdeploy` handle Bing.
 npm test
 ```
 
-Three suites: an App shell smoke test (landing page renders, footer links, a
-content route and its document title), the ATS checker rules, and the route
-data that feeds the pre-render script and the sitemap — a duplicate template
-slug or a malformed path would otherwise publish a broken URL silently.
+Four suites: an App shell smoke test (landing page renders, footer links, a
+content route and its document title), the ATS checker rules, the route data
+that feeds the pre-render script and the sitemap, and the pre-render output
+itself — every route has one `<h1>` and real body text, every internal link and
+schema URL resolves to a page that is actually generated, and the sitemap lists
+the indexable routes and omits the noindex shells. None of those failures throw
+at build time; they just quietly stop a page being indexed.
 
 Two workarounds live in config because React Router 7 is newer than the Jest
 that Create React App 5 ships:

@@ -30,6 +30,10 @@ export const EXAMPLE_RESUMES = [
     slug: 'software-engineer',
     role: 'Software Engineer',
     year: '2026',
+    // Dates the example page reports in its Article markup, and what the
+    // sitemap uses for this URL. Bump "updated" when the resume text changes.
+    published: '2026-07-31',
+    updated: '2026-07-31',
     navLabel: 'Software engineer',
     templateId: 6,
     templateNote: 'FAANG Engineer — the single-column layout big-tech recruiters expect',
@@ -95,6 +99,10 @@ export const EXAMPLE_RESUMES = [
     slug: 'data-analyst',
     role: 'Data Analyst',
     year: '2026',
+    // Dates the example page reports in its Article markup, and what the
+    // sitemap uses for this URL. Bump "updated" when the resume text changes.
+    published: '2026-07-31',
+    updated: '2026-07-31',
     navLabel: 'Data analyst',
     templateId: 7,
     templateNote: 'ATS Pro Plain — plain headings that survive any parser',
@@ -160,6 +168,10 @@ export const EXAMPLE_RESUMES = [
     slug: 'product-manager',
     role: 'Product Manager',
     year: '2026',
+    // Dates the example page reports in its Article markup, and what the
+    // sitemap uses for this URL. Bump "updated" when the resume text changes.
+    published: '2026-07-31',
+    updated: '2026-07-31',
     navLabel: 'Product manager',
     templateId: 1,
     templateNote: 'Professional Executive — clean and conservative, reads well in any industry',

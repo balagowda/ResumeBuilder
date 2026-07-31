@@ -11,7 +11,6 @@
 // of falling back to 404.html.
 const fs = require('fs');
 const path = require('path');
-const { pathToFileURL } = require('url');
 
 const BUILD_DIR = path.join(__dirname, '..', 'build');
 
@@ -24,12 +23,16 @@ const escapeHtml = (value) =>
 
 // The <title>, description and canonical are single-line tags in index.html;
 // swapping them per route is a plain string replace.
-const replaceMeta = (html, { title, description, url }) =>
+const replaceMeta = (html, { title, description, url, robots }) =>
   html
     .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`)
     .replace(
       /(<meta name="description" content=")[^"]*(")/,
       `$1${escapeHtml(description)}$2`
+    )
+    .replace(
+      /(<meta name="robots" content=")[^"]*(")/,
+      `$1${robots || 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'}$2`
     )
     .replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${url}$2`)
     .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escapeHtml(title)}$2`)
@@ -69,16 +72,21 @@ const replaceJsonLd = (html, jsonLd) =>
     `<script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n</script>`
   );
 
-async function main() {
-  const { CONTENT_PAGES, SITE_URL, BRAND } = await import(
-    pathToFileURL(path.join(__dirname, '..', 'src', 'seo', 'contentPages.mjs')).href
-  );
-  const { TEMPLATES, TEMPLATE_PAGES } = await import(
-    pathToFileURL(path.join(__dirname, '..', 'src', 'components', 'templateMeta.mjs')).href
-  );
-  const { EXAMPLE_RESUMES, exampleSections } = await import(
-    pathToFileURL(path.join(__dirname, '..', 'src', 'seo', 'exampleResumes.mjs')).href
-  );
+/**
+ * Build the route table: everything that gets its own HTML document, with the
+ * title, description, static body and structured data each one needs.
+ *
+ * Separated from the file writing below so it can be tested without a build
+ * directory — an empty body or a missing title is invisible until a page stops
+ * being indexed.
+ */
+async function buildRoutes() {
+  // Relative specifiers, not file:// URLs: Node resolves them against this
+  // module either way, and it keeps the module reachable from the test suite,
+  // whose resolver does not understand a file:// string.
+  const { CONTENT_PAGES, SITE_URL, BRAND } = await import('../src/seo/contentPages.mjs');
+  const { TEMPLATES, TEMPLATE_PAGES } = await import('../src/components/templateMeta.mjs');
+  const { EXAMPLE_RESUMES, exampleSections } = await import('../src/seo/exampleResumes.mjs');
   const {
     templatePageMeta,
     templateCopy,
@@ -86,10 +94,8 @@ async function main() {
     EXAMPLES_HUB_META,
     ATS_CHECKER_META,
     ATS_CHECKER_COPY,
-  } = await import(pathToFileURL(path.join(__dirname, '..', 'src', 'seo', 'pageMeta.mjs')).href);
-
-  const indexHtml = fs.readFileSync(path.join(BUILD_DIR, 'index.html'), 'utf8');
-  const today = new Date().toISOString().slice(0, 10);
+    CONTENT_UPDATED,
+  } = await import('../src/seo/pageMeta.mjs');
 
   const brandRef = { '@id': `${SITE_URL}/#organization` };
   const siteRef = { '@id': `${SITE_URL}/#website` };
@@ -145,13 +151,15 @@ async function main() {
           {
             '@type': 'ItemList',
             name: `${BRAND} resume templates`,
-            numberOfItems: TEMPLATES.length,
-            itemListElement: TEMPLATES.map((t, i) => ({
+            numberOfItems: TEMPLATE_PAGES.length,
+            // Each item points at the template's own indexable page, not at the
+            // editor route: /template<id> is a noindex app shell.
+            itemListElement: TEMPLATE_PAGES.map((t, i) => ({
               '@type': 'ListItem',
               position: i + 1,
               name: t.name,
               description: t.description,
-              url: `${SITE_URL}/template${t.id}`,
+              url: `${SITE_URL}${t.path}/`,
             })),
           },
           breadcrumb('Resume Templates', `${SITE_URL}/templates/`),
@@ -383,6 +391,7 @@ async function main() {
         title: meta.title,
         description: meta.description,
         priority: '0.8',
+        lastmod: example.updated,
         body: [
           `<h1>${escapeHtml(example.role)} Resume Example (${escapeHtml(example.year)})</h1>`,
           `<p>${escapeHtml(example.intro)}</p>`,
@@ -409,6 +418,8 @@ async function main() {
               headline: `${example.role} Resume Example`,
               description: meta.description,
               url,
+              datePublished: example.published,
+              dateModified: example.updated,
               isPartOf: siteRef,
               publisher: brandRef,
               author: brandRef,
@@ -468,32 +479,70 @@ async function main() {
         ],
       },
     },
+
+    // The editor itself, one shell per template.
+    //
+    // These are where "Use this template" and "Use this example" actually go.
+    // Without a document at /template<id>, GitHub Pages answered 404 and the
+    // SPA shim rescued it with JavaScript — fine for a person, but every
+    // crawler following those links got a 404, and they are the most important
+    // link on each template page. A real 200 also spares visitors the
+    // redirect bounce when they open a shared editor link.
+    //
+    // noindex because there is nothing here to rank: the content is the app,
+    // and the template's own page is the indexable version. `follow` so the
+    // links out still count.
+    ...TEMPLATE_PAGES.map((template) => ({
+      dir: `template${template.id}`,
+      url: `${SITE_URL}/template${template.id}/`,
+      title: `Edit the ${template.name} Template — Free Resume Builder | ${BRAND}`,
+      description: `Fill in the ${template.name} resume template and download a PDF. Free, no sign-up, and your resume never leaves your browser.`,
+      robots: 'noindex, follow',
+      inSitemap: false,
+      body: [
+        `<h1>${escapeHtml(template.name)} — ${BRAND} Editor</h1>`,
+        `<p>This is the ${BRAND} resume editor, loaded with the ${escapeHtml(
+          template.name
+        )} template. It needs JavaScript: type your details on the left and the A4 preview updates as you go, then export a PDF. Nothing you enter is uploaded.</p>`,
+        `<p><a href="${SITE_URL}${template.path}/">About the ${escapeHtml(
+          template.name
+        )} template</a> · <a href="${SITE_URL}/templates/">All ${TEMPLATE_PAGES.length} free templates</a> · <a href="${SITE_URL}/examples/">Resume examples</a> · <a href="${SITE_URL}/ats-resume-checker/">Free ATS checker</a></p>`,
+      ].join('\n'),
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'WebPage',
+            '@id': `${SITE_URL}/template${template.id}/#webpage`,
+            url: `${SITE_URL}/template${template.id}/`,
+            name: `${template.name} — ${BRAND} editor`,
+            isPartOf: siteRef,
+            publisher: brandRef,
+            inLanguage: 'en',
+          },
+        ],
+      },
+    })),
   ];
 
   // ---------------------------------------------------------------------
-  // Write one static HTML document per route.
-  // ---------------------------------------------------------------------
-  for (const route of routes) {
-    let html = replaceMeta(indexHtml, route);
-    html = replaceStaticBody(html, route.body);
-    html = replaceJsonLd(html, route.jsonLd);
-
-    const outDir = path.join(BUILD_DIR, route.dir);
-    fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(path.join(outDir, 'index.html'), html);
-    console.log(`Pre-rendered ${route.dir}/index.html`);
-  }
-
-  // ---------------------------------------------------------------------
   // sitemap.xml — generated from the same route list so it can't go stale.
+  // The noindex editor shells are left out: a sitemap is a list of pages you
+  // want indexed, and asking for one you have told the crawler to skip is a
+  // contradiction it reports back as an error.
   // ---------------------------------------------------------------------
   const sitemapEntries = [
-    { loc: `${SITE_URL}/`, priority: '1.0', changefreq: 'weekly' },
-    ...routes.map((route) => ({
-      loc: route.url,
-      priority: route.priority,
-      changefreq: 'monthly',
-    })),
+    { loc: `${SITE_URL}/`, priority: '1.0', changefreq: 'weekly', lastmod: CONTENT_UPDATED },
+    ...routes
+      .filter((route) => route.inSitemap !== false)
+      .map((route) => ({
+        loc: route.url,
+        priority: route.priority,
+        changefreq: 'monthly',
+        // Per-page, not the build date: every URL claiming to have changed on
+        // every deploy is a signal search engines learn to ignore.
+        lastmod: route.lastmod || CONTENT_UPDATED,
+      })),
   ];
 
   const sitemap = [
@@ -503,7 +552,7 @@ async function main() {
       [
         '  <url>',
         `    <loc>${entry.loc}</loc>`,
-        `    <lastmod>${today}</lastmod>`,
+        `    <lastmod>${entry.lastmod}</lastmod>`,
         `    <changefreq>${entry.changefreq}</changefreq>`,
         `    <priority>${entry.priority}</priority>`,
         '  </url>',
@@ -512,9 +561,6 @@ async function main() {
     '</urlset>',
     '',
   ].join('\n');
-
-  fs.writeFileSync(path.join(BUILD_DIR, 'sitemap.xml'), sitemap);
-  console.log(`Generated sitemap.xml (${sitemapEntries.length} URLs)`);
 
   // ---------------------------------------------------------------------
   // llms.txt — a plain-text brief for LLM crawlers and answer engines, which
@@ -560,11 +606,38 @@ async function main() {
     '',
   ].join('\n');
 
+  return { routes, sitemap, llms, sitemapUrlCount: sitemapEntries.length };
+}
+
+/** Write everything the build needs into build/. */
+async function main() {
+  const { routes, sitemap, llms, sitemapUrlCount } = await buildRoutes();
+  const indexHtml = fs.readFileSync(path.join(BUILD_DIR, 'index.html'), 'utf8');
+
+  for (const route of routes) {
+    let html = replaceMeta(indexHtml, route);
+    html = replaceStaticBody(html, route.body);
+    html = replaceJsonLd(html, route.jsonLd);
+
+    const outDir = path.join(BUILD_DIR, route.dir);
+    fs.mkdirSync(outDir, { recursive: true });
+    fs.writeFileSync(path.join(outDir, 'index.html'), html);
+  }
+  console.log(`Pre-rendered ${routes.length} routes`);
+
+  fs.writeFileSync(path.join(BUILD_DIR, 'sitemap.xml'), sitemap);
+  console.log(`Generated sitemap.xml (${sitemapUrlCount} URLs)`);
+
   fs.writeFileSync(path.join(BUILD_DIR, 'llms.txt'), llms);
   console.log('Generated llms.txt');
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+module.exports = { buildRoutes, replaceMeta, replaceStaticBody, replaceJsonLd, escapeHtml };
+
+// Only run when invoked as a script, so the test can import the route builder.
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

@@ -7,6 +7,16 @@
 
 export const BRAND = 'HatchResume';
 
+/**
+ * When the site's copy last changed, as YYYY-MM-DD.
+ *
+ * Bump this when you edit page text — it is what the sitemap reports as
+ * `lastmod` for pages that do not carry their own date. Deliberately not the
+ * build date: stamping every URL as modified on every deploy tells search
+ * engines nothing, and they learn to discount it.
+ */
+export const CONTENT_UPDATED = '2026-07-31';
+
 export const templatePageMeta = (template) => ({
   title: `${template.name} Resume Template — Free Download | ${BRAND}`,
   description: `${template.description} Free ${template.layout.toLowerCase()} resume template — edit it online and download a PDF with no sign-up and no watermark.`,

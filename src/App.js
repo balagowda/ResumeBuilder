@@ -102,39 +102,57 @@ function App() {
       </main>
       {showFooter && (
         <footer className="App-footer">
-          <div className="footer-content">
+          <div className="footer-inner">
             {/* Every page links to the content pages: it is how crawlers find
                 them, and how the brand name gets repeated site-wide. */}
-            <nav className="footer-nav" aria-label="Footer">
-              <Link to="/templates">Resume Templates</Link>
-              <Link to="/examples">Resume Examples</Link>
-              <Link to="/ats-resume-checker">ATS Checker</Link>
-              {CONTENT_PAGES.map((page) => (
-                <Link key={page.path} to={page.path}>
-                  {page.navLabel}
-                </Link>
-              ))}
-            </nav>
-            <nav className="footer-nav footer-nav-secondary" aria-label="Resume examples">
-              {EXAMPLE_RESUMES.map((example) => (
-                <Link key={example.slug} to={`/examples/${example.slug}`}>
-                  {example.role} resume example
-                </Link>
-              ))}
-            </nav>
-            <p className="footer-blurb">
-              HatchResume is a free online resume builder with 25+ ATS-friendly
-              templates — no sign-up, no watermark, and your data never leaves
-              your browser.
-            </p>
-            <p>
-              Contact us at: <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
-            </p>
-            <p>
-              Have a suggestion or found a bug?{' '}
-              <Link to="/#feedback">Let us know</Link>.
-            </p>
-            <p>&copy; 2026 HatchResume. All rights reserved.</p>
+            <div className="footer-grid">
+              <div className="footer-brand">
+                <div className="footer-logo">HatchResume</div>
+                <p className="footer-blurb">
+                  A free online resume builder with 25+ ATS-friendly templates —
+                  no sign-up, no watermark, and your data never leaves your
+                  browser.
+                </p>
+              </div>
+
+              <nav className="footer-col" aria-label="Build a resume">
+                <div className="footer-col-title">Build</div>
+                <ul>
+                  <li><Link to="/templates">Resume Templates</Link></li>
+                  <li><Link to="/examples">Resume Examples</Link></li>
+                  <li><Link to="/ats-resume-checker">ATS Checker</Link></li>
+                </ul>
+              </nav>
+
+              <nav className="footer-col" aria-label="Resume examples by job title">
+                <div className="footer-col-title">Examples</div>
+                <ul>
+                  {EXAMPLE_RESUMES.map((example) => (
+                    <li key={example.slug}>
+                      <Link to={`/examples/${example.slug}`}>{example.role}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              <nav className="footer-col" aria-label="About HatchResume">
+                <div className="footer-col-title">HatchResume</div>
+                <ul>
+                  {CONTENT_PAGES.map((page) => (
+                    <li key={page.path}>
+                      <Link to={page.path}>{page.navLabel}</Link>
+                    </li>
+                  ))}
+                  <li><Link to="/#feedback">Send feedback</Link></li>
+                  <li><a href={`mailto:${SUPPORT_EMAIL}`}>Contact us</a></li>
+                </ul>
+              </nav>
+            </div>
+
+            <div className="footer-bottom">
+              <p>&copy; 2026 HatchResume. All rights reserved.</p>
+              <p>Built in your browser — nothing you type is uploaded.</p>
+            </div>
           </div>
         </footer>
       )}
