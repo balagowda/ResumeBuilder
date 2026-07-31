@@ -1,0 +1,191 @@
+/* Per-template landing page (/templates/<slug>). */
+
+.template-detail {
+  width: 100%;
+  padding: 40px 24px 88px;
+}
+
+.template-detail-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.template-crumbs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 24px;
+}
+
+.template-crumbs a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.template-crumbs a:hover {
+  text-decoration: underline;
+}
+
+.template-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 48px;
+  align-items: start;
+}
+
+.template-detail-copy h1 {
+  font-size: 2.3rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin: 0 0 16px;
+}
+
+.template-detail-lead {
+  font-size: 1.08rem;
+  color: #4b5563;
+  margin: 0 0 28px;
+}
+
+/* Fact grid */
+.template-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  margin: 0 0 24px;
+  padding: 20px 22px;
+  background: var(--white);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+}
+
+.template-facts dt {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-light);
+  margin-bottom: 4px;
+}
+
+.template-facts dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.template-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.template-tag {
+  background: rgba(79, 70, 229, 0.08);
+  color: var(--primary-color);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.template-detail-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--primary-color);
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.template-detail-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.28);
+}
+
+.template-detail-note {
+  margin: 16px 0 0;
+  font-size: 0.92rem;
+  color: var(--text-light);
+}
+
+/* Live preview of the actual template, scaled down to fit the column. */
+/* The sheet itself is ResumeSheetPreview; this column only sets its width. */
+.template-detail-preview {
+  width: 100%;
+}
+
+.template-detail-section {
+  margin-top: 56px;
+  max-width: 780px;
+}
+
+.template-detail-section h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 12px;
+}
+
+.template-detail-section p {
+  color: #4b5563;
+  margin: 0 0 14px;
+}
+
+.template-related {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.template-related li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eceef3;
+  color: var(--text-light);
+}
+
+.template-related a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.template-related a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 980px) {
+  .template-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .template-detail-preview {
+    max-width: 460px;
+  }
+}
+
+@media (max-width: 560px) {
+  .template-detail {
+    padding: 28px 18px 64px;
+  }
+
+  .template-detail-copy h1 {
+    font-size: 1.8rem;
+  }
+
+  .template-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .template-detail-preview {
+    max-width: 100%;
+  }
+}

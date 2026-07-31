@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TEMPLATES, SAMPLE_DATA, DEFAULT_SECTION_ORDER, renderResumeTemplate, formatTextToList } from './ResumeTemplates';
+import { TWO_COLUMN_IDS, templateSlug } from './templateMeta.mjs';
 import useDocumentMeta from '../seo/useDocumentMeta';
 import '../Styles/HomePage.css';
 
 const CATEGORIES = ['All', 'ATS-Optimized', 'Professional', 'Creative'];
 
-// Which templates use a two-column page layout (everything else is single column)
-const TWO_COLUMN_IDS = [2, 4, 13, 21];
 const LAYOUTS = ['Any layout', 'Single column', 'Two column'];
 
 // Every card renders its template live with realistic sample data,
@@ -195,6 +194,10 @@ const HomePage = () => {
                       <div className="card-back-footer">
                         <Link to={`/template${template.id}`} className="btn-card-action">
                           Use Template <i className="fa-solid fa-arrow-right"></i>
+                        </Link>
+                        {/* Also the crawl path to each template's own page. */}
+                        <Link to={`/templates/${templateSlug(template)}`} className="btn-card-details">
+                          Details
                         </Link>
                       </div>
                     </div>

@@ -141,6 +141,24 @@ export default function useResumeStore(makeEmpty) {
     [makeEmpty, commit]
   );
 
+  /**
+   * Add a resume that already has content — how the example pages hand a
+   * finished resume to the editor. Separate from createResume because the
+   * caller cannot patch the new record afterwards: updateActive closes over the
+   * activeId from the current render, which is still the old resume.
+   */
+  const createResumeFrom = useCallback(
+    (name, data, extra = {}) => {
+      const record = createResumeRecord(name || 'Untitled resume', data, extra);
+      commit(
+        (doc) => ({ resumes: [...doc.resumes, record], activeId: record.id }),
+        { label: 'load example' }
+      );
+      return record.id;
+    },
+    [commit]
+  );
+
   const duplicateResume = useCallback(
     (id) => {
       const source = resumes.find((r) => r.id === id);
@@ -250,6 +268,7 @@ export default function useResumeStore(makeEmpty) {
     setFormData,
     updateActive,
     createResume,
+    createResumeFrom,
     duplicateResume,
     renameResume,
     deleteResume,

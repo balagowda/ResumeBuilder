@@ -259,6 +259,8 @@ const LandingPage = () => {
             your browser, so your work history is never uploaded to a server.
           </p>
           <div className="about-strip-links">
+            <Link to="/examples">Resume examples by job title</Link>
+            <Link to="/ats-resume-checker">Free ATS resume checker</Link>
             <Link to="/about">About HatchResume</Link>
             <Link to="/faq">Is HatchResume free and private?</Link>
             <Link to="/alternatives">A free alternative to paid resume builders</Link>

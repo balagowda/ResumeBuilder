@@ -31,10 +31,12 @@ export const CONTENT_PAGES = [
         bullets: [
           '25+ free professional resume templates, including single-column ATS layouts',
           'A job-description matcher that shows which keywords from a posting your resume is missing',
+          'A writing review that flags weak openers, passive voice, unquantified claims and repeated verbs',
+          'Two PDF exports: a text-based one applicant tracking systems can read, and a pixel-exact image one',
           'Page-overflow warnings with one-click "fit to one page" resizing',
           'Drag-and-drop section reordering',
           'Multiple saved resume versions with undo and redo',
-          'Instant PDF download at print resolution',
+          'Backup and restore as a JSON file, so your work can move between browsers without an account',
         ],
       },
       {
@@ -93,7 +95,15 @@ export const CONTENT_PAGES = [
       },
       {
         q: 'How do I download my resume as a PDF?',
-        a: 'Click the download button in the editor. The PDF is generated in your browser at print resolution, sized for A4, and saved straight to your device. Resumes longer than one page export as multi-page PDFs.',
+        a: 'There are two export buttons in the editor. "Download ATS PDF" goes through your browser\'s print-to-PDF and keeps the text selectable, which is what applicant tracking systems need in order to read it — use this one when applying. "Download Print PDF" captures the preview as an image, so the layout is pixel-exact but the text cannot be parsed; use it for printing or emailing a human. Both are free, generated on your own device, and support multi-page resumes.',
+      },
+      {
+        q: 'Does HatchResume check how my resume is written?',
+        a: 'Yes. The Writing Review panel scores your bullet points and flags the specific problems recruiters notice: openers like "Responsible for", passive voice, first-person phrasing, claims with no number attached, bullets that run too long, and the same verb starting three different lines. It runs as you type, in your browser.',
+      },
+      {
+        q: 'Can I move my resume to another browser or computer?',
+        a: 'Yes, with the Backup button: it downloads your resume as a JSON file, and Restore loads it back in anywhere. There is no cloud sync — that would mean storing your resume on a server, which is exactly what HatchResume avoids — so the file is the handoff.',
       },
       {
         q: 'Can I make my resume fit on one page?',
@@ -139,7 +149,7 @@ export const CONTENT_PAGES = [
         body: [
           'Paid builders — Zety, Resume.io, Novoresume, Enhancv, Kickresume, Resume Genius and similar tools — invest in large template libraries, AI phrasing help, cover-letter tooling, and hosted storage of your documents. That work is funded by subscriptions, so the export, the watermark removal, or both usually sit behind a paywall or a trial that renews.',
           'Canva sits in between: its resume templates export free, but they are design-first documents, and heavily styled multi-column layouts with graphics are the ones applicant tracking systems most often mis-read.',
-          'HatchResume is deliberately smaller in scope. It has no AI writing assistant and no cloud sync, and in exchange there is nothing to pay for and no account to create. Check any competitor\'s current pricing and features on their own site before deciding — plans change.',
+          'HatchResume is deliberately smaller in scope. It has no AI writing assistant and no cloud sync, and in exchange there is nothing to pay for and no account to create. What it does include for free is the part that changes whether you get called: keyword matching against the posting, a writing review of your bullet points, and a text-based PDF export that parsers can actually read. Check any competitor\'s current pricing and features on their own site before deciding — plans change.',
         ],
       },
       {
@@ -153,9 +163,11 @@ export const CONTENT_PAGES = [
             ['Where your resume is stored', 'Your browser only', 'The provider\'s servers'],
             ['ATS-friendly single-column templates', 'Yes, a dedicated category', 'Usually yes'],
             ['Job-description keyword matching', 'Included, free', 'Often a premium feature'],
+            ['Writing feedback on your bullets', 'Included, free', 'Often a premium feature'],
+            ['Text-based PDF an ATS can read', 'Yes, a dedicated export', 'Usually yes'],
             ['AI writing assistant', 'No', 'Often included'],
             ['Cover letter builder', 'No', 'Often included'],
-            ['Cloud sync across devices', 'No — local to one browser', 'Yes'],
+            ['Moving your resume between devices', 'Backup and restore as a file', 'Cloud sync'],
           ],
         },
       },
