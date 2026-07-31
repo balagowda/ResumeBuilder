@@ -14,7 +14,11 @@ const Summary = ({ summary, collapsed, toggleSection, handleChange, dragHandle }
     </div>
     <div className={`section-content ${collapsed ? 'collapsed' : 'expanded'}`}>
       <div className="section-content-inner">
+        {/* The section heading names this field visually but is not associated
+            with it, so the accessible name is spelled out here. */}
         <textarea
+          id="summary"
+          aria-label="Professional summary"
           name="summary"
           rows={4}
           value={summary}

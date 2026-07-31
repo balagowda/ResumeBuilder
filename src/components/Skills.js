@@ -14,7 +14,10 @@ const Skills = ({ skills, collapsed, toggleSection, handleChange, dragHandle }) 
     </div>
     <div className={`section-content ${collapsed ? 'collapsed' : 'expanded'}`}>
       <div className="section-content-inner">
+        {/* See Summary — the heading is not programmatically the field's label. */}
         <textarea
+          id="skills"
+          aria-label="Skills"
           name="skills"
           rows={4}
           value={skills}

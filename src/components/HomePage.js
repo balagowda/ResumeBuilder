@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TEMPLATES, SAMPLE_DATA, DEFAULT_SECTION_ORDER, renderResumeTemplate, formatTextToList } from './ResumeTemplates';
 import { TWO_COLUMN_IDS, templateSlug } from './templateMeta.mjs';
 import useDocumentMeta from '../seo/useDocumentMeta';
 import '../Styles/HomePage.css';
+
+// Card thumbnails render the real template on the same 560px-wide sheet the
+// editor uses, then scale it down to the card. The scale used to be hard-coded
+// per view mode (360/560 large, 230/560 compact), which silently assumed the
+// card got its full max-width — on a phone it is narrower than that, so the
+// sheet overflowed and the preview was cropped on both sides. Measure instead.
+const THUMB_PAGE_W = 560;
 
 const CATEGORIES = ['All', 'ATS-Optimized', 'Professional', 'Creative'];
 
@@ -31,6 +38,28 @@ const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [compactView, setCompactView] = useState(false);
   const [flippedCards, setFlippedCards] = useState({});
+
+  // One measurement drives every card: they are all the same width, so the
+  // scale goes on the grid as a custom property and each thumbnail inherits it.
+  const gridRef = useRef(null);
+  const measureThumbScale = useCallback(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const frame = grid.querySelector('.template-preview-live');
+    if (!frame) return;
+    const width = frame.getBoundingClientRect().width;
+    if (width <= 0) return;
+    grid.style.setProperty('--thumb-scale', String(width / THUMB_PAGE_W));
+  }, []);
+
+  // Re-run after every render — switching view mode or filtering changes the
+  // card width — and on resize, which does not re-render.
+  useLayoutEffect(measureThumbScale);
+
+  useEffect(() => {
+    window.addEventListener('resize', measureThumbScale);
+    return () => window.removeEventListener('resize', measureThumbScale);
+  }, [measureThumbScale]);
 
   const handleFilterChange = (category) => {
     setSelectedFilter(category);
@@ -133,7 +162,7 @@ const HomePage = () => {
       {/* Template cards grid */}
       <section className="templates-grid-section">
         {filteredTemplates.length > 0 ? (
-          <div className={`templates-cards-grid ${compactView ? 'compact' : ''}`}>
+          <div className={`templates-cards-grid ${compactView ? 'compact' : ''}`} ref={gridRef}>
             {filteredTemplates.map((template) => {
               const isFlipped = !!flippedCards[template.id];
               return (

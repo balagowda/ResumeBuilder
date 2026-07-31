@@ -48,7 +48,7 @@ export const CONTENT_PAGES = [
       {
         h2: 'How your data is handled',
         body: [
-          'Everything you type stays in your browser\'s local storage. Your resume content is never uploaded, never transmitted to HatchResume, and never shared with a third party, because the app has no backend to send it to. Clearing your browser storage deletes it permanently — HatchResume keeps no copy.',
+          'Everything you type stays in your own browser. Your resume content is never uploaded, never transmitted to HatchResume, and never shared with a third party, because the app has no backend to send it to. By default it is held only for the current tab and erased as soon as you close it; you can opt into keeping it on the device instead. Either way HatchResume keeps no copy, so download a backup if you want it later.',
           'The PDF is generated in the browser as well, so the finished file exists only on your device.',
         ],
       },
@@ -87,7 +87,7 @@ export const CONTENT_PAGES = [
       },
       {
         q: 'Where is my resume data stored? Is it private?',
-        a: 'Your resume is stored only in your own browser\'s local storage. It is never uploaded to a server, because HatchResume has no backend — the whole app runs client-side. Clearing your browser data deletes the resume permanently, and no copy exists anywhere else.',
+        a: 'Only in your own browser, and never on a server — HatchResume has no backend, so the whole app runs client-side. By default your resume is kept just for the current tab and the browser erases it the moment you close that tab; refreshing and moving around the site are safe. If you would rather keep it between visits, tick "Keep my resumes on this device" in the editor and it moves to this browser\'s longer-term storage on this device only. Either way, no copy exists anywhere else, so use the Backup button before you close the tab if you want to keep it.',
       },
       {
         q: 'Are the templates ATS-friendly?',

@@ -268,6 +268,79 @@
   color: var(--primary-color);
 }
 
+.section-handle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* The keyboard- and touch-reachable half of reordering. Deliberately always
+   visible: on a touch screen the drag handle beside it does nothing at all,
+   so hiding these behind a hover state would leave no way to reorder. */
+.section-move {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.section-move:hover:not(:disabled) {
+  color: var(--primary-color);
+  background-color: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.section-move:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Jumps to the live sheet from anywhere in the form. Only exists on the
+   stacked layout — see the note where it is rendered. */
+.mobile-preview-fab {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .mobile-preview-fab {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    /* Clear of the iOS home indicator. */
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 1500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.28);
+  }
+
+  .mobile-preview-fab-pages {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.22);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+}
+
 .input-field {
   width: 100%;
   padding: 10px 12px;
@@ -1373,6 +1446,9 @@
     width: 100%;
     height: auto;
     padding: 40px 10px;
+    /* Clear the floating Preview button, which would otherwise sit on top of
+       the download buttons at the very end of the page. */
+    padding-bottom: 96px;
   }
 }
 

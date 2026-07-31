@@ -23,8 +23,10 @@ const Others = ({ others, collapsed, toggleSection, handleChange, addEntry, dele
         ) : (
           others.map((other, index) => (
             <div key={index} className="sub-group">
-              <label htmlFor="title">Title</label>
+              {/* Per-entry ids — see the note in Experiences. */}
+              <label htmlFor={`other-title-${index}`}>Title</label>
               <input
+                id={`other-title-${index}`}
                 type="text"
                 name="title"
                 value={other.title}
@@ -32,8 +34,9 @@ const Others = ({ others, collapsed, toggleSection, handleChange, addEntry, dele
                 placeholder="e.g., Volunteer Work"
                 className="input-field"
               />
-              <label htmlFor="description">Description</label>
+              <label htmlFor={`other-description-${index}`}>Description</label>
               <textarea
+                id={`other-description-${index}`}
                 name="description"
                 rows={4}
                 value={other.description}

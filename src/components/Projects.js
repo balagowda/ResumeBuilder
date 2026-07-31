@@ -24,8 +24,10 @@ const Projects = ({ projects, collapsed, toggleSection, handleChange, addEntry, 
         ) : (
           projects.map((proj, index) => (
             <div key={index} className="sub-group">
-              <label htmlFor="title">Title</label>
+              {/* Per-entry ids — see the note in Experiences. */}
+              <label htmlFor={`project-title-${index}`}>Title</label>
               <input
+                id={`project-title-${index}`}
                 type="text"
                 name="title"
                 value={proj.title}
@@ -40,8 +42,9 @@ const Projects = ({ projects, collapsed, toggleSection, handleChange, addEntry, 
                   handleChange({ target: { name: 'dates', value: next } }, 'projects', index)
                 }
               />
-              <label htmlFor="description">Description</label>
+              <label htmlFor={`project-description-${index}`}>Description</label>
               <textarea
+                id={`project-description-${index}`}
                 name="description"
                 rows={4}
                 value={proj.description}

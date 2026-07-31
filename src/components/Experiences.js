@@ -55,8 +55,12 @@ const Experiences = ({
         ) : (
           experiences.map((exp, index) => (
             <div key={index} className="sub-group">
-              <label htmlFor="title">Title</label>
+              {/* Ids are per-entry: every role renders the same fields, so a
+                  bare "title" would repeat across the list and each label
+                  would point at the first one. */}
+              <label htmlFor={`experience-title-${index}`}>Title</label>
               <input
+                id={`experience-title-${index}`}
                 type="text"
                 name="title"
                 value={exp.title}
@@ -64,10 +68,12 @@ const Experiences = ({
                 placeholder="e.g., Software Engineer"
                 className="input-field"
               />
-              <label htmlFor="company">Company</label>
+              <label htmlFor={`experience-company-${index}`}>Company</label>
               <input
+                id={`experience-company-${index}`}
                 type="text"
                 name="company"
+                autoComplete="organization"
                 value={exp.company}
                 onChange={(e) => handleChange(e, 'experiences', index)}
                 placeholder="e.g., ABC Corp"
@@ -80,8 +86,9 @@ const Experiences = ({
                   handleChange({ target: { name: 'dates', value: next } }, 'experiences', index)
                 }
               />
-              <label htmlFor="description">Description</label>
+              <label htmlFor={`experience-description-${index}`}>Description</label>
               <textarea
+                id={`experience-description-${index}`}
                 name="description"
                 rows={4}
                 value={exp.description}

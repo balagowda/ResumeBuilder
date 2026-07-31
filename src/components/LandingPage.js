@@ -201,7 +201,7 @@ const LandingPage = () => {
                 <i className="fas fa-shield-alt"></i>
               </div>
               <h3>Complete Data Privacy</h3>
-              <p>Your details are saved exclusively in your browser's local storage. We do not store or send any of your private credentials to a server.</p>
+              <p>Your details never leave your own browser — by default they are erased the moment you close the tab. We do not store or send any of your private information to a server.</p>
             </div>
             <div className="feature-item">
               <div className="feature-icon-wrapper">

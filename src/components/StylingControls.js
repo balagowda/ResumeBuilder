@@ -96,9 +96,10 @@ export default function StylingControls({ formData, handleChange }) {
       </div>
       
       <div style={formGroupStyle}>
-        <label style={labelStyle}>Main Headers Font</label>
-        <select 
-          name="fontHeading" 
+        <label style={labelStyle} htmlFor="fontHeading">Main Headers Font</label>
+        <select
+          id="fontHeading"
+          name="fontHeading"
           value={formData.fontHeading || 'Arial, Helvetica, sans-serif'} 
           onChange={handleChange}
           style={selectStyle}
@@ -110,9 +111,10 @@ export default function StylingControls({ formData, handleChange }) {
       </div>
       
       <div style={formGroupStyle}>
-        <label style={labelStyle}>Sub-Headers Font</label>
-        <select 
-          name="fontSubheading" 
+        <label style={labelStyle} htmlFor="fontSubheading">Sub-Headers Font</label>
+        <select
+          id="fontSubheading"
+          name="fontSubheading"
           value={formData.fontSubheading || 'Arial, Helvetica, sans-serif'} 
           onChange={handleChange}
           style={selectStyle}
@@ -124,9 +126,10 @@ export default function StylingControls({ formData, handleChange }) {
       </div>
 
       <div style={formGroupStyle}>
-        <label style={labelStyle}>Text Font</label>
-        <select 
-          name="fontText" 
+        <label style={labelStyle} htmlFor="fontText">Text Font</label>
+        <select
+          id="fontText"
+          name="fontText"
           value={formData.fontText || 'Arial, Helvetica, sans-serif'} 
           onChange={handleChange}
           style={selectStyle}

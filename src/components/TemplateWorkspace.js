@@ -444,6 +444,59 @@ export default function TemplateWorkspace({ templateId }) {
     setDragOverSection(null);
   };
 
+  // Move a section one place without dragging. The drag handle above is HTML5
+  // drag-and-drop, which never fires on a touch screen, so on a phone these
+  // buttons are the only way to reorder at all. Entries already work this way
+  // through moveEntry.
+  const moveSection = (section, direction) => {
+    const from = sectionOrder.indexOf(section);
+    const to = from + direction;
+    if (from < 0 || to < 0 || to >= sectionOrder.length) return;
+    const next = [...sectionOrder];
+    [next[from], next[to]] = [next[to], next[from]];
+    setSectionOrder(next);
+  };
+
+  // The handle every section renders in its heading: grab-to-drag on a pointer,
+  // and the two buttons for everyone else. The heading itself toggles the
+  // section, hence stopPropagation.
+  const sectionHandle = (section) => {
+    const index = sectionOrder.indexOf(section);
+    return (
+      <span className="section-handle">
+        <span
+          className="drag-handle"
+          draggable="true"
+          onDragStart={(e) => handleDragStart(e, section)}
+          onDragEnd={handleDragEnd}
+          title="Drag to reorder"
+        >
+          <i className="fas fa-grip-vertical"></i>
+        </span>
+        <button
+          type="button"
+          className="section-move"
+          onClick={(e) => { e.stopPropagation(); moveSection(section, -1); }}
+          disabled={index <= 0}
+          title="Move section up"
+          aria-label={`Move ${section} section up`}
+        >
+          <i className="fas fa-chevron-up" aria-hidden="true"></i>
+        </button>
+        <button
+          type="button"
+          className="section-move"
+          onClick={(e) => { e.stopPropagation(); moveSection(section, 1); }}
+          disabled={index === -1 || index >= sectionOrder.length - 1}
+          title="Move section down"
+          aria-label={`Move ${section} section down`}
+        >
+          <i className="fas fa-chevron-down" aria-hidden="true"></i>
+        </button>
+      </span>
+    );
+  };
+
   const handleChange = (e, section, index = null) => {
     const { name, value, type, checked } = e.target;
     const finalValue = type === 'checkbox' ? checked : value;
@@ -963,17 +1016,7 @@ export default function TemplateWorkspace({ templateId }) {
                 collapsed={collapsedSections.summary}
                 toggleSection={() => toggleSection('summary')}
                 handleChange={handleChange}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -983,17 +1026,7 @@ export default function TemplateWorkspace({ templateId }) {
                 collapsed={collapsedSections.skills}
                 toggleSection={() => toggleSection('skills')}
                 handleChange={handleChange}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -1008,17 +1041,7 @@ export default function TemplateWorkspace({ templateId }) {
                 moveEntry={moveEntry}
                 experienceHeading={experienceHeading}
                 handleHeadingChange={setExperienceHeading}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -1031,17 +1054,7 @@ export default function TemplateWorkspace({ templateId }) {
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
                 moveEntry={moveEntry}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -1054,17 +1067,7 @@ export default function TemplateWorkspace({ templateId }) {
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
                 moveEntry={moveEntry}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -1077,17 +1080,7 @@ export default function TemplateWorkspace({ templateId }) {
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
                 moveEntry={moveEntry}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
           </div>
@@ -1223,6 +1216,24 @@ export default function TemplateWorkspace({ templateId }) {
           </p>
         </div>
       </div>
+
+      {/* Below 1100px the panels stack, so the live sheet sits underneath the
+          entire form — on a phone that is a few thousand pixels of scrolling to
+          see what an edit did, and the page-count warning is down there too.
+          This pulls the same sheet up over whatever you are editing. */}
+      {!isPreviewOpen && (
+        <button
+          type="button"
+          className="mobile-preview-fab"
+          onClick={togglePreview}
+        >
+          <i className="fas fa-file-lines" aria-hidden="true"></i>
+          <span>Preview</span>
+          {pageCount > 1 && (
+            <span className="mobile-preview-fab-pages">{pageCount} pages</span>
+          )}
+        </button>
+      )}
 
       {isPreviewOpen && (
         <div className="preview-modal" onClick={togglePreview}>
