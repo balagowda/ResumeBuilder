@@ -11,6 +11,7 @@ import Projects from './Projects';
 import Skills from './Skills';
 import Others from './Others';
 import JobMatch from './JobMatch';
+import AtsScorePanel from './AtsScorePanel';
 import StylingControls from './StylingControls';
 import ResumeVersions from './ResumeVersions';
 import StorageNotice from './StorageNotice';
@@ -105,6 +106,7 @@ export default function TemplateWorkspace({ templateId }) {
     others: true,
     jobMatch: true,
     contentReview: true,
+    atsCheck: true,
   });
 
   const resumeRef = useRef();
@@ -513,14 +515,17 @@ export default function TemplateWorkspace({ templateId }) {
     }
   };
 
-  const addEntry = (section) => {
+  // `preset` lets a caller prefill the new entry — the "Additional Sections"
+  // quick-add chips use it to create a pre-titled Certifications/Languages/…
+  // entry in one click.
+  const addEntry = (section, preset = {}) => {
     setFormData({
       ...formData,
       [section]: [...formData[section],
-        section === 'education' ? { studyTitle: '', school: '', date: '', score: '' } :
-        section === 'experiences' ? { title: '', company: '', dates: '', description: '' } :
-        section === 'projects' ? { title: '', description: '', dates: '' } :
-        { title: '', description: '' }],
+        section === 'education' ? { studyTitle: '', school: '', date: '', score: '', ...preset } :
+        section === 'experiences' ? { title: '', company: '', dates: '', description: '', ...preset } :
+        section === 'projects' ? { title: '', description: '', dates: '', ...preset } :
+        { title: '', description: '', ...preset }],
     }, { label: `add ${section}` });
   };
 
@@ -1131,6 +1136,14 @@ export default function TemplateWorkspace({ templateId }) {
             )}
           </div>
         </div>
+
+        <AtsScorePanel
+          formData={formData}
+          sectionOrder={sectionOrder}
+          experienceHeading={experienceHeading}
+          collapsed={collapsedSections.atsCheck}
+          toggleSection={() => toggleSection('atsCheck')}
+        />
 
         <ContentReview
           formData={formData}

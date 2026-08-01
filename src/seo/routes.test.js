@@ -66,7 +66,14 @@ describe('resume examples', () => {
       // in the live preview rather than failing loudly.
       expect(typeof data.lineHeight).toBe('number');
       expect(typeof data.showProfessionalTitle).toBe('boolean');
-      expect(data.others).toEqual([]);
+
+      // "Others" sections (certifications, licenses…) are optional, but every
+      // entry present must have the title/description shape the editor edits.
+      expect(Array.isArray(data.others)).toBe(true);
+      for (const entry of data.others) {
+        expect(entry.title).toBeTruthy();
+        expect(typeof entry.description).toBe('string');
+      }
     }
   });
 

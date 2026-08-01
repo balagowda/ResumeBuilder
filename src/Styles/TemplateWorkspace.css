@@ -1876,7 +1876,8 @@
    ========================================================================== */
 
 .job-match,
-.content-review {
+.content-review,
+.ats-score-panel {
   margin-bottom: 12px;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -3948,4 +3949,130 @@
   .resume-versions-actions button {
     flex: 1 1 45%;
   }
+}
+
+/* ==========================================================================
+   ADDITIONAL SECTIONS — quick-add preset chips
+   ========================================================================== */
+
+.others-presets-hint {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.others-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.others-preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.others-preset-chip i {
+  color: var(--primary-color);
+  font-size: 0.75rem;
+}
+
+.others-preset-chip:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: #f5f6ff;
+}
+
+.others-preset-chip:disabled {
+  cursor: default;
+  opacity: 0.65;
+  background: #f8fafc;
+}
+
+.others-preset-added {
+  color: #059669 !important;
+}
+
+/* ==========================================================================
+   ATS CHECK PANEL (live score in the editor)
+   ========================================================================== */
+
+.ats-score-icon {
+  color: #059669;
+  margin-right: 8px;
+}
+
+.ats-score-checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ats-score-check {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.ats-score-check > i {
+  margin-top: 2px;
+  font-size: 0.9rem;
+}
+
+.ats-score-check.state-fail > i { color: #dc2626; }
+.ats-score-check.state-warn > i { color: #d97706; }
+.ats-score-check.state-pass > i { color: #059669; }
+
+.ats-score-check.state-fail { border-left: 3px solid #dc2626; }
+.ats-score-check.state-warn { border-left: 3px solid #d97706; }
+
+.ats-score-check strong {
+  display: block;
+  font-size: 0.8rem;
+  color: #1e293b;
+}
+
+.ats-score-check p {
+  margin: 3px 0 0;
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.ats-score-checks-pass {
+  margin-top: 8px;
+}
+
+.ats-score-checks-pass .ats-score-check {
+  padding: 7px 12px;
+  background: #f8fafc;
+}
+
+.ats-score-footer {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.ats-score-footer a {
+  color: var(--primary-color);
+  font-weight: 600;
 }
