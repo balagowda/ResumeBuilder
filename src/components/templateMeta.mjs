@@ -215,6 +215,41 @@ export const TEMPLATES = [
     category: 'ATS-Optimized',
     tags: ['Banking & Consulting', 'Double Rule', 'MBA Standard'],
   },
+  {
+    id: 31,
+    name: 'Federal Standard',
+    description: 'The plain, detail-first format government and public-sector applications expect, with rules above each heading and no colour or graphics anywhere.',
+    category: 'ATS-Optimized',
+    tags: ['Government & Federal', 'Plain Text', 'Detail First'],
+  },
+  {
+    id: 32,
+    name: 'Bordered Classic',
+    description: 'A traditional document look with a hairline frame around the page and a centered header. Familiar to any recruiter who has opened a Word resume.',
+    category: 'Professional',
+    tags: ['Framed Page', 'Traditional', 'Office Standard'],
+  },
+  {
+    id: 33,
+    name: 'Profile Spotlight',
+    description: 'Opens with your summary in a tinted callout, the way management and senior applications lead with a pitch before the history starts.',
+    category: 'Professional',
+    tags: ['Summary Callout', 'Management', 'Modern Corporate'],
+  },
+  {
+    id: 34,
+    name: 'Split Header Modern',
+    description: 'Name on the left, contact details stacked on the right — the modern chronological header, over a clean single-column body with quiet rules.',
+    category: 'ATS-Optimized',
+    tags: ['Split Header', 'Chronological', 'Single Column'],
+  },
+  {
+    id: 35,
+    name: 'Section Rail',
+    description: 'Each section sits beside a slim vertical rule, giving the page structure without boxes, bands or a sidebar for a parser to trip over.',
+    category: 'Professional',
+    tags: ['Vertical Rule', 'Structured', 'Quiet Accent'],
+  },
 ];
 
 /** Which templates use a two-column page layout (everything else is single

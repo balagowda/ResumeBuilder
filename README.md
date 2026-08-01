@@ -2,11 +2,11 @@
 
 **Live site:** [https://hatchresume.com](https://hatchresume.com)
 
-A 100% free, privacy-first resume builder. Pick one of 30+ professional, ATS-friendly templates, fill in your details, and download your resume as a PDF — no sign-up, no watermark, and your data never leaves the browser.
+A 100% free, privacy-first resume builder. Pick one of 35+ professional, ATS-friendly templates, fill in your details, and download your resume as a PDF — no sign-up, no watermark, and your data never leaves the browser.
 
 ## Features
 
-- **30+ free professional templates** — browse them at [/templates](https://hatchresume.com/templates/), one page per design
+- **35+ free professional templates** — browse them at [/templates](https://hatchresume.com/templates/), one page per design
 - **ATS-friendly layouts** that parse cleanly in applicant tracking systems
 - **Standalone ATS checker** at [/ats-resume-checker](https://hatchresume.com/ats-resume-checker/) — paste any resume for a structural and writing score, no account
 - **Resume examples by role** at [/examples](https://hatchresume.com/examples/) — complete resumes that load straight into the editor
@@ -73,7 +73,7 @@ crawlers need help seeing it:
   reads and what a visitor sees cannot drift apart. Adding a template or an
   example gives you a page, a sitemap entry and internal links from one edit.
 - **The landing page is small.** Routes below it are `React.lazy`, so the first
-  visit no longer downloads all 30 template renderers plus jsPDF and
+  visit no longer downloads all 35 template renderers plus jsPDF and
   html2canvas: the main bundle is ~89 kB gzipped rather than ~282 kB.
 - **The editor routes get a shell too.** `/template<id>` is pre-rendered as a
   `noindex, follow` document so the "use this template" links resolve to a real

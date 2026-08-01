@@ -708,10 +708,14 @@ const renderSingleColumn = (ctx, opts) => {
           </div>
         </div>
       </div>
+      {/* Each block carries its own `sc-<section>` class alongside the shared
+          one, so a variant can style a single section — a highlighted profile
+          box, say — without the renderer needing to know which design wants
+          it. */}
       {sectionOrder.map((section) => {
         if (section === 'summary' && formData.summary) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.summary || 'Summary'}</h3>
               {formatTextToList(formData.summary)}
             </div>
@@ -719,7 +723,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'skills' && formData.skills) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.skills || 'Skills'}</h3>
               {renderSkills()}
             </div>
@@ -727,7 +731,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{experienceHeading}</h3>
               {formData.experiences.map((exp, idx) => exp.title && (
                 <div key={idx} className="sc-entry">
@@ -744,7 +748,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.projects || 'Projects'}</h3>
               {formData.projects.map((proj, idx) => proj.title && (
                 <div key={idx} className="sc-entry">
@@ -760,7 +764,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.education || 'Education'}</h3>
               {formData.education.map((edu, idx) => edu.studyTitle && (
                 <div key={idx} className="sc-entry">
@@ -776,7 +780,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.others || 'Additional'}</h3>
               {formData.others.map((oth, idx) => oth.title && (
                 <div key={idx} className="sc-entry">
@@ -1077,6 +1081,45 @@ const SINGLE_COLUMN_VARIANTS = {
     contactSep: '|',
     skillsAs: 'line',
     headings: { summary: 'Summary', skills: 'Skills & Certifications' },
+  },
+  31: {
+    className: 'tmpl-federal',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: {
+      summary: 'Professional Summary',
+      skills: 'Skills & Competencies',
+      others: 'Additional Information',
+    },
+  },
+  32: {
+    className: 'tmpl-bordered',
+    showUrls: false,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
+  33: {
+    className: 'tmpl-spotlight',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'Executive Summary', skills: 'Core Competencies' },
+  },
+  34: {
+    className: 'tmpl-splithead',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Summary', skills: 'Key Skills' },
+  },
+  35: {
+    className: 'tmpl-rail',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'Profile' },
   },
 };
 

@@ -3292,6 +3292,201 @@
 }
 
 /* ==========================================================================
+   TEMPLATES 31-35: MORE SINGLE-COLUMN INDUSTRY STANDARDS
+   ========================================================================== */
+
+/* --- Template 31: Federal Standard ---------------------------------------- */
+
+.tmpl-federal {
+  color: #1f2937;
+}
+
+.tmpl-federal .sc-header {
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+}
+
+.tmpl-federal .sc-header h1 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1.3rem;
+}
+
+/* The rule sits above the heading rather than under it — the block-report
+   look of a government application, and it keeps every section visibly
+   separate without shading or colour, neither of which survives the plain
+   text conversion these applications are read through. */
+.tmpl-federal .sc-section {
+  border-top: 1px solid #111827;
+  padding-top: 5px;
+  margin-bottom: 12px;
+}
+
+.tmpl-federal .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 0.72rem;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.tmpl-federal .sc-entry {
+  margin-bottom: 9px;
+}
+
+/* --- Template 32: Bordered Classic ---------------------------------------- */
+
+/* The frame is drawn on the content itself, so a resume that runs to two
+   pages keeps its sides framed all the way down rather than boxing page one
+   and leaving page two bare. */
+.tmpl-bordered {
+  border: 1px solid #94a3b8;
+  padding: 15px 16px;
+}
+
+.tmpl-bordered .sc-header {
+  text-align: center;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 9px;
+  margin-bottom: 12px;
+}
+
+.tmpl-bordered .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-bordered .sc-header h1 {
+  letter-spacing: 0.5px;
+}
+
+.tmpl-bordered .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.71rem;
+  color: #1e293b;
+}
+
+/* --- Template 33: Profile Spotlight --------------------------------------- */
+
+.tmpl-spotlight .sc-header {
+  margin-bottom: 13px;
+}
+
+.tmpl-spotlight .sc-header h1 {
+  color: #1e1b4b;
+}
+
+/* Only the summary is boxed. Anything more and the page turns into a stack
+   of panels, which is the look this template exists to avoid. */
+.tmpl-spotlight .sc-summary {
+  background: #f5f5ff;
+  border-left: 3px solid #4338ca;
+  border-radius: 0 4px 4px 0;
+  padding: 8px 11px;
+}
+
+.tmpl-spotlight .sc-summary h3 {
+  margin-bottom: 3px;
+}
+
+.tmpl-spotlight .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 0.68rem;
+  color: #4338ca;
+}
+
+.tmpl-spotlight .sc-skill-pill {
+  background: #eeeeff;
+  color: #3730a3;
+}
+
+/* --- Template 34: Split Header Modern ------------------------------------- */
+
+/* Name and title in the left column, contact stacked flush right beside it. */
+.tmpl-splithead .sc-header-main {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 20px;
+  align-items: end;
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 8px;
+  margin-bottom: 13px;
+}
+
+.tmpl-splithead .sc-header-main h1 {
+  grid-column: 1;
+}
+
+.tmpl-splithead .sc-prof-title {
+  grid-column: 1;
+  margin-bottom: 0;
+}
+
+.tmpl-splithead .sc-contact {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: right;
+}
+
+/* The separators only make sense on one line; the stack has the line breaks
+   doing that job. */
+.tmpl-splithead .sc-sep {
+  display: none;
+}
+
+.tmpl-splithead .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 0.69rem;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 3px;
+}
+
+/* --- Template 35: Section Rail -------------------------------------------- */
+
+/* 3px border + 10px padding lines the name up with the section text, which
+   sits behind a 2px rail and 11px of padding. */
+.tmpl-rail .sc-header {
+  border-left: 3px solid #475569;
+  padding-left: 10px;
+  margin-bottom: 14px;
+}
+
+.tmpl-rail .sc-section {
+  border-left: 2px solid #dbe3ec;
+  padding-left: 11px;
+}
+
+.tmpl-rail .sc-section h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #334155;
+  position: relative;
+}
+
+/* A square on the rail marks where each section starts. */
+.tmpl-rail .sc-section h3::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 3px;
+  width: 6px;
+  height: 6px;
+  background: #475569;
+}
+
+.tmpl-rail .sc-skill-pill {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+/* ==========================================================================
    ACCENT COLOR SYSTEM
    When the user picks an accent, override each template's signature colors.
    ========================================================================== */
@@ -3325,14 +3520,23 @@
 .resume[data-accent='on'] .tmpl-teal .sc-header h1,
 .resume[data-accent='on'] .tmpl-coral .sc-header h1,
 .resume[data-accent='on'] .tmpl-clinical .sc-header h1,
+.resume[data-accent='on'] .tmpl-spotlight .sc-header h1,
 .resume[data-accent='on'] .tmpl-deedy .rb-header h1 {
   color: var(--accent) !important;
 }
 
 .resume[data-accent='on'] .tmpl-accentbar .sc-header h1::after,
 .resume[data-accent='on'] .tmpl-timeline .sc-entry::before,
-.resume[data-accent='on'] .tmpl-matrix .sc-section h3::before {
+.resume[data-accent='on'] .tmpl-matrix .sc-section h3::before,
+.resume[data-accent='on'] .tmpl-rail .sc-section h3::before {
   background: var(--accent) !important;
+}
+
+/* The rails and the summary callout carry an accent edge of their own; the
+   generic h3 rule above cannot reach either. */
+.resume[data-accent='on'] .tmpl-rail .sc-header,
+.resume[data-accent='on'] .tmpl-spotlight .sc-summary {
+  border-left-color: var(--accent) !important;
 }
 
 .resume[data-accent='on'] .sc-skill-pill,
