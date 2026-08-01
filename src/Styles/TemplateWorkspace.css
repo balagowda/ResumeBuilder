@@ -788,12 +788,41 @@
   );
 }
 
-.resume:has(.tmpl-rightbar:not(.tmpl-deedy)) {
+.resume:has(.tmpl-rightbar:not(.tmpl-deedy):not(.tmpl-leftbar):not(.tmpl-banner):not(.tmpl-bannerside)) {
   background-image: linear-gradient(
     to right,
     var(--white) 0 386.4px,
     #e2e8f0 386.4px 387.4px,
     #f1f5f9 387.4px
+  );
+}
+
+/* Same trick for the mixed-layout set: a 33% dark rail on the left (41), a
+   white right rail behind a hairline (42), and a 32% light rail on the left
+   under the banner (45). */
+.resume:has(.tmpl-leftbar) {
+  background-image: linear-gradient(
+    to right,
+    var(--accent, #2b3542) 0 184.8px,
+    var(--white) 184.8px
+  );
+}
+
+.resume:has(.tmpl-banner) {
+  background-image: linear-gradient(
+    to right,
+    var(--white) 0 386.4px,
+    #e2e8f0 386.4px 387.4px,
+    var(--white) 387.4px
+  );
+}
+
+.resume:has(.tmpl-bannerside) {
+  background-image: linear-gradient(
+    to right,
+    #f4f6f9 0 179.2px,
+    #e2e8f0 179.2px 180.2px,
+    var(--white) 180.2px
   );
 }
 
@@ -3684,6 +3713,222 @@
 }
 
 /* ==========================================================================
+   TEMPLATES 41-45: MIXED LAYOUTS
+   Two of the five are two-column and one puts a banner above the columns,
+   so this block also carries the shared banner rules.
+   ========================================================================== */
+
+/* --- Template 41: Slate Sidebar (dark rail on the left) ------------------- */
+
+.tmpl-rightbar.tmpl-leftbar .rb-side {
+  width: 33%;
+  background: #2b3542;
+  border-left: none;
+  border-right: none;
+  padding: 32px 16px 32px 22px;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-main {
+  padding: 32px 32px 32px 20px;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-side-section h4 {
+  color: #ffffff;
+  border-bottom-color: #4a5765;
+  letter-spacing: 1.2px;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-side-section ul li,
+.tmpl-rightbar.tmpl-leftbar .rb-side-edu .edu-title,
+.tmpl-rightbar.tmpl-leftbar .rb-side-edu .edu-school,
+.tmpl-rightbar.tmpl-leftbar .rb-side-edu .edu-date,
+.tmpl-rightbar.tmpl-leftbar .rb-side-other .oth-title,
+.tmpl-rightbar.tmpl-leftbar .rb-side-other p,
+.tmpl-rightbar.tmpl-leftbar .rb-side-other li {
+  color: #dbe1e8;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-side-edu .edu-title,
+.tmpl-rightbar.tmpl-leftbar .rb-side-other .oth-title {
+  color: #ffffff;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-skill-tag {
+  background: #3d4957;
+  color: #eef2f6;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-section h3 {
+  color: #2b3542;
+  border-bottom-color: #2b3542;
+}
+
+/* --- Templates 42 & 45: banner above the columns -------------------------- */
+
+/* The banner is full-bleed, so the container below it drops only its side and
+   bottom offsets — the -32px top the other two-column templates use would
+   pull the columns back over the banner. */
+.tmpl-rightbar .rb-banner + .rb-container {
+  margin: 0 -32px -32px;
+}
+
+.tmpl-rightbar .rb-banner {
+  margin: -32px -32px 0;
+  padding: 22px 32px 16px;
+}
+
+.tmpl-rightbar .rb-banner h1 {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+}
+
+.tmpl-rightbar .rb-banner .rb-prof-title {
+  margin: 2px 0 7px;
+}
+
+.tmpl-rightbar .rb-banner-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 14px;
+  font-size: 0.6rem;
+}
+
+/* --- Template 42: Banner Two-Column (light banner, right rail) ------------ */
+
+.tmpl-banner .rb-banner {
+  background: #f1f5f9;
+  border-bottom: 2px solid #1e293b;
+}
+
+.tmpl-banner .rb-banner-contact {
+  color: #475569;
+}
+
+.tmpl-banner .rb-main {
+  padding-top: 20px;
+}
+
+.tmpl-banner .rb-side {
+  padding-top: 20px;
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+}
+
+/* --- Template 45: Banner Sidebar Executive (dark banner, light left rail) - */
+
+.tmpl-bannerside .rb-banner {
+  background: #1f2933;
+}
+
+.tmpl-bannerside .rb-banner h1 {
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.tmpl-bannerside .rb-banner .rb-prof-title {
+  color: #b9c3ce;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-size: 0.64rem;
+}
+
+.tmpl-bannerside .rb-banner-contact,
+.tmpl-bannerside .rb-banner-contact a {
+  color: #e3e8ee;
+}
+
+.tmpl-bannerside .rb-side {
+  width: 32%;
+  background: #f4f6f9;
+  border-right: 1px solid #e2e8f0;
+  border-left: none;
+  padding: 20px 16px 32px 22px;
+}
+
+.tmpl-bannerside .rb-main {
+  padding: 20px 32px 32px 20px;
+}
+
+.tmpl-bannerside .rb-section h3,
+.tmpl-bannerside .rb-side-section h4 {
+  color: #1f2933;
+  border-bottom-color: #c7cfd8;
+}
+
+/* --- Template 43: Combination Hybrid -------------------------------------- */
+
+.tmpl-combo .sc-header {
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+/* The competencies run full-bleed across the sheet — the visual claim of the
+   combination format, that what you can do carries as much weight as where
+   you did it. The band follows the section wherever the user drags it. */
+.tmpl-combo .sc-skills {
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  margin: 0 -32px 12px;
+  padding: 9px 32px 10px;
+}
+
+.tmpl-combo .sc-skills h3 {
+  margin-bottom: 4px;
+}
+
+.tmpl-combo .sc-skill-grid {
+  font-size: 0.62rem;
+}
+
+.tmpl-combo .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.71rem;
+  color: #1e293b;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 2px;
+}
+
+/* --- Template 44: Contact Grid Classic ------------------------------------ */
+
+.tmpl-cgrid .sc-header {
+  text-align: center;
+  margin-bottom: 13px;
+}
+
+.tmpl-cgrid .sc-header h1 {
+  font-size: 1.4rem;
+}
+
+/* Contact details in a bordered grid rather than one long line: easier to
+   read, and still one plain-text item per cell. */
+.tmpl-cgrid .sc-contact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px 18px;
+  justify-items: center;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.tmpl-cgrid .sc-sep {
+  display: none;
+}
+
+.tmpl-cgrid .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-size: 0.72rem;
+  color: #1e293b;
+  border-bottom: 1px solid #94a3b8;
+  padding-bottom: 2px;
+}
+
+/* ==========================================================================
    ACCENT COLOR SYSTEM
    When the user picks an accent, override each template's signature colors.
    ========================================================================== */
@@ -3704,12 +3949,17 @@
 .resume[data-accent='on'] .tmpl-tech .tech-header-band,
 .resume[data-accent='on'] .tmpl-creative .creative-sidebar,
 .resume[data-accent='on'] .tmpl-charcoal .sc-header h1,
+.resume[data-accent='on'] .tmpl-leftbar .rb-side,
+.resume[data-accent='on'] .tmpl-bannerside .rb-banner,
 .resume[data-accent='on'] .tmpl-mono .sc-monogram {
   background-color: var(--accent) !important;
 }
 
+/* Headings sitting on a filled panel keep their reversed-out white; the
+   generic accent-on-h3 rule above would tint them into the panel. */
 .resume[data-accent='on'] .tmpl-corpblue .sc-header h3,
-.resume[data-accent='on'] .tmpl-creative .creative-sidebar h4 {
+.resume[data-accent='on'] .tmpl-creative .creative-sidebar h4,
+.resume[data-accent='on'] .tmpl-leftbar .rb-side-section h4 {
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.5) !important;
 }

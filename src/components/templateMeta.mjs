@@ -285,12 +285,47 @@ export const TEMPLATES = [
     category: 'Professional',
     tags: ['Name Block', 'Mid-Career', 'Contemporary'],
   },
+  {
+    id: 41,
+    name: 'Slate Sidebar',
+    description: 'The layout most modern resume builders default to: a dark slate column on the left for contact, skills and education, with your history filling the rest of the page.',
+    category: 'Professional',
+    tags: ['Dark Sidebar', '2-Column', 'Modern Standard'],
+  },
+  {
+    id: 42,
+    name: 'Banner Two-Column',
+    description: 'A full-width header across the top with your name and contact details, then two columns beneath — the standard corporate layout when one page has to hold a lot.',
+    category: 'Professional',
+    tags: ['Header Banner', '2-Column', 'Corporate'],
+  },
+  {
+    id: 43,
+    name: 'Combination Hybrid',
+    description: 'The combination format: a full-width competencies band under the header, then a dated chronological history. Skills lead, but nothing a tracking system needs is missing.',
+    category: 'ATS-Optimized',
+    tags: ['Hybrid Format', 'Skills Band', 'Single Column'],
+  },
+  {
+    id: 44,
+    name: 'Contact Grid Classic',
+    description: 'Contact details set in a bordered grid under a centered name, over a plain single-column body — the tidy office-document look, with every detail still plain text.',
+    category: 'ATS-Optimized',
+    tags: ['Contact Grid', 'Office Standard', 'Single Column'],
+  },
+  {
+    id: 45,
+    name: 'Banner Sidebar Executive',
+    description: 'A dark banner across the top over a light left rail: the senior-hire layout that leads with your name and keeps skills and education beside the history.',
+    category: 'Professional',
+    tags: ['Dark Banner', 'Left Rail', 'Senior Roles'],
+  },
 ];
 
 /** Which templates use a two-column page layout (everything else is single
  *  column). Single column is what ATS parsers read most reliably, so this
  *  drives both the gallery filter and the copy on each template page. */
-export const TWO_COLUMN_IDS = [2, 4, 13, 21];
+export const TWO_COLUMN_IDS = [2, 4, 13, 21, 41, 42, 45];
 
 /** Stable, human-readable URL segment for a template. Derived from the name,
  *  so renaming a template changes its URL — update the redirect story before

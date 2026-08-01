@@ -797,18 +797,46 @@ const renderSingleColumn = (ctx, opts) => {
   );
 };
 
-/* --- Templates 13 & 21: two-column layouts (light rail right / Deedy left) */
+/* --- Two-column layouts: light rail right, Deedy left, or under a banner --- */
 
-const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
+/**
+ * @param banner  Put the name, title and contact in a full-width block above
+ *                both columns instead of at the top of the main one. The
+ *                sidebar then drops its own Contact list, since the details
+ *                are already in the banner — printing them twice is the kind
+ *                of duplication that confuses a parser as much as a reader.
+ */
+const renderTwoColumn = (ctx, { className = '', sideFirst = false, banner = false } = {}) => {
   const { formData, sectionOrder, experienceHeading, formatTextToList } = ctx;
   const profTitle = getProfessionalTitle(formData);
 
+  const bannerBlock = banner ? (
+    <div className="rb-banner" key="banner">
+      <h1>{formData.fullName || 'Your Name'}</h1>
+      {profTitle && <p className="rb-prof-title">{profTitle}</p>}
+      <div className="rb-banner-contact">
+        {formData.mail && <span>{formData.mail}</span>}
+        {formData.mobile && <span>{formData.mobile}</span>}
+        {[['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['other', 'Portfolio']].map(
+          ([field, label]) =>
+            formData[field] && (
+              <a key={field} href={formData[field]} target="_blank" rel="noopener noreferrer">
+                {label}
+              </a>
+            )
+        )}
+      </div>
+    </div>
+  ) : null;
+
   const mainCol = (
         <div className="rb-main" key="main">
+          {!banner && (
           <div className="rb-header">
             <h1>{formData.fullName || 'Your Name'}</h1>
             {profTitle && <p className="rb-prof-title">{profTitle}</p>}
           </div>
+          )}
           {sectionOrder.map((section) => {
             if (section === 'summary' && formData.summary) {
               return (
@@ -851,6 +879,7 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
 
   const sideCol = (
         <div className="rb-side" key="side">
+          {!banner && (
           <div className="rb-side-section">
             <h4>Contact</h4>
             <ul>
@@ -861,6 +890,7 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
               {formData.other && <li><a href={formData.other} target="_blank" rel="noopener noreferrer">Portfolio</a></li>}
             </ul>
           </div>
+          )}
           {sectionOrder.map((section) => {
             if (section === 'skills' && formData.skills) {
               return (
@@ -908,6 +938,7 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
 
   return (
     <div className={`resume-content tmpl-rightbar ${className}`}>
+      {bannerBlock}
       <div className="rb-container">
         {sideFirst ? [sideCol, mainCol] : [mainCol, sideCol]}
       </div>
@@ -1156,6 +1187,20 @@ const SINGLE_COLUMN_VARIANTS = {
     skillsAs: 'pills',
     headings: { summary: 'Profile' },
   },
+  43: {
+    className: 'tmpl-combo',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'columns',
+    headings: { summary: 'Professional Summary', skills: 'Core Competencies' },
+  },
+  44: {
+    className: 'tmpl-cgrid',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
 };
 
 export const renderResumeTemplate = (templateId, ctx) => {
@@ -1167,6 +1212,9 @@ export const renderResumeTemplate = (templateId, ctx) => {
     case 5: return renderTemplate5(ctx);
     case 13: return renderTwoColumn(ctx);
     case 21: return renderTwoColumn(ctx, { className: 'tmpl-deedy', sideFirst: true });
+    case 41: return renderTwoColumn(ctx, { className: 'tmpl-leftbar', sideFirst: true });
+    case 42: return renderTwoColumn(ctx, { className: 'tmpl-banner', banner: true });
+    case 45: return renderTwoColumn(ctx, { className: 'tmpl-bannerside', sideFirst: true, banner: true });
     default: {
       const opts = SINGLE_COLUMN_VARIANTS[templateId];
       return opts ? renderSingleColumn(ctx, opts) : renderTemplate1(ctx);
