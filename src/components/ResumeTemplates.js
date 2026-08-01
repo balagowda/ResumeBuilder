@@ -805,8 +805,14 @@ const renderSingleColumn = (ctx, opts) => {
  *                sidebar then drops its own Contact list, since the details
  *                are already in the banner — printing them twice is the kind
  *                of duplication that confuses a parser as much as a reader.
+ * @param profileBand  Pull the summary out of the main column and run it the
+ *                full width of the sheet, under the banner and above the
+ *                columns.
  */
-const renderTwoColumn = (ctx, { className = '', sideFirst = false, banner = false } = {}) => {
+const renderTwoColumn = (
+  ctx,
+  { className = '', sideFirst = false, banner = false, profileBand = false } = {}
+) => {
   const { formData, sectionOrder, experienceHeading, formatTextToList } = ctx;
   const profTitle = getProfessionalTitle(formData);
 
@@ -829,6 +835,13 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false, banner = fals
     </div>
   ) : null;
 
+  const profileBlock = profileBand && formData.summary ? (
+    <div className="rb-profile" key="profile">
+      <h3>Profile</h3>
+      {formatTextToList(formData.summary)}
+    </div>
+  ) : null;
+
   const mainCol = (
         <div className="rb-main" key="main">
           {!banner && (
@@ -838,7 +851,7 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false, banner = fals
           </div>
           )}
           {sectionOrder.map((section) => {
-            if (section === 'summary' && formData.summary) {
+            if (section === 'summary' && formData.summary && !profileBand) {
               return (
                 <div key={section} className="rb-section">
                   <h3>Profile</h3>
@@ -939,6 +952,7 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false, banner = fals
   return (
     <div className={`resume-content tmpl-rightbar ${className}`}>
       {bannerBlock}
+      {profileBlock}
       <div className="rb-container">
         {sideFirst ? [sideCol, mainCol] : [mainCol, sideCol]}
       </div>
@@ -1201,6 +1215,20 @@ const SINGLE_COLUMN_VARIANTS = {
     skillsAs: 'line',
     headings: { summary: 'Professional Summary' },
   },
+  47: {
+    className: 'tmpl-stripe',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'Profile' },
+  },
+  48: {
+    className: 'tmpl-centrules',
+    showUrls: true,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: { summary: 'Summary' },
+  },
 };
 
 export const renderResumeTemplate = (templateId, ctx) => {
@@ -1215,6 +1243,9 @@ export const renderResumeTemplate = (templateId, ctx) => {
     case 41: return renderTwoColumn(ctx, { className: 'tmpl-leftbar', sideFirst: true });
     case 42: return renderTwoColumn(ctx, { className: 'tmpl-banner', banner: true });
     case 45: return renderTwoColumn(ctx, { className: 'tmpl-bannerside', sideFirst: true, banner: true });
+    case 46: return renderTwoColumn(ctx, { className: 'tmpl-profileband', banner: true, profileBand: true });
+    case 49: return renderTwoColumn(ctx, { className: 'tmpl-tlside' });
+    case 50: return renderTwoColumn(ctx, { className: 'tmpl-serifcol' });
     default: {
       const opts = SINGLE_COLUMN_VARIANTS[templateId];
       return opts ? renderSingleColumn(ctx, opts) : renderTemplate1(ctx);

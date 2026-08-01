@@ -495,7 +495,7 @@ const LandingPage = () => {
           <h2 className="section-title">What is <span className="gradient-text">HatchResume</span>?</h2>
           <p className="about-strip-text">
             HatchResume is a free online resume builder at hatchresume.com. Pick
-            one of 45+ professional, ATS-friendly templates, fill in your
+            one of 50+ professional, ATS-friendly templates, fill in your
             details, and download a print-ready PDF — with no account, no
             watermark, and no payment at the download step. Everything runs in
             your browser, so your work history is never uploaded to a server.

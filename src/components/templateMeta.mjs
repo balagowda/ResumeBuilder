@@ -320,12 +320,47 @@ export const TEMPLATES = [
     category: 'Professional',
     tags: ['Dark Banner', 'Left Rail', 'Senior Roles'],
   },
+  {
+    id: 46,
+    name: 'Profile Band Two-Column',
+    description: 'Header, then your profile running the full width of the page, then two columns — the structure that gives a summary room to be read before the history starts.',
+    category: 'Professional',
+    tags: ['Profile Band', '2-Column', 'Modern Corporate'],
+  },
+  {
+    id: 47,
+    name: 'Edge Stripe Modern',
+    description: 'A single colour stripe down the edge of the page and nothing else — a designed look that stays strictly single-column, so nothing interferes with parsing.',
+    category: 'Creative',
+    tags: ['Edge Stripe', 'Single Column', 'Colour Accent'],
+  },
+  {
+    id: 48,
+    name: 'Centered Rules Classic',
+    description: 'Section headings centered between two hairline rules, body text left where it belongs. A symmetrical, formal layout with no colour and no graphics.',
+    category: 'ATS-Optimized',
+    tags: ['Centered Headings', 'Formal', '100% ATS'],
+  },
+  {
+    id: 49,
+    name: 'Timeline Sidebar',
+    description: 'Your career drawn as a timeline in the main column with skills, education and contact in a light rail beside it — progression and detail on one page.',
+    category: 'Professional',
+    tags: ['Timeline', '2-Column', 'Career Path'],
+  },
+  {
+    id: 50,
+    name: 'Serif Two-Column',
+    description: 'Georgia set against a light rail: the two-column layout in a serif voice, for academic, legal and senior roles where a sans-serif page reads too casual.',
+    category: 'Professional',
+    tags: ['Serif', '2-Column', 'Academic & Legal'],
+  },
 ];
 
 /** Which templates use a two-column page layout (everything else is single
  *  column). Single column is what ATS parsers read most reliably, so this
  *  drives both the gallery filter and the copy on each template page. */
-export const TWO_COLUMN_IDS = [2, 4, 13, 21, 41, 42, 45];
+export const TWO_COLUMN_IDS = [2, 4, 13, 21, 41, 42, 45, 46, 49, 50];
 
 /** Stable, human-readable URL segment for a template. Derived from the name,
  *  so renaming a template changes its URL — update the redirect story before

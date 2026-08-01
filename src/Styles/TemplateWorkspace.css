@@ -826,6 +826,16 @@
   );
 }
 
+/* Template 47 is single column: the same technique, but the band is a 16px
+   stripe inside the sheet's left margin rather than a column. */
+.resume:has(.tmpl-stripe) {
+  background-image: linear-gradient(
+    to right,
+    var(--accent, #4338ca) 0 16px,
+    var(--white) 16px
+  );
+}
+
 .resume:has(.tmpl-deedy) {
   background-image: linear-gradient(
     to right,
@@ -3767,8 +3777,11 @@
 
 /* The banner is full-bleed, so the container below it drops only its side and
    bottom offsets — the -32px top the other two-column templates use would
-   pull the columns back over the banner. */
-.tmpl-rightbar .rb-banner + .rb-container {
+   pull the columns back over the banner. Keyed on the template rather than on
+   adjacency, since a profile band can sit between the two. */
+.tmpl-banner .rb-container,
+.tmpl-bannerside .rb-container,
+.tmpl-profileband .rb-container {
   margin: 0 -32px -32px;
 }
 
@@ -3926,6 +3939,197 @@
   color: #1e293b;
   border-bottom: 1px solid #94a3b8;
   padding-bottom: 2px;
+}
+
+/* ==========================================================================
+   TEMPLATES 46-50: MIXED LAYOUTS, SECOND SET
+   ========================================================================== */
+
+/* --- Template 46: Profile Band Two-Column --------------------------------- */
+
+.tmpl-profileband .rb-banner {
+  background: #ffffff;
+  border-bottom: 3px solid #1e293b;
+  padding-bottom: 12px;
+}
+
+.tmpl-profileband .rb-banner-contact {
+  color: #475569;
+}
+
+/* The summary spans both columns, so it is read as a statement about the
+   whole page rather than as the first item in the left one. */
+.tmpl-profileband .rb-profile {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  margin: 0 -32px;
+  padding: 10px 32px 11px;
+}
+
+.tmpl-profileband .rb-profile h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #1e293b;
+  margin: 0 0 3px;
+}
+
+.tmpl-profileband .rb-main,
+.tmpl-profileband .rb-side {
+  padding-top: 18px;
+}
+
+/* --- Template 47: Edge Stripe Modern -------------------------------------- */
+
+/* The stripe is painted as the sheet background (see the gradient block near
+   the top of this file) so it runs to the bottom of every page; it lives in
+   the sheet's own 32px margin, and the content only steps in far enough to
+   breathe. */
+.tmpl-stripe {
+  padding-left: 8px;
+}
+
+.tmpl-stripe .sc-header {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 9px;
+  margin-bottom: 13px;
+}
+
+.tmpl-stripe .sc-header h1 {
+  color: #312e81;
+}
+
+.tmpl-stripe .sc-prof-title {
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 0.62rem;
+  color: #4338ca;
+  font-weight: 600;
+}
+
+.tmpl-stripe .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 0.7rem;
+  color: #312e81;
+}
+
+.tmpl-stripe .sc-skill-pill {
+  background: #eef0ff;
+  color: #3730a3;
+}
+
+/* --- Template 48: Centered Rules Classic ---------------------------------- */
+
+.tmpl-centrules .sc-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.tmpl-centrules .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-centrules .sc-header h1 {
+  letter-spacing: 1px;
+}
+
+/* Heading centered between two rules. Only the heading is centered — running
+   the body text down the middle as well is what makes a resume hard to skim. */
+.tmpl-centrules .sc-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  font-size: 0.68rem;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.tmpl-centrules .sc-section h3::before,
+.tmpl-centrules .sc-section h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #cbd5e1;
+}
+
+/* --- Template 49: Timeline Sidebar ---------------------------------------- */
+
+.tmpl-tlside .rb-section h3 {
+  color: #334155;
+  border-bottom-color: #cbd5e1;
+}
+
+.tmpl-tlside .rb-entry {
+  position: relative;
+  padding-left: 15px;
+}
+
+.tmpl-tlside .rb-entry::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #475569;
+}
+
+/* The connector stops at the last entry of each section rather than running
+   on into the next heading. */
+.tmpl-tlside .rb-entry::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 13px;
+  bottom: -5px;
+  width: 1px;
+  background: #cbd5e1;
+}
+
+.tmpl-tlside .rb-entry:last-child::after {
+  display: none;
+}
+
+/* --- Template 50: Serif Two-Column ---------------------------------------- */
+
+.tmpl-serifcol,
+.tmpl-serifcol .rb-header h1,
+.tmpl-serifcol .rb-section h3,
+.tmpl-serifcol .rb-side-section h4,
+.tmpl-serifcol .entry-header {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.tmpl-serifcol {
+  color: #2b2f33;
+}
+
+.tmpl-serifcol .rb-header h1 {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.tmpl-serifcol .rb-prof-title {
+  font-style: italic;
+}
+
+.tmpl-serifcol .rb-section h3,
+.tmpl-serifcol .rb-side-section h4 {
+  text-transform: none;
+  letter-spacing: 0.2px;
+  color: #2b2f33;
+  border-bottom-color: #b8bfc6;
+}
+
+.tmpl-serifcol .rb-skill-tag {
+  background: #eceef1;
+  color: #2b2f33;
+  border-radius: 3px;
+  font-family: inherit;
 }
 
 /* ==========================================================================

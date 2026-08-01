@@ -18,10 +18,10 @@ export const CONTENT_PAGES = [
     navLabel: 'About',
     title: 'About HatchResume — The Free, Private Resume Builder',
     description:
-      'HatchResume is a free online resume builder with 45+ ATS-friendly templates. No sign-up, no watermark, no subscription — and your resume never leaves your browser.',
+      'HatchResume is a free online resume builder with 50+ ATS-friendly templates. No sign-up, no watermark, no subscription — and your resume never leaves your browser.',
     h1: 'About HatchResume',
     intro:
-      'HatchResume (hatchresume.com) is a free online resume builder. You pick one of 45+ professional, ATS-friendly templates, type your details into the editor, and download a print-ready PDF — with no account, no watermark, and no payment step at the end.',
+      'HatchResume (hatchresume.com) is a free online resume builder. You pick one of 50+ professional, ATS-friendly templates, type your details into the editor, and download a print-ready PDF — with no account, no watermark, and no payment step at the end.',
     sections: [
       {
         h2: 'What HatchResume is',
@@ -29,7 +29,7 @@ export const CONTENT_PAGES = [
           'HatchResume is a single-page web app that runs entirely in your browser. There is no server holding your work history, no database of users, and nothing to cancel later. Open the site, build the resume, download the PDF, close the tab.',
         ],
         bullets: [
-          '45+ free professional resume templates, including single-column ATS layouts',
+          '50+ free professional resume templates, including single-column ATS layouts',
           'A job-description matcher that shows which keywords from a posting your resume is missing',
           'A writing review that flags weak openers, passive voice, unquantified claims and repeated verbs',
           'Two PDF exports: a text-based one applicant tracking systems can read, and a pixel-exact image one',
@@ -75,7 +75,7 @@ export const CONTENT_PAGES = [
     faqs: [
       {
         q: 'What is HatchResume?',
-        a: 'HatchResume is a free online resume builder at hatchresume.com. It gives you 45+ professional, ATS-friendly templates, an editor for your details, and a one-click PDF download — with no account required.',
+        a: 'HatchResume is a free online resume builder at hatchresume.com. It gives you 50+ professional, ATS-friendly templates, an editor for your details, and a one-click PDF download — with no account required.',
       },
       {
         q: 'Is HatchResume really free?',
@@ -123,7 +123,7 @@ export const CONTENT_PAGES = [
       },
       {
         q: 'Can I switch templates without losing what I typed?',
-        a: 'Yes. Your content is kept separately from the design, so you can move between any of the 45+ templates at any time and your details carry over.',
+        a: 'Yes. Your content is kept separately from the design, so you can move between any of the 50+ templates at any time and your details carry over.',
       },
       {
         q: 'Who made HatchResume?',
