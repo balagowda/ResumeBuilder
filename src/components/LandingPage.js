@@ -143,6 +143,28 @@ const TestimonialCard = ({ person, duplicate }) => (
 );
 
 /**
+ * One resume sheet in the decorative fan on the "What is HatchResume?" banner.
+ *
+ * Skeleton bars rather than a screenshot: nothing to download, it stays sharp
+ * at any size, and it cannot go stale when the templates change. Line widths
+ * come from CSS so the three sheets differ without three sets of markup.
+ */
+const FanSheet = ({ variant }) => (
+  <div className={`fan-sheet fan-sheet-${variant}`}>
+    <span className="fan-name"></span>
+    <span className="fan-sub"></span>
+    <span className="fan-rule"></span>
+    <span className="fan-head"></span>
+    <span className="fan-line"></span>
+    <span className="fan-line"></span>
+    <span className="fan-head"></span>
+    <span className="fan-line"></span>
+    <span className="fan-line"></span>
+    <span className="fan-line"></span>
+  </div>
+);
+
+/**
  * The scrolling row.
  *
  * The loop works by rendering the list several times and sliding left by
@@ -498,11 +520,21 @@ const LandingPage = () => {
       <section className="cta-section">
         <div className="landing-section-inner">
           <div className="cta-box">
-            <h2>Ready to stand out in your job search?</h2>
-            <p>Create a beautiful, modern resume in under 5 minutes.</p>
-            <Link to="/templates" className="btn-white">
-              Build My Resume Now <i className="fas fa-arrow-right icon-right"></i>
-            </Link>
+            <div className="cta-copy">
+              <h2>Ready to stand out in your job search?</h2>
+              <p>Create a beautiful, modern resume in under 5 minutes.</p>
+              <Link to="/templates" className="btn-white">
+                Build My Resume Now <i className="fas fa-arrow-right icon-right"></i>
+              </Link>
+            </div>
+
+            {/* Decorative fan of resume sheets — pure CSS skeletons, no images
+                to load and nothing here for a screen reader to read out. */}
+            <div className="cta-fan" aria-hidden="true">
+              <FanSheet variant={1} />
+              <FanSheet variant={2} />
+              <FanSheet variant={3} />
+            </div>
           </div>
         </div>
       </section>
