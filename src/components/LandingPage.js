@@ -510,7 +510,7 @@ const LandingPage = () => {
 
       {/* CTA Footer Section */}
       <section className="cta-section">
-        <div className="landing-section-inner">
+        <div className="landing-section-inner cta-container">
           <div className="cta-box">
             <div className="cta-copy">
               <h2>Ready to stand out in your job search?</h2>
