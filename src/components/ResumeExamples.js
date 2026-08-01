@@ -41,6 +41,7 @@ export const ExamplesHub = () => {
                   formData={example.data}
                   label={`${example.role} resume example preview`}
                 />
+                <div className="preview-watermark">{example.role}</div>
               </div>
               <div className="example-card-body">
                 <h2>
