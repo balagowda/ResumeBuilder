@@ -69,6 +69,36 @@ const deepen = (hex, amount = 0.45) => {
   return `rgb(${mixed.join(', ')})`;
 };
 
+// The four steps, in order. The accent walks from indigo through violet and
+// lands on emerald: the last step is the one where you have a finished resume,
+// so it reads as "done" rather than as a fourth of the same thing.
+const STEPS = [
+  {
+    icon: 'fa-th-large',
+    title: 'Choose Template',
+    accent: ['#4f46e5', '#7c3aed'],
+    text: 'Select from our professionally tailored design templates that suit your industry style.',
+  },
+  {
+    icon: 'fa-keyboard',
+    title: 'Fill in Details',
+    accent: ['#7c3aed', '#a855f7'],
+    text: 'Type in your educational qualifications, work experiences, projects, and key skills.',
+  },
+  {
+    icon: 'fa-sort',
+    title: 'Arrange Sections',
+    accent: ['#0ea5e9', '#6366f1'],
+    text: 'Use our interactive drag-and-drop system to reorder categories to present your best self.',
+  },
+  {
+    icon: 'fa-file-download',
+    title: 'Download PDF',
+    accent: ['#10b981', '#14b8a6'],
+    text: 'Download your high-resolution A4-sized PDF instantly, ready to send to employers.',
+  },
+];
+
 /** Every colour a card needs, derived from its two accent stops. */
 const accentVars = ([base, second]) => ({
   '--accent': base,
@@ -366,28 +396,24 @@ const LandingPage = () => {
       <section className="steps-section">
         <div className="landing-section-inner">
           <h2 className="section-title">Create your resume in <span className="gradient-text">4 Easy Steps</span></h2>
-          <div className="steps-grid">
-            <div className="step-card">
-              <div className="step-num">01</div>
-              <h3>Choose Template</h3>
-              <p>Select from our professionally tailored design templates that suit your industry style.</p>
-            </div>
-            <div className="step-card">
-              <div className="step-num">02</div>
-              <h3>Fill in Details</h3>
-              <p>Type in your educational qualifications, work experiences, projects, and key skills.</p>
-            </div>
-            <div className="step-card">
-              <div className="step-num">03</div>
-              <h3>Arrange Sections</h3>
-              <p>Use our interactive drag-and-drop system to reorder categories to present your best self.</p>
-            </div>
-            <div className="step-card">
-              <div className="step-num">04</div>
-              <h3>Download PDF</h3>
-              <p>Download your high-resolution A4-sized PDF instantly, ready to send to employers.</p>
-            </div>
-          </div>
+          {/* An ordered list, because these are steps in sequence — the visible
+              "01" is then decoration and hidden from assistive tech, which
+              numbers the items itself. */}
+          <ol className="steps-grid">
+            {STEPS.map((step, i) => (
+              <li className="step-card" key={step.title} style={accentVars(step.accent)}>
+                <span className="step-beam" aria-hidden="true"></span>
+                <span className="step-icon" aria-hidden="true">
+                  <i className={`fas ${step.icon}`}></i>
+                </span>
+                <span className="step-num" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 

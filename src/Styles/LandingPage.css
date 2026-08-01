@@ -390,47 +390,143 @@
   margin-bottom: 50px;
 }
 
+/* Steps
+   ------------------------------------------------------------------
+   No card boxes. Each step is a leaning beam of colour with the icon tile
+   sitting on top of it and the number ghosted underneath — the same -9deg
+   geometry the testimonial cards use, so the two sections rhyme. */
 .steps-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .step-card {
-  background-color: #ffffff;
-  padding: 30px;
-  border-radius: 16px;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-  transition: all 0.3s ease;
   position: relative;
+  /* Contains the beam's stacking so it can sit behind the step's own content
+     without falling behind the section background. */
+  isolation: isolate;
+  padding: 26px 22px 30px;
 }
 
-.step-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
-  border-color: #e2e8f0;
+/* The slanted wash running the height of the step. */
+.step-beam {
+  position: absolute;
+  z-index: -1;
+  /* Runs past the content at both ends so it reads as a band passing through
+     the step, not as a rounded panel sitting behind it. */
+  top: -18px;
+  bottom: -24px;
+  left: 4px;
+  width: 124px;
+  border-radius: 26px;
+  transform: skewX(-9deg);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    var(--accent-soft, rgba(79, 70, 229, 0.11)) 22%,
+    rgba(255, 255, 255, 0) 82%
+  );
+  opacity: 0.9;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
+.step-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  transform: skewX(-9deg);
+  background: linear-gradient(135deg, var(--accent, #4f46e5) 0%, var(--accent-2, #7c3aed) 100%);
+  color: #ffffff;
+  font-size: 1.3rem;
+  box-shadow: 0 14px 26px var(--accent-glow, rgba(79, 70, 229, 0.35));
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* Keeps the glyph upright inside the leaning tile. */
+.step-icon i {
+  transform: skewX(9deg);
+}
+
+/* Oversized, ghosted, and tucked under the heading — depth rather than a
+   label you are meant to read. */
 .step-num {
-  font-size: 2.5rem;
+  display: block;
+  margin: 10px 0 2px;
+  font-size: 3.4rem;
   font-weight: 800;
-  color: rgba(79, 70, 229, 0.1);
-  line-height: 1;
-  margin-bottom: 16px;
+  /* Must exceed 1: background-clip:text only paints inside the element box, so
+     a glyph taller than its line box loses its bottom to a hard cut rather
+     than to the gradient. These digits need 66px in a 54px box at line-height 1. */
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+  color: var(--accent-edge, rgba(79, 70, 229, 0.32));
+  /* Fades out past the glyph's own height — stopping at 92% cut the digits
+     off mid-stroke and read as a clipping bug rather than a fade. */
+  background: linear-gradient(
+    180deg,
+    var(--accent-edge, rgba(79, 70, 229, 0.32)) 0%,
+    var(--accent-soft, rgba(79, 70, 229, 0.11)) 62%,
+    rgba(148, 163, 184, 0) 128%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .step-card h3 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .step-card p {
   color: #64748b;
   font-size: 0.95rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  max-width: 30ch;
+}
+
+/* Dashed run between the tiles, so the row reads as a sequence. Only drawn
+   once the grid is definitely four across — below that the steps wrap and a
+   connector would point at nothing. */
+@media (min-width: 1100px) {
+  .step-card::after {
+    content: '';
+    position: absolute;
+    top: 55px;
+    left: 96px;
+    right: -20px;
+    height: 2px;
+    background-image: linear-gradient(
+      90deg,
+      var(--accent-edge, rgba(79, 70, 229, 0.32)) 45%,
+      rgba(255, 255, 255, 0) 45%
+    );
+    background-size: 11px 2px;
+  }
+
+  .step-card:last-child::after {
+    display: none;
+  }
+}
+
+.step-card:hover .step-icon {
+  transform: skewX(-9deg) translateY(-7px);
+  box-shadow: 0 20px 34px var(--accent-glow, rgba(79, 70, 229, 0.35));
+}
+
+.step-card:hover .step-beam {
+  opacity: 1;
+  transform: skewX(-9deg) scaleY(1.03);
 }
 
 /* Features Grid */
