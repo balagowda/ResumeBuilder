@@ -10,6 +10,7 @@ import '../Styles/ResumeExamples.css';
 /** Hub page: /examples */
 export const ExamplesHub = () => {
   useDocumentMeta({ ...EXAMPLES_HUB_META, path: '/examples' });
+  const navigate = useNavigate();
 
   return (
     <div className="examples-page">
@@ -25,13 +26,31 @@ export const ExamplesHub = () => {
         <ul className="examples-grid">
           {EXAMPLE_RESUMES.map((example) => (
             <li key={example.slug} className="example-card">
-              <h2>
-                <Link to={`/examples/${example.slug}`}>{example.role} Resume Example</Link>
-              </h2>
-              <p>{example.summaryLine}</p>
-              <span className="example-card-meta">
-                Uses the {example.templateNote.split(' — ')[0]} template
-              </span>
+              {/* Live render of the actual example on its template, cropped to
+                  the top of the page — the same preview the detail page shows.
+                  A div rather than a Link: the templates contain <a> tags, and
+                  an <a> may not nest inside another <a>. The card title below
+                  is the accessible link; this is a convenience click target. */}
+              <div
+                className="example-card-preview"
+                aria-hidden="true"
+                onClick={() => navigate(`/examples/${example.slug}`)}
+              >
+                <ResumeSheetPreview
+                  templateId={example.templateId}
+                  formData={example.data}
+                  label={`${example.role} resume example preview`}
+                />
+              </div>
+              <div className="example-card-body">
+                <h2>
+                  <Link to={`/examples/${example.slug}`}>{example.role} Resume Example</Link>
+                </h2>
+                <p>{example.summaryLine}</p>
+                <span className="example-card-meta">
+                  Uses the {example.templateNote.split(' — ')[0]} template
+                </span>
+              </div>
             </li>
           ))}
         </ul>

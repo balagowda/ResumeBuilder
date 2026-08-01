@@ -60,13 +60,48 @@
   background: var(--white);
   border: 1px solid #e5e7eb;
   border-radius: 14px;
-  padding: 22px;
+  padding: 0;
+  overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .example-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+/* Live preview cropped to the top of the sheet, fading out at the cut so it
+   reads as a peek at the document rather than a truncation. */
+.example-card-preview {
+  display: block;
+  position: relative;
+  max-height: 290px;
+  overflow: hidden;
+  padding: 16px 16px 0;
+  background: linear-gradient(180deg, #eef2f7 0%, #f8fafc 100%);
+  border-bottom: 1px solid #eef1f6;
+  cursor: pointer;
+}
+
+.example-card-preview::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, #f8fafc 100%);
+  pointer-events: none;
+}
+
+.example-card-preview .sheet-frame {
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1);
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+}
+
+.example-card-body {
+  padding: 18px 22px 22px;
 }
 
 .example-card h2 {
