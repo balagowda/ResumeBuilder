@@ -109,6 +109,8 @@ export default function TemplateWorkspace({ templateId }) {
 
   const resumeRef = useRef();
   const importInputRef = useRef();
+  const importResumeInputRef = useRef();
+  const [isImporting, setIsImporting] = useState(false);
   const panelRef = useRef();
   const navigate = useNavigate();
 
@@ -772,6 +774,57 @@ export default function TemplateWorkspace({ templateId }) {
     e.target.value = '';
   };
 
+  // Import an existing resume file (PDF/DOCX/TXT): extract its text, parse it
+  // into form fields, and land it in a NEW resume so nothing current is
+  // overwritten. Extraction libraries load on demand; the file stays local.
+  const handleImportResumeFile = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file || isImporting) return;
+
+    setIsImporting(true);
+    try {
+      const [{ extractTextFromFile }, { parseResumeText }] = await Promise.all([
+        import('../utils/resumeImportFiles'),
+        import('../utils/resumeImport'),
+      ]);
+      const text = await extractTextFromFile(file);
+      const { data, stats } = parseResumeText(text);
+      if (!stats.foundAnything) {
+        throw new Error(
+          'No resume content could be read from this file. If it is a scanned image PDF, the text is not extractable — try pasting the text into a TXT file instead.'
+        );
+      }
+
+      // Keep the outgoing resume's template, then open the import as its own
+      // resume — same pattern as handleCreateResume.
+      updateActive({ templateId });
+      const name = file.name.replace(/\.(pdf|docx|txt)$/i, '') || 'Imported resume';
+      store.createResumeFrom(name, { ...createEmptyFormData(), ...data });
+
+      const found = [
+        stats.name && 'name',
+        stats.contactParts > 0 && `${stats.contactParts} contact detail${stats.contactParts === 1 ? '' : 's'}`,
+        stats.summary && 'summary',
+        stats.experiences > 0 && `${stats.experiences} experience entr${stats.experiences === 1 ? 'y' : 'ies'}`,
+        stats.education > 0 && `${stats.education} education entr${stats.education === 1 ? 'y' : 'ies'}`,
+        stats.projects > 0 && `${stats.projects} project${stats.projects === 1 ? '' : 's'}`,
+        stats.skills && 'skills',
+        stats.others > 0 && `${stats.others} other section${stats.others === 1 ? '' : 's'}`,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      alert(
+        `Imported "${file.name}" as a new resume.\n\nFound: ${found}.\n\nImports are never perfect — check each section against the preview and fix anything that landed in the wrong place.`
+      );
+    } catch (err) {
+      console.error('Resume import failed:', err);
+      alert(err && err.message ? err.message : 'Could not import this file.');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const handleClearData = () => {
     if (window.confirm('Clear every resume you have here? This cannot be undone — download a backup first if you want to keep them.')) {
       clearEverything();
@@ -976,11 +1029,27 @@ export default function TemplateWorkspace({ templateId }) {
             <button className="data-tool-btn" onClick={() => importInputRef.current && importInputRef.current.click()} title="Restore data from a backup file">
               <i className="fas fa-file-import"></i> Restore
             </button>
+            <button
+              className="data-tool-btn"
+              onClick={() => importResumeInputRef.current && importResumeInputRef.current.click()}
+              disabled={isImporting}
+              title="Upload your existing resume (PDF, DOCX, or TXT) and we fill in the form for you — the file never leaves your browser"
+            >
+              <i className={`fas ${isImporting ? 'fa-spinner fa-spin' : 'fa-file-arrow-up'}`}></i>{' '}
+              {isImporting ? 'Reading…' : 'Import'}
+            </button>
             <input
               type="file"
               accept="application/json,.json"
               ref={importInputRef}
               onChange={handleImportJSON}
+              style={{ display: 'none' }}
+            />
+            <input
+              type="file"
+              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+              ref={importResumeInputRef}
+              onChange={handleImportResumeFile}
               style={{ display: 'none' }}
             />
           </div>

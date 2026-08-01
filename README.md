@@ -10,6 +10,7 @@ A 100% free, privacy-first resume builder. Pick one of 25+ professional, ATS-fri
 - **ATS-friendly layouts** that parse cleanly in applicant tracking systems
 - **Standalone ATS checker** at [/ats-resume-checker](https://hatchresume.com/ats-resume-checker/) — paste any resume for a structural and writing score, no account
 - **Resume examples by role** at [/examples](https://hatchresume.com/examples/) — complete resumes that load straight into the editor
+- **Import your existing resume** — upload a PDF, DOCX, or TXT and the form fills itself; parsing runs entirely in the browser (pdf.js / mammoth, lazy-loaded), so the file never leaves your machine
 - **Job description matching** — paste a posting and see which of its keywords your resume is missing, scored and ranked, entirely in-browser
 - **Writing review** — flags weak openers, passive voice, unquantified claims, repeated verbs and common misspellings as you type
 - **Two PDF exports** — a one-click text-based ATS PDF built with jsPDF (selectable text, clickable links, clean page breaks), and a pixel-exact image one for printing; the browser's print-to-PDF remains as a styled text fallback
@@ -142,6 +143,8 @@ src/
     useDocumentMeta.js  # Keeps title/description/canonical in sync on SPA navigation
   utils/
     keywordMatch.js     # Job-description keyword extraction and resume matching
+    resumeImport.js     # Heuristic parser: resume text -> editor formData
+    resumeImportFiles.js# PDF/DOCX/TXT text extraction (lazy pdf.js + mammoth)
     contentLint.js      # Writing rules, shared by the editor and the ATS checker
     atsCheck.js         # Structural ATS checks over pasted resume text
     pendingExample.js   # Hand-off from an example page into the editor

@@ -1555,6 +1555,12 @@
 .data-tool-btn:nth-child(1) i { color: #7c3aed; } /* Sample — purple */
 .data-tool-btn:nth-child(2) i { color: #059669; } /* Backup — green */
 .data-tool-btn:nth-child(3) i { color: #0284c7; } /* Restore — blue */
+.data-tool-btn:nth-child(4) i { color: #d97706; } /* Import — amber */
+
+.data-tool-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 
 .data-tool-btn:hover i { color: inherit; }
 
