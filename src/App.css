@@ -1,20 +1,121 @@
-/* CSS Variables for theming */
+/* ==========================================================================
+   DESIGN TOKENS
+   One place for colour, type, shape and depth. Everything below — and every
+   page stylesheet — reads from here, so the site can be retuned by editing
+   this block rather than by hunting hex codes through six files.
+
+   The legacy four (--primary-color, --text-dark, --text-light, --white) are
+   kept as aliases: the editor stylesheet alone references them ~150 times,
+   and renaming them buys nothing.
+   ========================================================================== */
 :root {
-  --primary-color: #4f46e5;
-  --text-dark: #1f2a44;
-  --text-light: #6b7280;
-  --background-light: #f9fafb;
-  --background-dark: #1f2a44;
+  /* Ink — a desaturated blue-grey ramp. Pure black reads harsh on a white
+     page and makes every heading shout; the darkest step here is #12181d. */
+  --ink-900: #12181d;
+  --ink-800: #1d262c;
+  --ink-700: #2d3639;
+  --ink-600: #414d55;
+  --ink-500: #55636b;
+  --ink-400: #78868f;
+  --ink-300: #9aa6b0;
+
+  /* Brand indigo, plus the deep stop the CTA gradient starts from. */
+  --brand: #4f46e5;
+  --brand-hover: #4038d4;
+  --brand-deep: #312e81;
+  --brand-ink: #3730a3;
+  --brand-tint: rgba(79, 70, 229, 0.07);
+  --brand-tint-strong: rgba(79, 70, 229, 0.13);
+  --brand-edge: rgba(79, 70, 229, 0.16);
+
+  /* Green counterpoint. The page was one hue end to end, which is most of why
+     it read flat — this carries "free / passed / private" so the eye has
+     somewhere else to land. */
+  --accent-green: #0d9f76;
+  --accent-green-ink: #087557;
+  --accent-green-tint: #e7f7f1;
+
+  /* Surfaces. Sections alternate between these three to give the page a
+     rhythm; --surface-ink is the one dark band. */
+  --surface: #ffffff;
+  --surface-2: #fafbfd;
+  --surface-3: #f3f6fb;
+  --surface-ink: #171f24;
+
+  --line: #e7ecf2;
+  --line-soft: #f0f3f7;
+
+  /* Type. Only Inter is self-hosted, so display and body share a family and
+     differ by weight and tracking instead. Headings sit at 600, not 800:
+     large-and-medium reads considered, large-and-black reads like a default. */
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tracking-display: -0.028em;
+  --tracking-tight: -0.015em;
+
+  /* Shape. Crisp rather than pill — 30px capsules on every button were doing
+     a lot of the "generic template" work. */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* Depth. Neutral and diffuse. Coloured glows under every button read as
+     decoration; these read as elevation. */
+  --shadow-xs: 0 1px 2px rgba(18, 24, 29, 0.05);
+  --shadow-sm: 0 2px 8px rgba(18, 24, 29, 0.06);
+  --shadow-md: 0 8px 24px rgba(18, 24, 29, 0.07);
+  --shadow-lg: 0 20px 48px rgba(18, 24, 29, 0.1);
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Legacy aliases — retargeted onto the ramp above. --background-light and
+     --background-dark are gone: nothing referenced them once the header and
+     footer moved to --surface / --surface-ink. */
+  --primary-color: var(--brand);
+  --text-dark: var(--ink-800);
+  --text-light: var(--ink-500);
   --white: #ffffff;
 }
 
 /* Global styles */
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--background-light);
-  color: var(--text-dark);
+  font-family: var(--font-body);
+  background-color: var(--surface);
+  color: var(--ink-700);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings share one voice site-wide: medium weight, tight tracking, tight
+   leading. Individual pages set only the size. */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--ink-900);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.15;
+  font-weight: 600;
+}
+
+h3, h4 {
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.3;
+}
+
+::selection {
+  background: var(--brand-tint-strong);
+  color: var(--ink-900);
+}
+
+/* One visible focus treatment for the whole site, so keyboard users get the
+   same affordance on a link, a button and a filter chip. */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .App {
@@ -23,11 +124,18 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
+/* Header
+   ------------------------------------------------------------------
+   A hairline, not a drop shadow. The shadow gave the bar a lip that floated
+   above every page; a 1px line sits flush and lets the content start clean.
+   Translucent + blurred so the page scrolls under it rather than behind a
+   solid slab. */
 .App-header {
-  background-color: var(--white);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  padding: 16px 24px;
+  background-color: rgba(255, 255, 255, 0.82);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--line);
+  padding: 14px 24px;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -42,9 +150,10 @@ body {
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  color: var(--primary-color);
+  letter-spacing: -0.03em;
+  color: var(--ink-900);
   margin: 0;
 }
 
@@ -54,39 +163,49 @@ body {
 
 .nav-menu {
   display: flex;
-  gap: 24px;
+  gap: 8px;
   align-items: center;
 }
 
+/* Nav items are quiet by default and get a tinted pad on hover / when active,
+   so the current page is legible without a second accent colour in the bar. */
 .nav-link {
-  font-size: 1rem;
+  font-size: 0.94rem;
   font-weight: 500;
-  color: var(--text-dark);
+  color: var(--ink-500);
   text-decoration: none;
-  transition: all 0.2s ease;
+  padding: 7px 12px;
+  border-radius: var(--radius-xs);
+  transition: color 0.18s var(--ease), background-color 0.18s var(--ease);
 }
 
-.nav-link:hover,
+.nav-link:hover {
+  color: var(--ink-900);
+  background-color: var(--surface-3);
+}
+
 .nav-link.active {
-  color: var(--primary-color);
+  color: var(--brand-ink);
+  background-color: var(--brand-tint);
 }
 
 .nav-btn-build {
-  font-size: 1rem;
+  font-size: 0.94rem;
   font-weight: 600;
   color: var(--white);
-  background-color: var(--primary-color);
+  background-color: var(--ink-900);
   text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+  padding: 9px 18px;
+  margin-left: 8px;
+  border-radius: var(--radius-xs);
+  transition: background-color 0.18s var(--ease);
 }
 
+/* Ink rather than indigo: the button is the one thing in the bar that must be
+   found instantly, and against five indigo-tinged nav items a sixth indigo
+   element is camouflage. */
 .nav-btn-build:hover {
-  background-color: #3b31d9;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(79, 70, 229, 0.3);
+  background-color: var(--brand);
 }
 
 /* Main content */
@@ -108,9 +227,9 @@ body {
    are used to scanning. Everything used to be centred in one stack, which read
    as an afterthought and gave the links no grouping. */
 .App-footer {
-  background-color: var(--background-dark);
+  background-color: var(--surface-ink);
   color: rgba(255, 255, 255, 0.72);
-  padding: 56px 24px 24px;
+  padding: 72px 24px 28px;
   text-align: left;
 }
 
@@ -126,8 +245,9 @@ body {
 }
 
 .footer-logo {
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--white);
   margin-bottom: 12px;
 }
@@ -158,14 +278,14 @@ body {
 }
 
 .footer-col a {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.72);
   text-decoration: none;
   font-size: 0.92rem;
+  transition: color 0.18s var(--ease);
 }
 
 .footer-col a:hover {
   color: var(--white);
-  text-decoration: underline;
 }
 
 .footer-bottom {
@@ -223,13 +343,35 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  /* Brand row, then the nav as a single strip that scrolls sideways.
+     Centring the logo over a nav that wrapped to two ragged rows cost ~190px
+     of a phone viewport and pushed the H1 out of sight; this keeps the header
+     to two tight rows however many nav items there are. */
   .header-container {
     flex-direction: column;
-    gap: 16px;
+    align-items: stretch;
+    gap: 12px;
   }
 
   .nav-menu {
-    gap: 16px;
+    gap: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    /* Bleeds to the header's edges so the strip visibly runs off-screen —
+       the cue that there is more to scroll to. */
+    margin: 0 -24px;
+    padding: 0 24px 2px;
+    scrollbar-width: none;
+  }
+
+  .nav-menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link,
+  .nav-btn-build {
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .App-main {
@@ -248,25 +390,18 @@ body {
 }
 
 @media (max-width: 480px) {
-  /* Wrap rather than stack: with five entries, a column pushed the whole page
-     below the fold on a phone. */
-  .nav-menu {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px 14px;
-  }
-
   .nav-link,
   .nav-btn-build {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
 
   .nav-btn-build {
-    padding: 7px 14px;
+    padding: 8px 14px;
+    margin-left: 4px;
   }
 
   .logo {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
 
   .App-footer {

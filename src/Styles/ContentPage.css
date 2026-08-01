@@ -13,87 +13,108 @@
 }
 
 .content-page h1 {
-  font-size: 2.5rem;
-  line-height: 1.2;
-  font-weight: 800;
-  color: var(--text-dark);
+  font-size: clamp(2rem, 4vw, 2.7rem);
+  line-height: 1.12;
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink-900);
   margin: 0 0 20px;
+  text-wrap: balance;
 }
 
 .content-lead {
   font-size: 1.15rem;
-  color: var(--text-light);
-  margin: 0 0 40px;
+  line-height: 1.7;
+  color: var(--ink-500);
+  margin: 0 0 44px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--line);
 }
 
 .content-section {
-  margin-bottom: 44px;
+  margin-bottom: 46px;
 }
 
 .content-section h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin: 0 0 14px;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink-900);
+  margin: 0 0 16px;
 }
 
+/* 1.75 rather than the inherited 1.6. These pages are the only long-form
+   reading on the site, and at an 820px measure the extra leading is what
+   makes a paragraph scannable instead of dense. */
 .content-section p {
-  color: #4b5563;
-  margin: 0 0 14px;
+  color: var(--ink-600);
+  line-height: 1.75;
+  margin: 0 0 16px;
 }
 
 .content-list {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   padding-left: 22px;
-  color: #4b5563;
+  color: var(--ink-600);
+  line-height: 1.75;
 }
 
 .content-list li {
   margin-bottom: 8px;
 }
 
+.content-list li::marker {
+  color: var(--ink-300);
+}
+
 /* Comparison table */
 .content-table-wrap {
   overflow-x: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
 }
 
 .content-table {
   border-collapse: collapse;
   width: 100%;
   min-width: 560px;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
 }
 
 .content-table th,
 .content-table td {
   text-align: left;
   padding: 14px 16px;
-  border-bottom: 1px solid #eef0f4;
+  border-bottom: 1px solid var(--line-soft);
   vertical-align: top;
 }
 
 .content-table thead th {
-  background: #f5f6fa;
-  font-weight: 700;
-  color: var(--text-dark);
+  background: var(--surface-2);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-500);
   white-space: nowrap;
 }
 
+/* The site's own column, marked out from the competitors beside it. */
 .content-table thead th:nth-child(2) {
-  color: var(--primary-color);
+  color: var(--brand-ink);
+  background: var(--brand-tint);
 }
 
 .content-table tbody th {
   font-weight: 600;
-  color: var(--text-dark);
+  color: var(--ink-800);
   width: 34%;
 }
 
 .content-table tbody td {
-  color: #4b5563;
+  color: var(--ink-500);
+  line-height: 1.6;
 }
 
 .content-table tbody tr:last-child th,
@@ -107,8 +128,8 @@
 }
 
 .content-faq-item {
-  padding: 20px 0;
-  border-bottom: 1px solid #e9ebf0;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
 }
 
 .content-faq-item:last-child {
@@ -116,15 +137,17 @@
 }
 
 .content-faq dt {
-  font-weight: 700;
-  color: var(--text-dark);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink-900);
   font-size: 1.05rem;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .content-faq dd {
   margin: 0;
-  color: #4b5563;
+  color: var(--ink-600);
+  line-height: 1.75;
 }
 
 /* Call to action */
@@ -136,18 +159,20 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: var(--primary-color);
+  background: var(--ink-900);
   color: var(--white);
   text-decoration: none;
   font-weight: 600;
-  padding: 14px 26px;
-  border-radius: 10px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.98rem;
+  letter-spacing: var(--tracking-tight);
+  padding: 15px 26px;
+  border-radius: var(--radius-xs);
+  transition: background-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
 .content-cta-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.28);
+  background: var(--brand);
+  box-shadow: var(--shadow-md);
 }
 
 @media (max-width: 768px) {

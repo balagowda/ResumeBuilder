@@ -4,59 +4,88 @@
   position: relative;
   overflow: hidden;
   padding-bottom: 0;
+  background: var(--surface);
 }
 
 .landing-section-inner {
-  max-width: 1400px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 0 24px;
   width: 100%;
 }
 
-/* Glowing Background Blobs */
+/* Background wash
+   ------------------------------------------------------------------
+   Three 120px-blurred circles spread over the whole page used to sit behind
+   everything at 0.15 — far enough apart to never resolve into anything, close
+   enough to grey the whole page down. They are now one aurora confined to the
+   top of the page: overlapping tints that bleed into white before the first
+   section boundary, so the hero has atmosphere and the rest of the page is
+   clean white to alternate against.
+
+   .blob-1/2/3 are the markup's existing hooks; each paints one stop. */
 .glow-blob {
   position: absolute;
+  top: 0;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.15;
-  z-index: -1;
   pointer-events: none;
+  z-index: 0;
 }
 
 .blob-1 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, #4f46e5 0%, #818cf8 100%);
-  top: -100px;
-  right: -50px;
+  width: 820px;
+  height: 600px;
+  right: -200px;
+  top: -300px;
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0) 66%);
+  filter: blur(60px);
 }
 
 .blob-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #a855f7 0%, #c084fc 100%);
-  bottom: 20%;
-  left: -200px;
+  width: 760px;
+  height: 540px;
+  left: -260px;
+  top: -250px;
+  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.15) 0%, rgba(168, 85, 247, 0) 66%);
+  filter: blur(60px);
 }
 
 .blob-3 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, #06b6d4 0%, #22d3ee 100%);
-  bottom: -50px;
-  right: 10%;
+  width: 680px;
+  height: 460px;
+  left: 40%;
+  top: -230px;
+  background: radial-gradient(circle at 50% 50%, rgba(13, 159, 118, 0.11) 0%, rgba(13, 159, 118, 0) 66%);
+  filter: blur(60px);
 }
 
 /* Hero Section */
 .hero-section {
+  position: relative;
   width: 100%;
-  padding: 80px 0;
+  padding: 84px 0 96px;
+}
+
+/* Fades the aurora out into flat white before the steps section starts, so the
+   band ends on a gradient rather than on a visible seam. */
+.hero-section::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 220px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, var(--surface) 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hero-container {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 60px;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 64px;
   align-items: center;
 }
 
@@ -66,71 +95,92 @@
   align-items: flex-start;
 }
 
+/* Sits on white rather than on a tint, with the dot carrying the colour. The
+   filled lozenge competed with the H1 directly beneath it. */
 .badge-intro {
   display: inline-flex;
   align-items: center;
-  padding: 6px 14px;
-  border-radius: 20px;
-  background-color: rgba(79, 70, 229, 0.08);
-  border: 1px solid rgba(79, 70, 229, 0.15);
-  font-size: 0.9rem;
+  gap: 8px;
+  padding: 7px 14px 7px 12px;
+  border-radius: 999px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
+  font-size: 0.84rem;
   font-weight: 600;
-  color: #4f46e5;
-  margin-bottom: 24px;
+  letter-spacing: 0.005em;
+  color: var(--ink-600);
+  margin-bottom: 28px;
 }
 
+/* Display type
+   ------------------------------------------------------------------
+   The single biggest change on the page. Every heading was 800 — at 3.5rem
+   that is a wall of black text, and weight is the loudest signal a page
+   gives. Large-and-medium (600) with tight tracking reads considered; the
+   size still carries the emphasis. */
 .hero-title {
-  font-size: 3.5rem;
-  line-height: 1.2;
-  font-weight: 800;
-  color: #1e293b;
-  margin-bottom: 20px;
+  font-size: clamp(2.5rem, 5vw, 3.85rem);
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink-900);
+  margin-bottom: 22px;
+  max-width: 15ch;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+  background: linear-gradient(100deg, var(--brand) 0%, #7c3aed 55%, #a855f7 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .hero-description {
-  font-size: 1.15rem;
-  color: #475569;
-  line-height: 1.6;
+  font-size: 1.08rem;
+  color: var(--ink-500);
+  line-height: 1.7;
   margin-bottom: 36px;
-  max-width: 620px;
+  max-width: 54ch;
 }
 
 .hero-ctas {
   display: flex;
-  gap: 16px;
-  margin-bottom: 48px;
+  gap: 12px;
+  margin-bottom: 52px;
   flex-wrap: wrap;
 }
 
+/* Buttons
+   ------------------------------------------------------------------
+   Crisp corners, flat fill, no coloured glow. A 30px capsule with a
+   rgba(brand, .25) shadow under it is the default look of a bootstrapped
+   landing page; the shape doing less makes the colour do more. Hover moves
+   the fill, not the element — the lift-and-glow was the busiest interaction
+   on the page and it fired on six different things. */
 .btn-primary-large {
   display: inline-flex;
   align-items: center;
-  background-color: #4f46e5;
+  background-color: var(--ink-900);
   color: #ffffff;
-  padding: 14px 28px;
-  border-radius: 30px;
+  padding: 15px 26px;
+  border-radius: var(--radius-xs);
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  letter-spacing: var(--tracking-tight);
   text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+  transition: background-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
 .btn-primary-large:hover {
-  background-color: #3b31d9;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(79, 70, 229, 0.35);
+  background-color: var(--brand);
+  box-shadow: var(--shadow-md);
 }
 
 .icon-right {
-  margin-left: 8px;
-  transition: transform 0.2s ease;
+  margin-left: 10px;
+  font-size: 0.85em;
+  transition: transform 0.25s var(--ease);
 }
 
 .btn-primary-large:hover .icon-right {
@@ -140,52 +190,62 @@
 .btn-secondary-large {
   display: inline-flex;
   align-items: center;
-  background-color: #ffffff;
-  color: #1e293b;
-  border: 1px solid #cbd5e1;
-  padding: 14px 28px;
-  border-radius: 30px;
+  background-color: var(--surface);
+  color: var(--ink-800);
+  border: 1px solid var(--line);
+  padding: 15px 26px;
+  border-radius: var(--radius-xs);
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  letter-spacing: var(--tracking-tight);
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease);
 }
 
 .btn-secondary-large:hover {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
-  transform: translateY(-2px);
+  background-color: var(--surface-2);
+  border-color: var(--ink-300);
 }
 
-/* Stats */
+/* Stats
+   ------------------------------------------------------------------
+   Numerals set in the display voice, labels reduced to small caps. The old
+   pairing was 800-weight numbers over plain grey text, which made three
+   equal facts look like three headlines. */
 .hero-stats {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 30px;
   flex-wrap: wrap;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .stat-num {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: #1e293b;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  color: var(--ink-900);
 }
 
 .stat-label {
-  font-size: 0.85rem;
-  color: #64748b;
-  margin-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-400);
 }
 
 .stat-divider {
   width: 1px;
-  height: 40px;
-  background-color: #e2e8f0;
+  height: 34px;
+  background-color: var(--line);
 }
 
 /* 3D Visual Mockup Section */
@@ -213,10 +273,13 @@
   position: relative;
   transform-style: preserve-3d;
   background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12), 
-              0 0 0 1px rgba(0, 0, 0, 0.04);
-  padding: 24px;
+  border-radius: var(--radius-lg);
+  /* Two stacked shadows: a tight contact shadow to seat the card, and a wide
+     soft one for the drop. A single 60px blur reads as fog. */
+  box-shadow: 0 2px 6px rgba(18, 24, 29, 0.06),
+              0 32px 64px rgba(18, 24, 29, 0.14),
+              0 0 0 1px rgba(18, 24, 29, 0.05);
+  padding: 22px;
   user-select: none;
   cursor: grab;
 }
@@ -319,52 +382,73 @@
 }
 
 /* 3D Floating Parallax Badges */
+/* The floating badges read as chips of white paper with a coloured glyph,
+   rather than three differently-tinted pastel blocks. Keeping the surface
+   white lets them sit over the card without competing with it, and the icon
+   still carries each one's meaning. */
 .parallax-badge {
   position: absolute;
-  padding: 10px 16px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink-800);
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 22px rgba(18, 24, 29, 0.1);
   pointer-events: none;
   animation: floating 3s ease-in-out infinite alternate;
 }
 
 .parallax-badge i {
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .badge-ats {
   top: 50px;
   left: -20px;
-  background-color: #e6fdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
   transform: translateZ(60px);
   animation-delay: 0.2s;
+}
+
+.badge-ats i {
+  color: var(--accent-green);
 }
 
 .badge-free {
   bottom: 80px;
   right: -25px;
-  background-color: #fffbeb;
-  color: #d97706;
-  border: 1px solid #fef3c7;
   transform: translateZ(90px);
   animation-delay: 0.5s;
+}
+
+.badge-free i {
+  color: #e0a010;
 }
 
 .badge-pdf {
   top: 240px;
   left: -30px;
-  background-color: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
   transform: translateZ(45px);
   animation-delay: 0.8s;
+}
+
+.badge-pdf i {
+  color: var(--brand);
+}
+
+/* Decoration only, and it never stops — hand it back to anyone who has asked
+   the OS for less movement. */
+@media (prefers-reduced-motion: reduce) {
+  .parallax-badge {
+    animation: none;
+  }
 }
 
 @keyframes floating {
@@ -376,18 +460,35 @@
   }
 }
 
-/* How It Works Section */
+/* How It Works Section
+   ------------------------------------------------------------------
+   The first of the two tinted bands. Every section on this page used to be
+   white or near-white with identical 80px padding, so the page scrolled as
+   one undifferentiated column — that sameness, more than any single element,
+   is what made it read as flat. White / tint / white / tint / dark gives the
+   scroll a rhythm and tells you where one idea ends. */
 .steps-section {
-  padding: 80px 0;
   position: relative;
+  padding: 92px 0;
+  background: var(--surface-2);
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
 }
 
+/* text-wrap: balance rather than a max-width in ch. Capping the measure split
+   "Create your resume in 4 Easy Steps" as "…in 4" / "Easy Steps", orphaning
+   the numeral; balance evens the lines out instead, and degrades to a normal
+   wrap where it is unsupported. */
 .section-title {
   text-align: center;
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #1e293b;
-  margin-bottom: 50px;
+  font-size: clamp(1.9rem, 3.2vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.18;
+  color: var(--ink-900);
+  max-width: 28ch;
+  text-wrap: balance;
+  margin: 0 auto 52px;
 }
 
 /* Steps
@@ -430,24 +531,29 @@
     var(--accent-soft, rgba(79, 70, 229, 0.11)) 22%,
     rgba(255, 255, 255, 0) 82%
   );
-  opacity: 0.9;
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  opacity: 0.75;
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
 }
 
+/* Tinted tile with a coloured glyph, not a saturated gradient block throwing a
+   matching coloured glow. Four filled gradient chips in a row were the
+   heaviest thing in the section and pulled the eye straight past the copy
+   they were introducing. */
 .step-icon {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
-  border-radius: 18px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
   transform: skewX(-9deg);
-  background: linear-gradient(135deg, var(--accent, #4f46e5) 0%, var(--accent-2, #7c3aed) 100%);
-  color: #ffffff;
-  font-size: 1.3rem;
-  box-shadow: 0 14px 26px var(--accent-glow, rgba(79, 70, 229, 0.35));
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--accent-edge, rgba(79, 70, 229, 0.32)),
+              var(--shadow-sm);
+  color: var(--accent, #4f46e5);
+  font-size: 1.2rem;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
 }
 
 /* Keeps the glyph upright inside the leaning tile. */
@@ -482,16 +588,17 @@
 }
 
 .step-card h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: 1.12rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink-900);
   margin-bottom: 10px;
 }
 
 .step-card p {
-  color: #64748b;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  color: var(--ink-500);
+  font-size: 0.93rem;
+  line-height: 1.65;
   max-width: 30ch;
 }
 
@@ -519,9 +626,14 @@
   }
 }
 
+/* The tile fills with its accent on hover — the colour arrives on intent
+   rather than sitting at full strength on all four at rest. */
 .step-card:hover .step-icon {
-  transform: skewX(-9deg) translateY(-7px);
-  box-shadow: 0 20px 34px var(--accent-glow, rgba(79, 70, 229, 0.35));
+  transform: skewX(-9deg) translateY(-5px);
+  background: var(--accent, #4f46e5);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px transparent,
+              0 12px 24px var(--accent-glow, rgba(79, 70, 229, 0.35));
 }
 
 .step-card:hover .step-beam {
@@ -529,51 +641,76 @@
   transform: skewX(-9deg) scaleY(1.03);
 }
 
-/* Features Grid */
+/* Features Grid
+   ------------------------------------------------------------------
+   Real cards on white, rather than six bare icon-and-text blocks floating on
+   a tint. Bordered panels give the grid structure and let the section sit on
+   plain white between the two tinted bands. */
 .features-section {
-  padding: 80px 0;
-  background-color: rgba(248, 250, 252, 0.6);
+  padding: 92px 0;
+  background-color: var(--surface);
   width: 100%;
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
 }
 
+/* 300px, not 280: at the 1192px content width 280 fits four columns, which
+   left the six features as a row of four and an orphaned row of two. 300
+   forces three, so the grid resolves as an even 3 x 2. */
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .feature-item {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  padding: 30px 28px 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease),
+              transform 0.25s var(--ease);
+}
+
+.feature-item:hover {
+  border-color: transparent;
+  box-shadow: var(--shadow-md), 0 0 0 1px var(--brand-edge);
+  transform: translateY(-3px);
 }
 
 .feature-icon-wrapper {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
-  background-color: rgba(79, 70, 229, 0.08);
-  color: #4f46e5;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background-color: var(--brand-tint);
+  color: var(--brand);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.5rem;
-  margin-bottom: 20px;
+  font-size: 1.15rem;
+  margin-bottom: 22px;
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease);
+}
+
+.feature-item:hover .feature-icon-wrapper {
+  background-color: var(--brand);
+  color: #ffffff;
 }
 
 .feature-item h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink-900);
   margin-bottom: 10px;
 }
 
 .feature-item p {
-  color: #64748b;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  color: var(--ink-500);
+  font-size: 0.93rem;
+  line-height: 1.65;
+  margin: 0;
 }
 
 /* "What is HatchResume?" strip */
@@ -582,44 +719,105 @@
    Plain copy on the page — its job is to state the brand in prose and link the
    content pages, which it does best as ordinary readable text. Only the links
    changed: pills rather than underlines. */
+/* Dot-grid band
+   ------------------------------------------------------------------
+   The section gets its own identity from a pattern rather than from another
+   background tint — the page already alternates white and tint, and a third
+   surface colour here would flatten that rhythm back out.
+
+   Geometry is lifted from Enhancv's "Built for professionals" section: a 30px
+   grid with a ~4px dot at each intersection, ink at ~0.3 alpha. Theirs is a
+   60px @2x .webp; this is a radial-gradient tile instead — no network
+   request, and it resolves sharply at any device pixel ratio rather than
+   softening on a 3x phone.
+
+   Padding grows from 20px/8px because the strip is now a band: the pattern
+   needs room to read as a field the content sits on, not as a stripe behind
+   one paragraph. */
 .about-strip {
+  position: relative;
   width: 100%;
-  padding: 24px 0 8px;
+  padding: 78px 0 86px;
+  background: var(--surface);
+  /* Contains the pattern's negative z-index so it lands above this section's
+     own white background instead of falling behind the page. */
+  isolation: isolate;
+}
+
+.about-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    rgba(45, 54, 57, 0.26) 1.5px,
+    rgba(45, 54, 57, 0) 1.6px
+  );
+  background-size: 30px 30px;
+  /* Dots strongest at the top and dissolving downward. The short ramp at 0-12%
+     matters as much as the long fade: without it the grid would start on a
+     hard horizontal line against the white section above and read as a
+     rendering seam rather than as a designed edge. */
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 12%,
+    rgba(0, 0, 0, 0.32) 62%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 12%,
+    rgba(0, 0, 0, 0.32) 62%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 
 .about-strip-text {
-  max-width: 780px;
-  margin: 0 auto 28px;
+  max-width: 68ch;
+  margin: 0 auto 30px;
   text-align: center;
-  color: #4b5563;
+  color: var(--ink-500);
   font-size: 1.05rem;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .about-strip-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
+/* Neutral chips with an indigo hover, rather than five tinted indigo pills.
+   As a filled set they read as the page's main navigation, which they are not
+   — they are secondary links out to the content pages. */
 .about-strip-links a {
-  display: inline-block;
-  padding: 9px 18px;
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
   border-radius: 999px;
-  color: #4f46e5;
-  font-weight: 600;
-  font-size: 0.9rem;
+  color: var(--ink-600);
+  font-weight: 500;
+  font-size: 0.88rem;
   text-decoration: none;
-  background: rgba(79, 70, 229, 0.07);
-  border: 1px solid rgba(79, 70, 229, 0.18);
-  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: color 0.22s var(--ease), background 0.22s var(--ease),
+              border-color 0.22s var(--ease);
 }
 
 .about-strip-links a:hover {
-  background: rgba(79, 70, 229, 0.13);
-  border-color: rgba(79, 70, 229, 0.38);
-  transform: translateY(-2px);
+  color: var(--brand-ink);
+  background: var(--brand-tint);
+  border-color: var(--brand-edge);
 }
 
 /* The fan of resume sheets, on the CTA banner. */
@@ -740,13 +938,19 @@
   gap: 40px;
   align-items: center;
   width: 100%;
-  padding: 56px 52px;
-  border-radius: 28px;
+  padding: 60px 56px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   text-align: left;
   color: #ffffff;
-  background: linear-gradient(125deg, #312e81 0%, #4f46e5 46%, #7c3aed 80%, #a855f7 100%);
-  box-shadow: 0 26px 60px rgba(49, 46, 129, 0.3);
+  /* Starts from near-black and only reaches violet at the far edge. The old
+     ramp spent its whole width in saturated indigo-to-fuchsia, which is a lot
+     of colour for the largest block on the page; grounding it in ink makes
+     the violet read as a highlight instead of the subject. */
+  background:
+    radial-gradient(120% 140% at 88% 8%, rgba(168, 85, 247, 0.55) 0%, rgba(168, 85, 247, 0) 58%),
+    linear-gradient(118deg, #12181d 0%, #241f52 38%, #4f46e5 78%, #7c3aed 100%);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Light bloom, so the gradient is not a flat sheet of colour. */
@@ -787,17 +991,20 @@
 }
 
 .cta-box h2 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  line-height: 1.25;
+  font-size: clamp(1.85rem, 3vw, 2.35rem);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.15;
+  color: #ffffff;
   margin-bottom: 14px;
   max-width: 18ch;
 }
 
 .cta-box p {
-  font-size: 1.08rem;
-  margin-bottom: 30px;
-  opacity: 0.9;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  margin-bottom: 32px;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .cta-box .btn-white {
@@ -829,20 +1036,22 @@
   display: inline-flex;
   align-items: center;
   background-color: #ffffff;
-  color: #4f46e5;
-  padding: 12px 28px;
-  border-radius: 30px;
+  color: var(--ink-900);
+  padding: 15px 26px;
+  border-radius: var(--radius-xs);
   font-weight: 600;
   text-decoration: none;
-  font-size: 1.05rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  letter-spacing: var(--tracking-tight);
+  transition: background-color 0.2s var(--ease);
 }
 
 .btn-white:hover {
-  background-color: #f8fafc;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background-color: rgba(255, 255, 255, 0.88);
+}
+
+.btn-white:hover .icon-right {
+  transform: translateX(4px);
 }
 
 /* Testimonials
@@ -852,18 +1061,21 @@
    start and the loop is invisible. */
 .testimonials-section {
   position: relative;
-  padding: 20px 0 90px;
+  padding: 92px 0 100px;
   width: 100%;
   overflow: hidden;
+  background: var(--surface-2);
+  border-top: 1px solid var(--line-soft);
 }
 
 .testimonials-intro {
   text-align: center;
-  max-width: 640px;
-  /* Pulls up under .section-title's 50px gap, same as .feedback-intro. */
-  margin: -30px auto 44px;
-  color: #64748b;
-  font-size: 1.05rem;
+  max-width: 58ch;
+  /* Pulls up under .section-title's 52px gap, same as .feedback-intro. */
+  margin: -34px auto 46px;
+  color: var(--ink-500);
+  font-size: 1.02rem;
+  line-height: 1.7;
 }
 
 /* Colour wash behind the cards. Purely decorative and non-interactive. */
@@ -875,11 +1087,15 @@
   overflow: hidden;
 }
 
+/* Halved from 0.26. Four saturated washes under a row of white cards muddied
+   the section background into an indeterminate grey-pink; at this strength
+   they register as warmth behind the cards rather than as colour of their
+   own. */
 .t-blob {
   position: absolute;
   border-radius: 50%;
   filter: blur(90px);
-  opacity: 0.26;
+  opacity: 0.13;
 }
 
 .t-blob-a {
@@ -963,12 +1179,13 @@
   /* Fixed width keeps every card the same size and the loop distance exact. */
   flex: 0 0 340px;
   margin: 0;
-  background: linear-gradient(160deg, #ffffff 0%, #fdfdff 100%);
-  border: 1px solid #eef2f7;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   transform: skewX(-7deg);
-  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease),
+              border-color 0.35s var(--ease);
   overflow: hidden;
 }
 
@@ -1006,9 +1223,9 @@
 }
 
 .testimonial-card:hover {
-  transform: skewX(-7deg) translateY(-8px);
-  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.13);
-  border-color: #e2e8f0;
+  transform: skewX(-7deg) translateY(-6px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--ink-300);
 }
 
 .testimonial-inner {
@@ -1043,9 +1260,9 @@
   /* Pushes the author block to the bottom so the names line up across cards
      of unequal quote length. */
   flex: 1;
-  color: #44506b;
-  font-size: 0.96rem;
-  line-height: 1.7;
+  color: var(--ink-600);
+  font-size: 0.95rem;
+  line-height: 1.72;
 }
 
 .testimonial-author {
@@ -1100,10 +1317,10 @@
 }
 
 .testimonial-name {
-  font-weight: 700;
-  color: #0f172a;
-  font-size: 1rem;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  color: var(--ink-900);
+  font-size: 0.98rem;
+  letter-spacing: var(--tracking-tight);
 }
 
 /* The role is a chip rather than a second grey line. */
@@ -1164,9 +1381,26 @@
   }
 }
 
+@media (max-width: 640px) {
+  /* Copy first on a phone. The 1024px rule lifts the mock resume above the
+     text, which works in the tablet two-column collapse but on a 390px screen
+     puts a 600px decorative card in front of the headline — the H1 and both
+     CTAs started below the fold. */
+  .hero-visual {
+    order: 0;
+    margin-bottom: 0;
+    margin-top: 16px;
+  }
+
+  .hero-container {
+    gap: 32px;
+  }
+}
+
 @media (max-width: 576px) {
   .hero-title {
-    font-size: 2.25rem;
+    font-size: 2.15rem;
+    max-width: none;
   }
 
   .hero-visual {
