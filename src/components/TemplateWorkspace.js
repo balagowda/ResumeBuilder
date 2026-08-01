@@ -1008,109 +1008,121 @@ export default function TemplateWorkspace({ templateId }) {
             storageError={storageError}
           />
 
-          <ResumeVersions
-            resumes={store.resumes}
-            activeId={store.activeId}
-            active={store.active}
-            onSwitch={handleSwitchResume}
-            onCreate={handleCreateResume}
-            onDuplicate={store.duplicateResume}
-            onRename={store.renameResume}
-            onDelete={store.deleteResume}
-          />
-
-          <div className="template-switcher-row">
-            <label htmlFor="template-switcher"><i className="fas fa-layer-group"></i> Template</label>
-            <select
-              id="template-switcher"
-              className="template-switcher-select"
-              value={templateId}
-              onChange={handleSwitchTemplate}
-            >
-              {TEMPLATES.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="data-tools-row">
-            <button className="data-tool-btn" onClick={handleLoadSample} title="Fill the form with example content">
-              <i className="fas fa-magic"></i> Sample
-            </button>
-            <button className="data-tool-btn" onClick={handleExportJSON} title="Download your data as a backup file">
-              <i className="fas fa-file-export"></i> Backup
-            </button>
-            <button className="data-tool-btn" onClick={() => importInputRef.current && importInputRef.current.click()} title="Restore data from a backup file">
-              <i className="fas fa-file-import"></i> Restore
-            </button>
-            <input
-              type="file"
-              accept="application/json,.json"
-              ref={importInputRef}
-              onChange={handleImportJSON}
-              style={{ display: 'none' }}
-            />
-          </div>
-
-          {/* Drop zone for importing an existing resume. Also a button, so
-              keyboard and touch users get the same path as drag-and-drop. */}
-          <div
-            className={`resume-import-zone ${isDragOver ? 'drag-over' : ''} ${isImporting ? 'importing' : ''}`}
-            role="button"
-            tabIndex={0}
-            aria-label="Import your existing resume — drag and drop a PDF, DOCX, or TXT file, or press Enter to browse"
-            onClick={() => !isImporting && importResumeInputRef.current && importResumeInputRef.current.click()}
-            onKeyDown={(e) => {
-              if ((e.key === 'Enter' || e.key === ' ') && !isImporting) {
-                e.preventDefault();
-                if (importResumeInputRef.current) importResumeInputRef.current.click();
-              }
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragOver(true);
-            }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={handleImportDrop}
-          >
-            <i className={`fas ${isImporting ? 'fa-spinner fa-spin' : 'fa-file-arrow-up'}`} aria-hidden="true"></i>
-            <div className="resume-import-zone-text">
-              {isImporting ? (
-                <strong>Reading your resume…</strong>
-              ) : (
-                <>
-                  <strong>
-                    Have a resume already? Drop it here
-                    <span className="beta-badge">BETA</span>
-                  </strong>
-                  <span>
-                    or <span className="resume-import-browse">browse files</span> — PDF, DOCX or TXT.
-                  </span>
-                </>
-              )}
+          <div className="document-settings-col">
+            <div className="doc-setting-item template-select-item">
+              <label htmlFor="template-switcher"><i className="fas fa-layer-group"></i> Template</label>
+              <select
+                id="template-switcher"
+                className="template-switcher-select"
+                value={templateId}
+                onChange={handleSwitchTemplate}
+                title="Switch Template"
+              >
+                {TEMPLATES.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
             </div>
-            <input
-              type="file"
-              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-              ref={importResumeInputRef}
-              onChange={handleImportResumeInput}
-              style={{ display: 'none' }}
-              tabIndex={-1}
-            />
+            <div className="doc-setting-item">
+              <ResumeVersions
+                resumes={store.resumes}
+                activeId={store.activeId}
+                active={store.active}
+                onSwitch={handleSwitchResume}
+                onCreate={handleCreateResume}
+                onDuplicate={store.duplicateResume}
+                onRename={store.renameResume}
+                onDelete={store.deleteResume}
+              />
+            </div>
           </div>
-          <div className="strength-meter-container">
+
+          <div className="tools-import-section">
+            <div className="tools-import-header-static">
+              <span><i className="fas fa-toolbox"></i> Advanced Tools & Import</span>
+            </div>
+            <div className="tools-import-content">
+              <div className="data-tools-row">
+                <button className="data-tool-btn" onClick={handleLoadSample} title="Fill the form with example content">
+                  <i className="fas fa-magic"></i> Sample
+                </button>
+                <button className="data-tool-btn" onClick={handleExportJSON} title="Download your data as a backup file">
+                  <i className="fas fa-file-export"></i> Backup
+                </button>
+                <button className="data-tool-btn" onClick={() => importInputRef.current && importInputRef.current.click()} title="Restore data from a backup file">
+                  <i className="fas fa-file-import"></i> Restore
+                </button>
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  ref={importInputRef}
+                  onChange={handleImportJSON}
+                  style={{ display: 'none' }}
+                />
+              </div>
+
+              {/* Drop zone for importing an existing resume. */}
+              <div
+                className={`resume-import-zone ${isDragOver ? 'drag-over' : ''} ${isImporting ? 'importing' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-label="Import your existing resume — drag and drop a PDF, DOCX, or TXT file, or press Enter to browse"
+                onClick={() => !isImporting && importResumeInputRef.current && importResumeInputRef.current.click()}
+                onKeyDown={(e) => {
+                  if ((e.key === 'Enter' || e.key === ' ') && !isImporting) {
+                    e.preventDefault();
+                    if (importResumeInputRef.current) importResumeInputRef.current.click();
+                  }
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(true);
+                }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleImportDrop}
+              >
+                <div className="beta-badge-corner"><i className="fas fa-sparkles"></i> BETA</div>
+                <div className="import-icon-wrapper">
+                  <i className={`fas ${isImporting ? 'fa-spinner fa-spin' : 'fa-plus'}`} aria-hidden="true"></i>
+                </div>
+                <div className="resume-import-zone-text">
+                  {isImporting ? (
+                    <strong>Reading your resume…</strong>
+                  ) : (
+                    <>
+                      <strong>Drop your old resume here</strong>
+                      <span>
+                        PDF, DOCX, TXT or <span className="resume-import-browse">browse</span>
+                      </span>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  ref={importResumeInputRef}
+                  onChange={handleImportResumeInput}
+                  style={{ display: 'none' }}
+                  tabIndex={-1}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="strength-meter-slim">
             <div className="strength-meter-header">
               <span>Resume Strength</span>
-              <span>{completeness}%</span>
+              <span className="strength-percentage">{completeness}%</span>
             </div>
             <div className="strength-meter-bar">
               <div className="strength-meter-fill" style={{ width: `${completeness}%` }}></div>
             </div>
             {completeness < 100 && (
-              <ul className="strength-tips">
-                {getStrengthTips().map((tip) => (
-                  <li key={tip.label}><i className="fas fa-plus-circle"></i> {tip.label} <span className="tip-pts">+{tip.pts}%</span></li>
-                ))}
-              </ul>
+              <div className="strength-tips-dropdown">
+                <i className="fas fa-lightbulb"></i>
+                <span className="tips-label">Tips to improve:</span>
+                <span className="tips-text">{getStrengthTips().map(t => t.label).join(', ')}</span>
+              </div>
             )}
             {savedAt && (
               <p className="autosave-note">
