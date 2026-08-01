@@ -227,7 +227,8 @@ h3, h4 {
    are used to scanning. Everything used to be centred in one stack, which read
    as an afterthought and gave the links no grouping. */
 .App-footer {
-  background-color: var(--surface-ink);
+  background: linear-gradient(180deg, #131127 0%, #090812 100%);
+  border-top: 1px solid rgba(79, 70, 229, 0.15);
   color: rgba(255, 255, 255, 0.72);
   padding: 72px 24px 28px;
   text-align: left;

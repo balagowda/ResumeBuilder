@@ -127,11 +127,16 @@ function App() {
               <nav className="footer-col" aria-label="Resume examples by job title">
                 <div className="footer-col-title">Some Examples</div>
                 <ul>
-                  {EXAMPLE_RESUMES.map((example) => (
+                  {EXAMPLE_RESUMES.slice(0, 5).map((example) => (
                     <li key={example.slug}>
                       <Link to={`/examples/${example.slug}`}>{example.role}</Link>
                     </li>
                   ))}
+                  <li>
+                    <Link to="/examples" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', opacity: 0.8 }}>
+                      View all <i className="fas fa-arrow-right" style={{ fontSize: '0.75em' }}></i>
+                    </Link>
+                  </li>
                 </ul>
               </nav>
 
