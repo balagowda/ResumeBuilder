@@ -111,6 +111,7 @@ export default function TemplateWorkspace({ templateId }) {
   const importInputRef = useRef();
   const importResumeInputRef = useRef();
   const [isImporting, setIsImporting] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const panelRef = useRef();
   const navigate = useNavigate();
 
@@ -777,9 +778,8 @@ export default function TemplateWorkspace({ templateId }) {
   // Import an existing resume file (PDF/DOCX/TXT): extract its text, parse it
   // into form fields, and land it in a NEW resume so nothing current is
   // overwritten. Extraction libraries load on demand; the file stays local.
-  const handleImportResumeFile = async (e) => {
-    const file = e.target.files && e.target.files[0];
-    e.target.value = '';
+  // Reached from both the drop zone (drag & drop) and its file picker.
+  const importResumeFile = async (file) => {
     if (!file || isImporting) return;
 
     setIsImporting(true);
@@ -823,6 +823,19 @@ export default function TemplateWorkspace({ templateId }) {
     } finally {
       setIsImporting(false);
     }
+  };
+
+  const handleImportResumeInput = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    importResumeFile(file);
+  };
+
+  const handleImportDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    importResumeFile(file);
   };
 
   const handleClearData = () => {
@@ -1029,15 +1042,6 @@ export default function TemplateWorkspace({ templateId }) {
             <button className="data-tool-btn" onClick={() => importInputRef.current && importInputRef.current.click()} title="Restore data from a backup file">
               <i className="fas fa-file-import"></i> Restore
             </button>
-            <button
-              className="data-tool-btn"
-              onClick={() => importResumeInputRef.current && importResumeInputRef.current.click()}
-              disabled={isImporting}
-              title="Upload your existing resume (PDF, DOCX, or TXT) and we fill in the form for you — the file never leaves your browser"
-            >
-              <i className={`fas ${isImporting ? 'fa-spinner fa-spin' : 'fa-file-arrow-up'}`}></i>{' '}
-              {isImporting ? 'Reading…' : 'Import'}
-            </button>
             <input
               type="file"
               accept="application/json,.json"
@@ -1045,12 +1049,52 @@ export default function TemplateWorkspace({ templateId }) {
               onChange={handleImportJSON}
               style={{ display: 'none' }}
             />
+          </div>
+
+          {/* Drop zone for importing an existing resume. Also a button, so
+              keyboard and touch users get the same path as drag-and-drop. */}
+          <div
+            className={`resume-import-zone ${isDragOver ? 'drag-over' : ''} ${isImporting ? 'importing' : ''}`}
+            role="button"
+            tabIndex={0}
+            aria-label="Import your existing resume — drag and drop a PDF, DOCX, or TXT file, or press Enter to browse"
+            onClick={() => !isImporting && importResumeInputRef.current && importResumeInputRef.current.click()}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ' ') && !isImporting) {
+                e.preventDefault();
+                if (importResumeInputRef.current) importResumeInputRef.current.click();
+              }
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragOver(true);
+            }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={handleImportDrop}
+          >
+            <i className={`fas ${isImporting ? 'fa-spinner fa-spin' : 'fa-file-arrow-up'}`} aria-hidden="true"></i>
+            <div className="resume-import-zone-text">
+              {isImporting ? (
+                <strong>Reading your resume…</strong>
+              ) : (
+                <>
+                  <strong>
+                    Have a resume already? Drop it here
+                    <span className="beta-badge">BETA</span>
+                  </strong>
+                  <span>
+                    or <span className="resume-import-browse">browse files</span> — PDF, DOCX or TXT.
+                  </span>
+                </>
+              )}
+            </div>
             <input
               type="file"
               accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
               ref={importResumeInputRef}
-              onChange={handleImportResumeFile}
+              onChange={handleImportResumeInput}
               style={{ display: 'none' }}
+              tabIndex={-1}
             />
           </div>
           <div className="strength-meter-container">

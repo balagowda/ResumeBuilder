@@ -1555,11 +1555,75 @@
 .data-tool-btn:nth-child(1) i { color: #7c3aed; } /* Sample — purple */
 .data-tool-btn:nth-child(2) i { color: #059669; } /* Backup — green */
 .data-tool-btn:nth-child(3) i { color: #0284c7; } /* Restore — blue */
-.data-tool-btn:nth-child(4) i { color: #d97706; } /* Import — amber */
 
-.data-tool-btn:disabled {
-  opacity: 0.6;
+/* ==========================================================================
+   RESUME IMPORT DROP ZONE
+   ========================================================================== */
+
+.resume-import-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #fafbfd;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.resume-import-zone:hover,
+.resume-import-zone:focus-visible {
+  border-color: var(--primary-color);
+  background: #f5f6ff;
+  outline: none;
+}
+
+.resume-import-zone.drag-over {
+  border-color: var(--primary-color);
+  border-style: solid;
+  background: #eef2ff;
+}
+
+.resume-import-zone.importing {
   cursor: wait;
+  opacity: 0.75;
+}
+
+.resume-import-zone > i {
+  font-size: 1.35rem;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.resume-import-zone.drag-over > i {
+  color: var(--primary-color);
+}
+
+.resume-import-zone-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.resume-import-zone-text strong {
+  font-size: 0.85rem;
+  color: #1e293b;
+}
+
+/* Direct children only, so the nested BETA badge keeps its own styling. */
+.resume-import-zone-text > span {
+  font-size: 0.74rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.resume-import-browse {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 .data-tool-btn:hover i { color: inherit; }
