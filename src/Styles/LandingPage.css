@@ -265,6 +265,17 @@
   aspect-ratio: 380 / 520;
   perspective: 1000px;
   position: relative;
+  animation: ambient-float 6s ease-in-out infinite;
+}
+
+.scene:hover {
+  animation-play-state: paused;
+}
+
+@keyframes ambient-float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
 }
 
 .tilt-card {
@@ -287,6 +298,8 @@
 .tilt-card:active {
   cursor: grabbing;
 }
+
+
 
 /* Fake Resume Paper styling */
 .mock-resume {
@@ -324,6 +337,8 @@
   background-color: #e2e8f0;
   border-radius: 4px;
   margin-bottom: 6px;
+  position: relative;
+  overflow: hidden;
 }
 
 .mock-line-short {
@@ -331,6 +346,8 @@
   width: 60%;
   background-color: #f1f5f9;
   border-radius: 4px;
+  position: relative;
+  overflow: hidden;
 }
 
 .mock-line-medium {
@@ -339,6 +356,8 @@
   background-color: #f8fafc;
   border-radius: 4px;
   margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
 .mock-divider {
@@ -360,6 +379,8 @@
   background-color: #cbd5e1;
   border-radius: 4px;
   margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
 }
 
 .mock-chip-container {
@@ -374,6 +395,25 @@
   background-color: #eff6ff;
   border: 1px solid #dbeafe;
   border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.mock-line-long::after, 
+.mock-line-short::after, 
+.mock-line-medium::after, 
+.mock-section-title::after, 
+.mock-chip::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+  animation: shimmer 2.5s infinite linear;
 }
 
 .mock-left, .mock-right {
@@ -381,18 +421,130 @@
   flex-direction: column;
 }
 
-/* 3D Floating Parallax Badges */
-/* The floating badges read as chips of white paper with a coloured glyph,
-   rather than three differently-tinted pastel blocks. Keeping the surface
-   white lets them sit over the card without competing with it, and the icon
-   still carries each one's meaning. */
-.parallax-badge {
+/* 3D Stacked Layers */
+.resume-layer {
   position: absolute;
-  padding: 9px 14px;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: var(--radius-lg);
+  background-color: #ffffff;
+  border: 1px solid #f1f5f9;
+  z-index: -1;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s ease;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Add a subtle brand tint to the background layers so they aren't plain white */
+.layer-left {
+  transform: translateZ(-20px) translateX(0) rotateZ(0deg);
+  justify-content: flex-start;
+  padding-left: 14px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+  border-color: #c7d2fe;
+}
+
+.layer-right {
+  transform: translateZ(-40px) translateX(0) rotateZ(0deg);
+  justify-content: flex-end;
+  padding-right: 14px;
+  background: linear-gradient(135deg, #f8fafc 0%, #dcfce7 100%);
+  border-color: #bbf7d0;
+}
+
+.tilt-card:hover .layer-left {
+  transform: translateZ(-20px) translateX(-90px) rotateZ(-4deg);
+  box-shadow: -12px 12px 24px rgba(18, 24, 29, 0.08);
+}
+
+.tilt-card:hover .layer-right {
+  transform: translateZ(-40px) translateX(90px) rotateZ(4deg);
+  box-shadow: 12px 12px 24px rgba(18, 24, 29, 0.08);
+}
+
+.layer-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  opacity: 0;
+  transition: opacity 0.4s ease 0.1s;
+  white-space: nowrap;
+  position: relative;
+  z-index: 2;
+}
+
+.layer-left .layer-text {
+  color: #4338ca; /* Deep indigo */
+}
+
+.layer-right .layer-text {
+  color: #166534; /* Deep green */
+}
+
+.layer-text-left {
+  transform: rotate(180deg);
+}
+
+.tilt-card:hover .layer-text {
+  opacity: 1;
+}
+
+/* Skeleton decorations inside the sliding layers */
+.layer-decoration {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.layer-left .layer-decoration {
+  align-items: flex-end; /* Align right side so it shows when sliding left */
+}
+
+.layer-right .layer-decoration {
+  align-items: flex-start; /* Align left side so it shows when sliding right */
+}
+
+.dec-box {
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
+.layer-left .dec-box, .layer-left .dec-line {
+  background-color: #818cf8;
+}
+
+.layer-right .dec-box, .layer-right .dec-line {
+  background-color: #4ade80;
+}
+
+.dec-line {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.w-full { width: 100%; }
+.w-3\/4 { width: 75%; }
+.w-1\/2 { width: 50%; }
+
+/* Float-out Interactive UI Panels */
+.ui-panel {
+  position: absolute;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
   font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: var(--tracking-tight);
+  font-weight: 500;
   color: var(--ink-800);
   background-color: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(8px);
@@ -400,47 +552,121 @@
   border: 1px solid var(--line);
   display: flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 0 8px 22px rgba(18, 24, 29, 0.1);
+  gap: 12px;
+  box-shadow: 0 12px 32px rgba(18, 24, 29, 0.12),
+              0 0 0 1px rgba(18, 24, 29, 0.04);
   pointer-events: none;
   animation: floating 3s ease-in-out infinite alternate;
+  z-index: 20;
 }
 
-.parallax-badge i {
-  font-size: 0.95rem;
-}
-
-.badge-ats {
-  top: 50px;
-  left: -20px;
-  transform: translateZ(60px);
+/* ATS Ring Panel */
+.panel-ats {
+  top: 40px;
+  left: -40px;
+  transform: translateZ(70px);
   animation-delay: 0.2s;
 }
 
-.badge-ats i {
-  color: var(--accent-green);
+.ats-ring {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.badge-free {
+.circular-chart {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: #e2e8f0;
+  stroke-width: 2.5;
+}
+
+.circle {
+  fill: none;
+  stroke: var(--accent-green);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  animation: progress 2s ease-out forwards;
+}
+
+@keyframes progress {
+  0% { stroke-dasharray: 0, 100; }
+  100% { stroke-dasharray: 95, 100; }
+}
+
+.ats-score {
+  position: absolute;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+.ats-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.ats-text strong {
+  font-size: 0.85rem;
+  color: var(--ink-900);
+  line-height: 1.2;
+}
+
+.ats-text span {
+  font-size: 0.75rem;
+  color: var(--ink-500);
+}
+
+/* Theme Picker Panel */
+.panel-theme {
   bottom: 80px;
-  right: -25px;
+  right: -50px;
   transform: translateZ(90px);
   animation-delay: 0.5s;
 }
 
-.badge-free i {
-  color: #e0a010;
+.theme-colors {
+  display: flex;
+  gap: 6px;
 }
 
-.badge-pdf {
-  top: 240px;
-  left: -30px;
-  transform: translateZ(45px);
+.theme-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);
+}
+
+.theme-text {
+  font-weight: 600;
+  color: var(--ink-800);
+  font-size: 0.85rem;
+}
+
+/* Drag to reorder panel */
+.panel-drag {
+  bottom: -20px;
+  left: 30px;
+  transform: translateZ(50px);
   animation-delay: 0.8s;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background-color: var(--ink-900);
+  color: #ffffff;
+  border: none;
 }
 
-.badge-pdf i {
-  color: var(--brand);
+.panel-drag i {
+  color: #94a3b8;
 }
 
 /* Decoration only, and it never stops — hand it back to anyone who has asked
@@ -1407,24 +1633,40 @@
     padding: 0 20px;
   }
 
-  .parallax-badge {
-    padding: 6px 12px;
+  .ui-panel {
+    padding: 6px 10px;
     font-size: 0.72rem;
+    gap: 8px;
   }
 
-  .badge-ats {
-    top: 30px;
-    left: -10px;
-  }
-
-  .badge-free {
-    bottom: 50px;
-    right: -15px;
-  }
-
-  .badge-pdf {
-    top: 180px;
+  .panel-ats {
+    top: 20px;
     left: -15px;
+    transform: translateZ(50px) scale(0.85);
+  }
+
+  .panel-theme {
+    bottom: 50px;
+    right: -25px;
+    transform: translateZ(60px) scale(0.85);
+  }
+
+  .panel-drag {
+    bottom: -10px;
+    left: 10px;
+    transform: translateZ(40px) scale(0.85);
+  }
+
+  .tilt-card:hover .layer-left, .tilt-card:active .layer-left {
+    transform: translateZ(-20px) translateX(-50px) rotateZ(-3deg);
+  }
+
+  .tilt-card:hover .layer-right, .tilt-card:active .layer-right {
+    transform: translateZ(-40px) translateX(50px) rotateZ(3deg);
+  }
+
+  .layer-text {
+    font-size: 0.9rem;
   }
 
   .features-grid {

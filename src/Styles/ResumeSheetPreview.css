@@ -3,7 +3,8 @@
    gallery cards use — the templates' type sizes are tuned against it. */
 
 .sheet-frame {
-  background: #eef0f6;
+  /* background: #eef0f6; */
+  background: white;
   border: 1px solid #e2e5ee;
   border-radius: 16px;
   padding: 20px;
