@@ -9,7 +9,7 @@ import '../Styles/TemplateDetail.css';
 
 // A page per template. Each one is a real, indexable URL for a query like
 // "faang engineer resume template" — the gallery alone gave search engines a
-// single page for all 25 designs.
+// single page for every design.
 const TemplateDetail = () => {
   const { slug } = useParams();
   const template = findTemplatePage(slug);
@@ -27,7 +27,7 @@ const TemplateDetail = () => {
         <div className="template-detail-inner">
           <h1>Template not found</h1>
           <p>
-            That template does not exist. <Link to="/templates">Browse all 25 free
+            That template does not exist. <Link to="/templates">Browse all {TEMPLATE_PAGES.length} free
             resume templates</Link> instead.
           </p>
         </div>

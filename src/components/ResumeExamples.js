@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EXAMPLE_RESUMES, findExample, exampleSections } from '../seo/exampleResumes.mjs';
+// Count only — the catalogue metadata, not the renderers, so the examples
+// pages do not pull every template design into their bundle.
+import { TEMPLATES } from './templateMeta.mjs';
 import { examplePageMeta, EXAMPLES_HUB_META } from '../seo/pageMeta.mjs';
 import ResumeSheetPreview from './ResumeSheetPreview';
 import { stageExample } from '../utils/pendingExample';
@@ -58,7 +61,7 @@ export const ExamplesHub = () => {
 
         <p className="examples-footnote">
           Want to start from a design instead?{' '}
-          <Link to="/templates">Browse all 25 free resume templates</Link>, or{' '}
+          <Link to="/templates">Browse all {TEMPLATES.length} free resume templates</Link>, or{' '}
           <Link to="/ats-resume-checker">check an existing resume against a job posting</Link>.
         </p>
       </div>
@@ -155,7 +158,7 @@ export const ExampleDetail = () => {
 
         <p className="examples-footnote">
           <Link to="/examples">All resume examples</Link> ·{' '}
-          <Link to="/templates">All 25 free templates</Link> ·{' '}
+          <Link to="/templates">All {TEMPLATES.length} free templates</Link> ·{' '}
           <Link to="/ats-resume-checker">Free ATS checker</Link>
         </p>
       </div>

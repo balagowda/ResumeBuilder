@@ -2271,6 +2271,21 @@
   gap: 4px;
 }
 
+/* Skills as a multi-column list. Grid rather than CSS `columns`: html2canvas
+   places every element by its own box, and a fragmented column flow is exactly
+   the layout it gets wrong in the image PDF. */
+.tmpl-single .sc-skill-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 14px;
+  margin: 2px 0;
+  padding-left: 13px;
+}
+
+.tmpl-single .sc-skill-grid li {
+  margin-bottom: 1px;
+}
+
 .tmpl-single .sc-skill-pill {
   padding: 2px 8px;
   border-radius: 10px;
@@ -3081,6 +3096,202 @@
 }
 
 /* ==========================================================================
+   TEMPLATES 26-30: MORE SINGLE-COLUMN INDUSTRY STANDARDS
+   ========================================================================== */
+
+/* --- Template 26: Chronological Standard ---------------------------------- */
+
+.tmpl-chrono .sc-header {
+  border-bottom: 1px solid #0f172a;
+  padding-bottom: 8px;
+  margin-bottom: 13px;
+}
+
+.tmpl-chrono .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.7rem;
+  color: #0f172a;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 2px;
+}
+
+/* The dates leave the text flow for a fixed gutter, so the career history
+   reads as one column of dates beside one column of roles. Only the painting
+   moves: the markup still runs title, company, dates in reading order, which
+   is what a parser and the text PDF export both go by. */
+.tmpl-chrono .sc-entry {
+  position: relative;
+  padding-left: 100px;
+}
+
+.tmpl-chrono .date-right {
+  position: absolute;
+  float: none;
+  left: 0;
+  top: 0;
+  width: 88px;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* --- Template 27: Graphite Rule ------------------------------------------- */
+
+.tmpl-graphite {
+  color: #3f4750;
+}
+
+.tmpl-graphite .sc-header {
+  border-bottom: 1px solid #dfe4e9;
+  padding-bottom: 9px;
+  margin-bottom: 13px;
+}
+
+.tmpl-graphite .sc-header h1 {
+  font-weight: 600;
+  color: #23282e;
+  letter-spacing: -0.4px;
+}
+
+.tmpl-graphite .sc-prof-title {
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  font-size: 0.6rem;
+  color: #6b7480;
+}
+
+/* Heading, then a hairline taking up whatever width is left. */
+.tmpl-graphite .sc-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-size: 0.66rem;
+  color: #3f4750;
+}
+
+.tmpl-graphite .sc-section h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #d7dde3;
+}
+
+/* --- Template 28: Skills Matrix ------------------------------------------- */
+
+.tmpl-matrix .sc-header {
+  border-bottom: 2px solid #334155;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.tmpl-matrix .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-size: 0.7rem;
+  color: #0f172a;
+}
+
+.tmpl-matrix .sc-section h3::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  background: #334155;
+}
+
+.tmpl-matrix .sc-skill-grid {
+  font-size: 0.62rem;
+}
+
+/* --- Template 29: Clinical Professional ----------------------------------- */
+
+.tmpl-clinical .sc-header h1 {
+  color: #1e3a5f;
+  font-size: 1.4rem;
+}
+
+/* Credentials line — "RN, BSN", "PA-C" — sits directly under the name, which
+   is where a nurse manager looks first. */
+.tmpl-clinical .sc-prof-title {
+  color: #35617f;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+/* Full-bleed contact strip. The -32px matches the sheet's own padding. */
+.tmpl-clinical .sc-contact {
+  background: #eef4f8;
+  border-top: 1px solid #cbdce8;
+  border-bottom: 1px solid #cbdce8;
+  margin: 8px -32px 0;
+  padding: 5px 32px;
+}
+
+.tmpl-clinical .sc-section h3 {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: 0.74rem;
+  color: #1e3a5f;
+  border-bottom: 2px solid #7ba7c7;
+  padding-bottom: 1px;
+}
+
+/* --- Template 30: Finance Standard ---------------------------------------- */
+
+.tmpl-finance,
+.tmpl-finance .sc-header h1,
+.tmpl-finance .sc-section h3,
+.tmpl-finance .entry-header {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.tmpl-finance {
+  color: #1f2328;
+}
+
+.tmpl-finance .sc-header {
+  text-align: center;
+  border-bottom: 3px double #1a1a1a;
+  padding-bottom: 8px;
+  margin-bottom: 13px;
+}
+
+.tmpl-finance .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-finance .sc-header h1 {
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.tmpl-finance .sc-prof-title {
+  font-style: italic;
+  color: #4b5563;
+}
+
+.tmpl-finance .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-size: 0.7rem;
+  color: #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: 1px;
+}
+
+.tmpl-finance .sc-company {
+  font-style: italic;
+  color: #374151;
+}
+
+/* ==========================================================================
    ACCENT COLOR SYSTEM
    When the user picks an accent, override each template's signature colors.
    ========================================================================== */
@@ -3113,12 +3324,14 @@
 .resume[data-accent='on'] .tmpl-compact .sc-header h1,
 .resume[data-accent='on'] .tmpl-teal .sc-header h1,
 .resume[data-accent='on'] .tmpl-coral .sc-header h1,
+.resume[data-accent='on'] .tmpl-clinical .sc-header h1,
 .resume[data-accent='on'] .tmpl-deedy .rb-header h1 {
   color: var(--accent) !important;
 }
 
 .resume[data-accent='on'] .tmpl-accentbar .sc-header h1::after,
-.resume[data-accent='on'] .tmpl-timeline .sc-entry::before {
+.resume[data-accent='on'] .tmpl-timeline .sc-entry::before,
+.resume[data-accent='on'] .tmpl-matrix .sc-section h3::before {
   background: var(--accent) !important;
 }
 

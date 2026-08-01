@@ -669,6 +669,17 @@ const renderSingleColumn = (ctx, opts) => {
         </div>
       );
     }
+    // A grid of skills scans faster than one long comma line, and stays a plain
+    // <ul> — a parser still gets one skill per list item either way.
+    if (opts.skillsAs === 'columns') {
+      return (
+        <ul className="sc-skill-grid">
+          {formData.skills.split(',').map((skill, i) => skill.trim() && (
+            <li key={i}>{skill.trim()}</li>
+          ))}
+        </ul>
+      );
+    }
     return <p className="sc-skills-line">{formData.skills}</p>;
   };
 
@@ -1027,6 +1038,45 @@ const SINGLE_COLUMN_VARIANTS = {
     contactSep: '•',
     skillsAs: 'line',
     headings: { summary: 'Profile' },
+  },
+  26: {
+    className: 'tmpl-chrono',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
+  27: {
+    className: 'tmpl-graphite',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'line',
+    headings: { summary: 'Profile', skills: 'Core Skills' },
+  },
+  28: {
+    className: 'tmpl-matrix',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'columns',
+    headings: { summary: 'Summary', skills: 'Technical Skills' },
+  },
+  29: {
+    className: 'tmpl-clinical',
+    showUrls: false,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: {
+      summary: 'Professional Summary',
+      skills: 'Clinical Skills',
+      others: 'Licenses & Certifications',
+    },
+  },
+  30: {
+    className: 'tmpl-finance',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Summary', skills: 'Skills & Certifications' },
   },
 };
 

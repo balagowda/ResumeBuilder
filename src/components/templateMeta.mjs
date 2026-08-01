@@ -180,6 +180,41 @@ export const TEMPLATES = [
     category: 'Professional',
     tags: ['Side Headings', 'Academic CV', 'LaTeX Style'],
   },
+  {
+    id: 26,
+    name: 'Chronological Standard',
+    description: 'The reverse-chronological format recruiters expect, with dates set in a left column so a career history reads straight down the page.',
+    category: 'ATS-Optimized',
+    tags: ['Date Column', 'Reverse Chronological', '100% ATS'],
+  },
+  {
+    id: 27,
+    name: 'Graphite Rule',
+    description: 'Charcoal typography with a hairline rule running out from each section heading. The restrained modern corporate look, with no colour to distract.',
+    category: 'Professional',
+    tags: ['Trailing Rules', 'Charcoal Ink', 'Modern Corporate'],
+  },
+  {
+    id: 28,
+    name: 'Skills Matrix',
+    description: 'Built for technical and IT roles: skills laid out as a three-column list a recruiter can scan in seconds, above a plain single-column history.',
+    category: 'ATS-Optimized',
+    tags: ['3-Column Skills', 'Technical & IT', 'Single Column'],
+  },
+  {
+    id: 29,
+    name: 'Clinical Professional',
+    description: 'The healthcare standard: credentials under your name, a banded contact strip, and dedicated headings for clinical skills and licenses.',
+    category: 'Professional',
+    tags: ['Healthcare & Nursing', 'Licenses Section', 'Slate Blue'],
+  },
+  {
+    id: 30,
+    name: 'Finance Standard',
+    description: 'The banking and consulting format: an uppercase serif name over a double rule, italic employers, and dates aligned right. Standard for MBA and finance applications.',
+    category: 'ATS-Optimized',
+    tags: ['Banking & Consulting', 'Double Rule', 'MBA Standard'],
+  },
 ];
 
 /** Which templates use a two-column page layout (everything else is single

@@ -115,7 +115,7 @@ async function buildRoutes() {
     `<h1>Free Resume Templates — ${TEMPLATES.length} ATS-Friendly Designs</h1>`,
     `<p>Every ${BRAND} template is free to use and free to download as a PDF — no account, no watermark, and no payment at the download step. Templates in the ATS-Optimized category use the single-column structure applicant tracking systems parse most reliably.</p>`,
     '<ul>',
-    // Linked, so a crawler reaches all 25 template pages from here.
+    // Linked, so a crawler reaches every template page from here.
     ...TEMPLATE_PAGES.map(
       (t) =>
         `  <li><a href="${SITE_URL}${t.path}/"><strong>${escapeHtml(t.name)}</strong></a> (${escapeHtml(

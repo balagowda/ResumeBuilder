@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import FeedbackForm from './FeedbackForm';
+// Count only — metadata, so the landing bundle stays free of the renderers.
+import { TEMPLATES } from './templateMeta.mjs';
 import '../Styles/LandingPage.css';
 
 // Early users who built their own resume on the site. Kept as data rather than
@@ -311,7 +313,7 @@ const LandingPage = () => {
               </div>
               <div className="stat-divider"></div>
               <div className="stat-item">
-                <span className="stat-num">25</span>
+                <span className="stat-num">{TEMPLATES.length}</span>
                 <span className="stat-label">Free Pro Templates</span>
               </div>
             </div>
@@ -493,7 +495,7 @@ const LandingPage = () => {
           <h2 className="section-title">What is <span className="gradient-text">HatchResume</span>?</h2>
           <p className="about-strip-text">
             HatchResume is a free online resume builder at hatchresume.com. Pick
-            one of 25+ professional, ATS-friendly templates, fill in your
+            one of 30+ professional, ATS-friendly templates, fill in your
             details, and download a print-ready PDF — with no account, no
             watermark, and no payment at the download step. Everything runs in
             your browser, so your work history is never uploaded to a server.
