@@ -3,7 +3,7 @@ import { Routes, Route, NavLink, Link, useLocation } from 'react-router-dom';
 import './App.css';
 import LandingPage from './components/LandingPage';
 import ContentPage from './components/ContentPage';
-// Metadata only — importing TEMPLATES from ResumeTemplates would pull all 35
+// Metadata only — importing TEMPLATES from ResumeTemplates would pull all 40
 // template renderers into the landing page's bundle just to declare routes.
 import { TEMPLATES } from './components/templateMeta.mjs';
 import { CONTENT_PAGES } from './seo/contentPages.mjs';
@@ -109,7 +109,7 @@ function App() {
               <div className="footer-brand">
                 <div className="footer-logo">HatchResume</div>
                 <p className="footer-blurb">
-                  A free online resume builder with 35+ ATS-friendly templates —
+                  A free online resume builder with 40+ ATS-friendly templates —
                   no sign-up, no watermark, and your data never leaves your
                   browser.
                 </p>

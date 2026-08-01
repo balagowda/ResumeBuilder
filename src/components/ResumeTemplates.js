@@ -1121,6 +1121,41 @@ const SINGLE_COLUMN_VARIANTS = {
     skillsAs: 'pills',
     headings: { summary: 'Profile' },
   },
+  36: {
+    className: 'tmpl-functional',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'columns',
+    headings: { summary: 'Profile', skills: 'Core Skills & Strengths' },
+  },
+  37: {
+    className: 'tmpl-garamond',
+    showUrls: false,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: { summary: 'Summary', skills: 'Areas of Expertise' },
+  },
+  38: {
+    className: 'tmpl-office',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
+  39: {
+    className: 'tmpl-scan',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Summary', skills: 'Key Skills' },
+  },
+  40: {
+    className: 'tmpl-charcoal',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'Profile' },
+  },
 };
 
 export const renderResumeTemplate = (templateId, ctx) => {

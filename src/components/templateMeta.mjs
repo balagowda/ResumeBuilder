@@ -250,6 +250,41 @@ export const TEMPLATES = [
     category: 'Professional',
     tags: ['Vertical Rule', 'Structured', 'Quiet Accent'],
   },
+  {
+    id: 36,
+    name: 'Functional Skills-First',
+    description: 'The functional format for career changers and people returning to work: strengths lead the page in a panel of their own, with the dated history kept intact underneath.',
+    category: 'Professional',
+    tags: ['Functional Format', 'Career Change', 'Skills Panel'],
+  },
+  {
+    id: 37,
+    name: 'Garamond Executive',
+    description: 'Set in Garamond with letter-spaced headings and generous leading — the quiet, well-set serif look that suits senior and executive applications.',
+    category: 'Professional',
+    tags: ['Garamond Serif', 'Executive', 'Generous Leading'],
+  },
+  {
+    id: 38,
+    name: 'Office Classic',
+    description: 'Cambria headings over a Calibri body: the default word-processor pairing behind more resumes than any other, and the one every recruiter reads without noticing it.',
+    category: 'ATS-Optimized',
+    tags: ['Cambria & Calibri', 'Word Standard', 'Plain Rules'],
+  },
+  {
+    id: 39,
+    name: 'Recruiter Scan',
+    description: 'Built for the ten seconds a resume actually gets: oversized black section headings, wide gaps between blocks, and nothing competing with the text.',
+    category: 'ATS-Optimized',
+    tags: ['Large Headings', 'High Whitespace', 'Fast Scan'],
+  },
+  {
+    id: 40,
+    name: 'Charcoal Modern',
+    description: 'Your name reversed out of a charcoal block with the contact line plain beneath it — a contemporary corporate header on an otherwise unadorned page.',
+    category: 'Professional',
+    tags: ['Name Block', 'Mid-Career', 'Contemporary'],
+  },
 ];
 
 /** Which templates use a two-column page layout (everything else is single

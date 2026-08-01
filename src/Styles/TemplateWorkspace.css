@@ -3487,6 +3487,203 @@
 }
 
 /* ==========================================================================
+   TEMPLATES 36-40: MORE SINGLE-COLUMN INDUSTRY STANDARDS
+   ========================================================================== */
+
+/* --- Template 36: Functional Skills-First --------------------------------- */
+
+.tmpl-functional .sc-header {
+  border-bottom: 2px solid #334155;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.tmpl-functional .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.7rem;
+  color: #1e293b;
+}
+
+/* Only the strengths get a panel — the point of the functional format is that
+   they are read first. The history keeps its dates and its order underneath,
+   which is what stops the layout from becoming the sort of undated functional
+   resume a parser has nothing to file. */
+.tmpl-functional .sc-skills {
+  background: #f6f8fb;
+  border: 1px solid #dfe6ee;
+  border-radius: 3px;
+  padding: 8px 11px;
+}
+
+.tmpl-functional .sc-skill-grid {
+  grid-template-columns: repeat(2, 1fr);
+  font-size: 0.63rem;
+}
+
+/* The history is supporting evidence here, so it is set tighter than the
+   panel above it. */
+.tmpl-functional .sc-entry {
+  margin-bottom: 6px;
+}
+
+/* --- Template 37: Garamond Executive -------------------------------------- */
+
+.tmpl-garamond,
+.tmpl-garamond .sc-header h1,
+.tmpl-garamond .sc-section h3,
+.tmpl-garamond .entry-header {
+  font-family: Garamond, 'EB Garamond', 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+/* Garamond runs small for its point size — the whole sheet is set a step up
+   so it reads at the same size as the sans templates. */
+.tmpl-garamond {
+  font-size: 0.7rem;
+  color: #262b2f;
+}
+
+.tmpl-garamond .sc-header {
+  margin-bottom: 15px;
+}
+
+.tmpl-garamond .sc-header h1 {
+  font-weight: 600;
+  font-size: 1.55rem;
+  letter-spacing: 0.5px;
+}
+
+.tmpl-garamond .sc-prof-title {
+  font-size: 0.88rem;
+  color: #4b5563;
+}
+
+.tmpl-garamond .sc-section {
+  margin-bottom: 14px;
+}
+
+.tmpl-garamond .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 2.2px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #262b2f;
+  border-bottom: 1px solid #b8bfc6;
+  padding-bottom: 3px;
+  margin-bottom: 7px;
+}
+
+.tmpl-garamond .entry-header {
+  font-size: 0.72rem;
+}
+
+/* --- Template 38: Office Classic ------------------------------------------ */
+
+.tmpl-office {
+  font-family: Calibri, Candara, 'Segoe UI', 'Trebuchet MS', sans-serif;
+  color: #1f2937;
+}
+
+/* The Cambria-over-Calibri pairing is the whole design — it is what a resume
+   written in Word has looked like for fifteen years. */
+.tmpl-office .sc-header h1,
+.tmpl-office .sc-section h3 {
+  font-family: Cambria, 'Hoefler Text', Georgia, serif;
+}
+
+.tmpl-office .sc-header {
+  padding-bottom: 7px;
+  border-bottom: 1px solid #6b7280;
+  margin-bottom: 11px;
+}
+
+.tmpl-office .sc-header h1 {
+  font-weight: 700;
+  font-size: 1.42rem;
+}
+
+.tmpl-office .sc-section h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 2px;
+}
+
+/* --- Template 39: Recruiter Scan ------------------------------------------ */
+
+.tmpl-scan .sc-header {
+  margin-bottom: 18px;
+}
+
+.tmpl-scan .sc-header h1 {
+  font-size: 1.7rem;
+  letter-spacing: -0.5px;
+}
+
+.tmpl-scan .sc-prof-title {
+  font-size: 0.9rem;
+}
+
+/* Headings big enough to find without reading, and enough air between blocks
+   that the eye lands on them one at a time. */
+.tmpl-scan .sc-section {
+  margin-bottom: 17px;
+}
+
+.tmpl-scan .sc-section h3 {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #000000;
+  margin-bottom: 7px;
+}
+
+.tmpl-scan .sc-entry {
+  margin-bottom: 9px;
+}
+
+/* --- Template 40: Charcoal Modern ----------------------------------------- */
+
+/* The block hugs the name rather than spanning the page: a full-width band
+   pushes the contact line into reversed-out small text, which is the first
+   thing to go wrong when a parser reads the header. */
+.tmpl-charcoal .sc-header h1 {
+  display: inline-block;
+  background: #1f2933;
+  color: #ffffff;
+  padding: 5px 12px 6px;
+  letter-spacing: 0.3px;
+}
+
+.tmpl-charcoal .sc-header {
+  margin-bottom: 13px;
+}
+
+.tmpl-charcoal .sc-prof-title {
+  margin-top: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-size: 0.62rem;
+  color: #52606d;
+}
+
+.tmpl-charcoal .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 0.7rem;
+  color: #1f2933;
+  border-bottom: 1px solid #1f2933;
+  padding-bottom: 2px;
+}
+
+.tmpl-charcoal .sc-skill-pill {
+  background: #eef1f4;
+  color: #1f2933;
+}
+
+/* ==========================================================================
    ACCENT COLOR SYSTEM
    When the user picks an accent, override each template's signature colors.
    ========================================================================== */
@@ -3506,6 +3703,7 @@
 .resume[data-accent='on'] .tmpl-corpblue .sc-header,
 .resume[data-accent='on'] .tmpl-tech .tech-header-band,
 .resume[data-accent='on'] .tmpl-creative .creative-sidebar,
+.resume[data-accent='on'] .tmpl-charcoal .sc-header h1,
 .resume[data-accent='on'] .tmpl-mono .sc-monogram {
   background-color: var(--accent) !important;
 }
