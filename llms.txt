@@ -26,6 +26,15 @@
 - [Software Engineer resume example](https://hatchresume.com/examples/software-engineer/): Five years of backend and full-stack work, written the way engineering recruiters scan it.
 - [Data Analyst resume example](https://hatchresume.com/examples/data-analyst/): Analytics work framed as decisions changed, not dashboards produced.
 - [Product Manager resume example](https://hatchresume.com/examples/product-manager/): Outcomes and trade-offs rather than a list of features shipped.
+- [Frontend Developer resume example](https://hatchresume.com/examples/frontend-developer/): Interface work measured in load time, conversion and accessibility, not screenshots.
+- [DevOps Engineer resume example](https://hatchresume.com/examples/devops-engineer/): Infrastructure work framed as reliability and cost, the two numbers that get DevOps hired.
+- [UX Designer resume example](https://hatchresume.com/examples/ux-designer/): Design decisions tied to task completion and conversion, with the portfolio one click away.
+- [Marketing Manager resume example](https://hatchresume.com/examples/marketing-manager/): Campaigns reported as pipeline and revenue, the way a CMO reads them.
+- [Financial Analyst resume example](https://hatchresume.com/examples/financial-analyst/): Modelling and reporting work stated in decisions funded and dollars found.
+- [Registered Nurse resume example](https://hatchresume.com/examples/registered-nurse/): Clinical experience with the license, unit type and patient ratios screeners scan for.
+- [Project Manager resume example](https://hatchresume.com/examples/project-manager/): Delivery stated in budgets, dates hit, and what the projects returned.
+- [Sales Manager resume example](https://hatchresume.com/examples/sales-manager/): Quota attainment, team performance and pipeline discipline — the three lines sales leaders are hired on.
+- [Customer Service Representative resume example](https://hatchresume.com/examples/customer-service-representative/): Support work with the metrics that prove it: CSAT, handle time, resolution rate.
 
 ## Templates
 
