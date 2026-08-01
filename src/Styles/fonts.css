@@ -1,0 +1,45 @@
+/*
+ * Bundled open-license fonts for the resume typography controls.
+ *
+ * Self-hosted (latin subset only, ~130KB total) rather than loaded from
+ * Google Fonts, so no visitor request ever leaves the site — same reason
+ * everything else here is client-side. A face only downloads when a resume
+ * actually uses it; visitors on the default system fonts fetch nothing.
+ *
+ * Inter and Source Serif 4 are variable fonts, so one file covers every
+ * weight the templates use. All three are SIL Open Font License.
+ * Inter © The Inter Project Authors. Lato © Łukasz Dziedzic.
+ * Source Serif 4 © Adobe.
+ */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/inter-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/lato-latin-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/lato-latin-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url('../fonts/source-serif-4-latin.woff2') format('woff2');
+}

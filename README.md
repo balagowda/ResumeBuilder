@@ -11,8 +11,11 @@ A 100% free, privacy-first resume builder. Pick one of 25+ professional, ATS-fri
 - **Standalone ATS checker** at [/ats-resume-checker](https://hatchresume.com/ats-resume-checker/) — paste any resume for a structural and writing score, no account
 - **Resume examples by role** at [/examples](https://hatchresume.com/examples/) — complete resumes that load straight into the editor
 - **Job description matching** — paste a posting and see which of its keywords your resume is missing, scored and ranked, entirely in-browser
-- **Writing review** — flags weak openers, passive voice, unquantified claims and repeated verbs as you type
-- **Two PDF exports** — a text-based one an ATS can read, and a pixel-exact image one for printing
+- **Writing review** — flags weak openers, passive voice, unquantified claims, repeated verbs and common misspellings as you type
+- **Two PDF exports** — a one-click text-based ATS PDF built with jsPDF (selectable text, clickable links, clean page breaks), and a pixel-exact image one for printing; the browser's print-to-PDF remains as a styled text fallback
+- **Version compare** — side-by-side diff of any two saved resumes, showing exactly which fields differ
+- **Complete backups** — one JSON file round-trips every resume with its name, section order and template
+- **Self-hosted fonts** — Inter, Lato and Source Serif 4 are bundled (latin subset); no Google Fonts request, so visiting the site sends nothing to any third party
 - **Page overflow protection** — warns when content runs onto a second page, with one-click "fit to one page" resizing and multi-page PDF export
 - **No login required** — start building immediately
 - **Instant PDF download** via html2pdf/jsPDF

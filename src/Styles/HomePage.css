@@ -473,7 +473,9 @@
   margin-left: -280px;
   padding: 32px;
   background: #ffffff;
-  transform: scale(0.643);
+  /* --thumb-scale is measured from the real card width in HomePage; the literal
+     is only the pre-measurement fallback (360px card / 560px sheet). */
+  transform: scale(var(--thumb-scale, 0.643));
   transform-origin: top center;
   pointer-events: none;
   user-select: none;
@@ -536,13 +538,30 @@
 
 .templates-toolbar {
   position: sticky;
-  top: 64px; /* below the sticky app header */
+  /* Matches the sticky app header's real height (16px padding x2 + a 42px
+     row). It was 64px, which let the toolbar's first 10px slide underneath. */
+  top: 74px;
   z-index: 50;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   padding: 14px 24px 4px;
   margin-bottom: 28px;
   border-bottom: 1px solid #e2e8f0;
+}
+
+/* Not sticky on a phone. Two things break down there: the app header stacks to
+   roughly 150px, so a bar pinned 64px from the top slides underneath it and
+   loses its first row, and the filters lay out as a full-width column that is
+   ~480px tall — about two thirds of the viewport, permanently, with the card
+   previews smeared behind its blur. Filters that are always in reach are not
+   worth that, so the bar scrolls away and the templates get the room.
+   Placed after the rule above because it has the same specificity. */
+@media (max-width: 768px) {
+  .templates-toolbar {
+    position: static;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 .templates-toolbar .templates-filter-bar {
@@ -661,8 +680,9 @@
   height: 310px;
 }
 
+/* Same measured value; only the fallback differs (230px card / 560px sheet). */
 .templates-cards-grid.compact .template-thumb-sheet {
-  transform: scale(0.41);
+  transform: scale(var(--thumb-scale, 0.41));
 }
 
 .templates-cards-grid.compact .template-front-name {

@@ -24,8 +24,10 @@ const Education = ({ education, collapsed, toggleSection, handleChange, addEntry
         ) : (
           education.map((edu, index) => (
             <div key={index} className="sub-group">
-              <label htmlFor="studyTitle">Study Title</label>
+              {/* Per-entry ids — see the note in Experiences. */}
+              <label htmlFor={`education-studyTitle-${index}`}>Study Title</label>
               <input
+                id={`education-studyTitle-${index}`}
                 type="text"
                 name="studyTitle"
                 value={edu.studyTitle}
@@ -33,8 +35,9 @@ const Education = ({ education, collapsed, toggleSection, handleChange, addEntry
                 placeholder="e.g., Bachelor of Science"
                 className="input-field"
               />
-              <label htmlFor="school">School</label>
+              <label htmlFor={`education-school-${index}`}>School</label>
               <input
+                id={`education-school-${index}`}
                 type="text"
                 name="school"
                 value={edu.school}
@@ -50,8 +53,9 @@ const Education = ({ education, collapsed, toggleSection, handleChange, addEntry
                   handleChange({ target: { name: 'date', value: next } }, 'education', index)
                 }
               />
-              <label htmlFor="score">Score</label>
+              <label htmlFor={`education-score-${index}`}>Score</label>
               <input
+                id={`education-score-${index}`}
                 type="text"
                 name="score"
                 value={edu.score}

@@ -47,6 +47,8 @@ const JobMatch = ({ jobDescription, formData, collapsed, toggleSection, handleCh
           </div>
 
           <textarea
+            id="jobDescription"
+            aria-label="Job description to match against"
             name="jobDescription"
             rows={6}
             value={jobDescription || ''}

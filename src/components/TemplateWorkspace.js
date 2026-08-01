@@ -17,13 +17,28 @@ import StorageNotice from './StorageNotice';
 import ContentReview from './ContentReview';
 import useResumeStore from '../hooks/useResumeStore';
 import { takePendingExample } from '../utils/pendingExample';
+import generateAtsPdf from '../utils/textPdf';
 import '../Styles/TemplateWorkspace.css';
 
 // Preview sheet geometry. The sheet is 560x794 CSS px (A4 at the preview's
 // scale) with 32px padding, and grows in whole-page increments.
 const PAGE_H = 794;
+const SHEET_W = 560;
 const SHEET_PAD = 64; // 32px top + 32px bottom
 const MIN_SCALE = 0.7;
+const SCROLLBAR_GUTTER = 16;
+
+/**
+ * How far the sheet has to shrink to fit `available` px of width.
+ *
+ * The sheet is never allowed to reflow to the viewport: every measurement that
+ * matters — content height, page count, where the page breaks land, what
+ * html2canvas captures — is only meaningful at the real 560px width. A narrow
+ * screen therefore gets a scaled-down copy of the actual page rather than a
+ * differently-shaped one, and never scales up past 1:1.
+ */
+const fitScaleFor = (available) =>
+  available >= SHEET_W ? 1 : Math.max(0.3, available / SHEET_W);
 
 // Single source of truth for a pristine resume, so "Clear Data" lands on
 // exactly the same state as a first visit — including typography, which used
@@ -94,12 +109,16 @@ export default function TemplateWorkspace({ templateId }) {
 
   const resumeRef = useRef();
   const importInputRef = useRef();
+  const panelRef = useRef();
   const navigate = useNavigate();
 
   const [sidebarWidth, setSidebarWidth] = useState(480);
   const [isResizing, setIsResizing] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [dragOverSection, setDragOverSection] = useState(null);
+  // Shrink-to-fit factor for screens too narrow to show the sheet at 1:1.
+  const [fitScale, setFitScale] = useState(1);
+  const [previewFitScale, setPreviewFitScale] = useState(1);
 
   // Layout height of .resume-content in CSS px, before --content-scale is
   // applied. Drives the page count and the overflow warning.
@@ -109,6 +128,10 @@ export default function TemplateWorkspace({ templateId }) {
   const [fitFailed, setFitFailed] = useState(false);
 
   const contentScale = formData.contentScale || 1;
+  // What the sheet is displayed at: the user's zoom, then shrunk again if the
+  // screen is too narrow for 1:1. Export does not go through this — see
+  // handleDownloadPDF — so nothing here moves while a PDF is being made.
+  const displayScale = (zoom / 100) * fitScale;
   const scaledHeight = contentHeight * contentScale;
   const pageCount = Math.max(1, Math.ceil((scaledHeight + SHEET_PAD) / PAGE_H));
   const sheetHeight = pageCount * PAGE_H;
@@ -224,6 +247,50 @@ export default function TemplateWorkspace({ templateId }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, [templateId, measureContent]);
+
+  // How much width the preview panel can actually give the sheet.
+  const measureFit = useCallback(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    const styles = window.getComputedStyle(el);
+    // Deliberately the border-box width rather than clientWidth: clientWidth
+    // excludes the panel's vertical scrollbar, and scaling the sheet changes
+    // how tall it is, which can make that scrollbar appear or disappear. At one
+    // specific window width the two would chase each other every frame, so the
+    // gutter is reserved as a constant instead of measured.
+    const available =
+      el.getBoundingClientRect().width -
+      (parseFloat(styles.paddingLeft) || 0) -
+      (parseFloat(styles.paddingRight) || 0) -
+      SCROLLBAR_GUTTER;
+    // The panel has no width yet (first paint, or the editor rendered while
+    // hidden). Keep whatever scale we had rather than collapsing to the floor.
+    if (!(available > 0)) return;
+    const next = fitScaleFor(available);
+    setFitScale((prev) => (prev === next ? prev : next));
+  }, []);
+
+  // Same arrangement as measureContent above: run it after every render, and
+  // separately on resize, which changes the panel without re-rendering.
+  // ResizeObserver alone would be neater but is not universally reliable.
+  useLayoutEffect(measureFit);
+
+  useEffect(() => {
+    window.addEventListener('resize', measureFit);
+    return () => window.removeEventListener('resize', measureFit);
+  }, [measureFit]);
+
+  // The modal sizes itself off the viewport rather than the panel, so it needs
+  // its own factor. Only tracked while it is open.
+  useEffect(() => {
+    if (!isPreviewOpen) return undefined;
+    // .preview-modal has 20px of side padding; .preview-content caps at 620px.
+    const update = () =>
+      setPreviewFitScale(fitScaleFor(Math.min(620, window.innerWidth - 40)));
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [isPreviewOpen]);
 
   const handleMouseDown = (e) => {
     e.preventDefault();
@@ -378,6 +445,59 @@ export default function TemplateWorkspace({ templateId }) {
     setDragOverSection(null);
   };
 
+  // Move a section one place without dragging. The drag handle above is HTML5
+  // drag-and-drop, which never fires on a touch screen, so on a phone these
+  // buttons are the only way to reorder at all. Entries already work this way
+  // through moveEntry.
+  const moveSection = (section, direction) => {
+    const from = sectionOrder.indexOf(section);
+    const to = from + direction;
+    if (from < 0 || to < 0 || to >= sectionOrder.length) return;
+    const next = [...sectionOrder];
+    [next[from], next[to]] = [next[to], next[from]];
+    setSectionOrder(next);
+  };
+
+  // The handle every section renders in its heading: grab-to-drag on a pointer,
+  // and the two buttons for everyone else. The heading itself toggles the
+  // section, hence stopPropagation.
+  const sectionHandle = (section) => {
+    const index = sectionOrder.indexOf(section);
+    return (
+      <span className="section-handle">
+        <span
+          className="drag-handle"
+          draggable="true"
+          onDragStart={(e) => handleDragStart(e, section)}
+          onDragEnd={handleDragEnd}
+          title="Drag to reorder"
+        >
+          <i className="fas fa-grip-vertical"></i>
+        </span>
+        <button
+          type="button"
+          className="section-move"
+          onClick={(e) => { e.stopPropagation(); moveSection(section, -1); }}
+          disabled={index <= 0}
+          title="Move section up"
+          aria-label={`Move ${section} section up`}
+        >
+          <i className="fas fa-chevron-up" aria-hidden="true"></i>
+        </button>
+        <button
+          type="button"
+          className="section-move"
+          onClick={(e) => { e.stopPropagation(); moveSection(section, 1); }}
+          disabled={index === -1 || index >= sectionOrder.length - 1}
+          title="Move section down"
+          aria-label={`Move ${section} section down`}
+        >
+          <i className="fas fa-chevron-down" aria-hidden="true"></i>
+        </button>
+      </span>
+    );
+  };
+
   const handleChange = (e, section, index = null) => {
     const { name, value, type, checked } = e.target;
     const finalValue = type === 'checkbox' ? checked : value;
@@ -421,34 +541,42 @@ export default function TemplateWorkspace({ templateId }) {
     const originalElement = resumeRef.current;
     if (!originalElement) return;
 
-    // Capture must happen at 100% zoom or coordinates come out scaled
-    const prevZoom = zoom;
-    if (prevZoom !== 100) {
-      setZoom(100);
-      await new Promise(resolve => setTimeout(resolve, 150));
-    }
-
     try {
-      // Find the scrolling container to temporarily reset its scroll
-      // This prevents html2canvas from capturing a blank or offset canvas
-      const panel = originalElement.closest('.resume-panel');
-      const oldScrollTop = panel ? panel.scrollTop : 0;
-      const oldScrollLeft = panel ? panel.scrollLeft : 0;
-      
-      if (panel) {
-        panel.scrollTop = 0;
-        panel.scrollLeft = 0;
-      }
-      
-      // Wait a tiny bit for the browser to register the scroll reset
-      await new Promise(resolve => setTimeout(resolve, 50));
-
-      // Capture the element precisely as it appears on screen
+      // The sheet on screen is scaled — by the user's zoom, and on a narrow
+      // screen by the shrink-to-fit factor — and html2canvas takes its bounds
+      // from getBoundingClientRect, so left alone it would capture the sheet at
+      // whatever size it is currently displayed at and stretch that onto A4.
+      //
+      // Undoing the scale on the real element works, but the preview visibly
+      // jumps while the capture runs. html2canvas renders its own copy of the
+      // document instead of the pixels on screen, so the same thing can be done
+      // there, where nobody sees it: onclone lifts the sheet out of the scaled
+      // wrapper, drops it at the origin on its own, and the explicit bounds
+      // below crop exactly that. Nothing on screen moves.
       const canvas = await html2canvas(originalElement, {
         scale: 3, // 3x scale guarantees retina-quality crisp text when stretched
         useCORS: true,
+        backgroundColor: '#ffffff',
         scrollX: 0,
         scrollY: 0,
+        x: 0,
+        y: 0,
+        width: SHEET_W,
+        height: sheetHeight,
+        onclone: (clonedDoc, clonedSheet) => {
+          const body = clonedDoc.body;
+          body.appendChild(clonedSheet);
+          // Everything else would still paint at the origin underneath it.
+          Array.from(body.children).forEach((child) => {
+            if (child !== clonedSheet) child.remove();
+          });
+          body.style.margin = '0';
+          body.style.padding = '0';
+          clonedSheet.style.position = 'absolute';
+          clonedSheet.style.left = '0';
+          clonedSheet.style.top = '0';
+          clonedSheet.style.margin = '0';
+        },
         ignoreElements: (element) => {
           // Check if classList exists and contains is a function (SVG elements can break this)
           if (element.classList && typeof element.classList.contains === 'function') {
@@ -498,6 +626,11 @@ export default function TemplateWorkspace({ templateId }) {
 
       // --- INJECT CLICKABLE LINKS ---
       // Since html2canvas outputs a flat image, we must manually map HTML <a> tags to PDF link boxes
+      //
+      // These rects come from the live sheet, so they carry whatever scale it
+      // is displayed at. That is harmless: every one of them below is divided
+      // by origRect, so a uniform scale cancels out and the ratios are the same
+      // at any zoom.
       const origRect = originalElement.getBoundingClientRect();
       const cssPageHeight = origRect.height / pageCount;
       const links = originalElement.querySelectorAll('a');
@@ -529,23 +662,25 @@ export default function TemplateWorkspace({ templateId }) {
 
       const filename = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'Resume'}.pdf`;
       pdf.save(filename);
-
-      // Restore user's previous scroll position
-      if (panel) {
-        panel.scrollTop = oldScrollTop;
-        panel.scrollLeft = oldScrollLeft;
-      }
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(`Failed to download PDF. Error: ${error.message}`);
-    } finally {
-      if (prevZoom !== 100) setZoom(prevZoom);
     }
   };
 
-  // Text-based export through the browser's print-to-PDF pipeline.
-  // Unlike the image capture, the resulting PDF has selectable text that
-  // ATS parsers can actually read.
+  // One-click text-based export: a real text-layer PDF built with jsPDF, so
+  // the text is selectable and ATS parsers can read it — no print dialog.
+  const handleDownloadTextPDF = () => {
+    try {
+      generateAtsPdf({ formData, sectionOrder, experienceHeading });
+    } catch (error) {
+      console.error('Error generating ATS PDF:', error);
+      alert(`Failed to download ATS PDF. Error: ${error.message}`);
+    }
+  };
+
+  // Kept as a fallback: the browser's print-to-PDF pipeline renders the
+  // template exactly as styled, also with selectable text.
   const handlePrintPDF = () => {
     window.print();
   };
@@ -581,12 +716,24 @@ export default function TemplateWorkspace({ templateId }) {
     setFormData({ ...formData, ...SAMPLE_DATA }, { label: 'load sample' });
   };
 
+  // Backs up the whole store — every resume, with its name, section order,
+  // heading, and template — not just the open form. Old backups held a single
+  // formData object; handleImportJSON still accepts those.
   const handleExportJSON = () => {
-    const blob = new Blob([JSON.stringify(formData, null, 2)], { type: 'application/json' });
+    const payload = {
+      app: 'hatchresume',
+      schema: 1,
+      exportedAt: new Date().toISOString(),
+      activeId: store.activeId,
+      // templateId is normally recorded on switch, so stamp the open resume
+      // with the template it is on right now.
+      resumes: store.resumes.map((r) => (r.id === store.activeId ? { ...r, templateId } : r)),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'resume'}_backup.json`;
+    link.download = 'hatchresume_backup.json';
     link.click();
     URL.revokeObjectURL(url);
     // Clears the "not backed up" warning and the close prompt.
@@ -603,7 +750,20 @@ export default function TemplateWorkspace({ templateId }) {
         if (typeof imported !== 'object' || imported === null || Array.isArray(imported)) {
           throw new Error('Not a resume backup file');
         }
-        setFormData((prev) => ({ ...prev, ...imported }), { label: 'restore backup' });
+        if (Array.isArray(imported.resumes)) {
+          // Full-store backup: restore every resume it holds.
+          const records = imported.resumes.filter(
+            (r) => r && typeof r === 'object' && r.data && typeof r.data === 'object' && !Array.isArray(r.data)
+          );
+          if (records.length === 0) throw new Error('Backup holds no resumes');
+          const restored = store.importResumes(records, imported.activeId);
+          if (restored && restored.templateId && restored.templateId !== templateId) {
+            navigate(`/template${restored.templateId}`);
+          }
+        } else {
+          // Legacy backup: one bare formData object, merged into the open resume.
+          setFormData((prev) => ({ ...prev, ...imported }), { label: 'restore backup' });
+        }
       } catch (err) {
         alert('Could not import this file. Please choose a resume backup (.json) exported from this site.');
       }
@@ -892,17 +1052,7 @@ export default function TemplateWorkspace({ templateId }) {
                 collapsed={collapsedSections.summary}
                 toggleSection={() => toggleSection('summary')}
                 handleChange={handleChange}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -912,17 +1062,7 @@ export default function TemplateWorkspace({ templateId }) {
                 collapsed={collapsedSections.skills}
                 toggleSection={() => toggleSection('skills')}
                 handleChange={handleChange}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -937,17 +1077,7 @@ export default function TemplateWorkspace({ templateId }) {
                 moveEntry={moveEntry}
                 experienceHeading={experienceHeading}
                 handleHeadingChange={setExperienceHeading}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -960,17 +1090,7 @@ export default function TemplateWorkspace({ templateId }) {
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
                 moveEntry={moveEntry}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -983,17 +1103,7 @@ export default function TemplateWorkspace({ templateId }) {
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
                 moveEntry={moveEntry}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
 
@@ -1006,17 +1116,7 @@ export default function TemplateWorkspace({ templateId }) {
                 addEntry={addEntry}
                 deleteEntry={deleteEntry}
                 moveEntry={moveEntry}
-                dragHandle={
-                  <span
-                    className="drag-handle"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragEnd={handleDragEnd}
-                    title="Drag to reorder"
-                  >
-                    <i className="fas fa-grip-vertical"></i>
-                  </span>
-                }
+                dragHandle={sectionHandle(section)}
               />
             )}
           </div>
@@ -1036,7 +1136,7 @@ export default function TemplateWorkspace({ templateId }) {
             <i className="fas fa-arrows-alt-h"></i>
           </div>
         </div>
-        <div className="resume-panel">
+        <div className="resume-panel" ref={panelRef}>
           <div className="zoom-toolbar">
             <button className="zoom-btn" onClick={() => setZoom((z) => Math.max(50, z - 10))} title="Zoom out">
               <i className="fas fa-search-minus"></i>
@@ -1093,9 +1193,16 @@ export default function TemplateWorkspace({ templateId }) {
           <div
             className="resume-zoom-wrapper"
             style={{
-              transform: `scale(${zoom / 100})`,
-              transformOrigin: 'top center',
-              height: `${Math.round((sheetHeight + 20) * (zoom / 100))}px`,
+              transform: `scale(${displayScale})`,
+              // Scaled from the top-left, with the box sized to match, so the
+              // wrapper occupies exactly the space the sheet paints in. A
+              // transform does not affect layout, so without this the panel
+              // reserves the full 560px and shows a horizontal scrollbar over
+              // empty space — and a centre origin would push the sheet off the
+              // left edge, where it cannot be scrolled back into view.
+              transformOrigin: 'top left',
+              width: `${Math.round(SHEET_W * displayScale)}px`,
+              height: `${Math.round((sheetHeight + 20) * displayScale)}px`,
             }}
           >
             <div
@@ -1133,7 +1240,7 @@ export default function TemplateWorkspace({ templateId }) {
             </div>
           </div>
           <div className="download-actions">
-            <button className="download-btn download-btn-ats" onClick={handlePrintPDF} title="Opens your browser's print dialog — choose 'Save as PDF'. Text stays selectable, so ATS software can read it.">
+            <button className="download-btn download-btn-ats" onClick={handleDownloadTextPDF} title="Downloads a clean single-column PDF with selectable text — the format ATS software reads most reliably.">
               <i className="fas fa-robot"></i> Download ATS PDF
             </button>
             <button className="download-btn" onClick={handleDownloadPDF} title="Exact snapshot of the preview as an image-based PDF">
@@ -1141,10 +1248,32 @@ export default function TemplateWorkspace({ templateId }) {
             </button>
           </div>
           <p className="ats-hint">
-            <i className="fas fa-circle-info"></i> ATS PDF keeps text selectable so recruiting software can parse it — in the print dialog, choose "Save as PDF".
+            <i className="fas fa-circle-info"></i> ATS PDF downloads instantly with selectable text so recruiting software can parse it. Prefer the styled layout with selectable text?{' '}
+            <button type="button" className="ats-hint-link" onClick={handlePrintPDF}>
+              Print / Save as PDF
+            </button>{' '}
+            uses your browser's print dialog.
           </p>
         </div>
       </div>
+
+      {/* Below 1100px the panels stack, so the live sheet sits underneath the
+          entire form — on a phone that is a few thousand pixels of scrolling to
+          see what an edit did, and the page-count warning is down there too.
+          This pulls the same sheet up over whatever you are editing. */}
+      {!isPreviewOpen && (
+        <button
+          type="button"
+          className="mobile-preview-fab"
+          onClick={togglePreview}
+        >
+          <i className="fas fa-file-lines" aria-hidden="true"></i>
+          <span>Preview</span>
+          {pageCount > 1 && (
+            <span className="mobile-preview-fab-pages">{pageCount} pages</span>
+          )}
+        </button>
+      )}
 
       {isPreviewOpen && (
         <div className="preview-modal" onClick={togglePreview}>
@@ -1153,20 +1282,26 @@ export default function TemplateWorkspace({ templateId }) {
               <i className="fas fa-times"></i>
             </button>
             <div
-              className="resume preview-resume"
-              data-accent={formData.accentColor ? 'on' : undefined}
-              style={{
-                height: `${sheetHeight}px`,
-                '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
-                '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
-                '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
-                '--line-height': formData.lineHeight || 1.4,
-                '--content-scale': contentScale,
-                '--accent': formData.accentColor || undefined,
-              }}
+              className="preview-scaler"
+              style={{ height: `${Math.round(sheetHeight * previewFitScale)}px` }}
             >
-              <div className="resume-fit">
-                {renderResumeContent()}
+              <div
+                className="resume preview-resume"
+                data-accent={formData.accentColor ? 'on' : undefined}
+                style={{
+                  transform: `scale(${previewFitScale})`,
+                  height: `${sheetHeight}px`,
+                  '--font-heading': formData.fontHeading || 'Arial, Helvetica, sans-serif',
+                  '--font-subheading': formData.fontSubheading || 'Arial, Helvetica, sans-serif',
+                  '--font-text': formData.fontText || 'Arial, Helvetica, sans-serif',
+                  '--line-height': formData.lineHeight || 1.4,
+                  '--content-scale': contentScale,
+                  '--accent': formData.accentColor || undefined,
+                }}
+              >
+                <div className="resume-fit">
+                  {renderResumeContent()}
+                </div>
               </div>
             </div>
           </div>

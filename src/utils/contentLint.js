@@ -103,6 +103,164 @@ const BUZZWORDS = [
   'visionary'
 ];
 
+// Common misspellings, biased towards the words that actually appear on
+// resumes. A curated map rather than a full dictionary: it stays a few KB,
+// needs no download, and — unlike dictionary lookup — can never false-positive
+// on a name, a product, or a technology it has not heard of. Only unambiguous
+// misspellings belong here; regional variants (organise, licence, fulfil) do not.
+const MISSPELLINGS = {
+  accomodate: 'accommodate',
+  acheive: 'achieve',
+  acheived: 'achieved',
+  acheivement: 'achievement',
+  acheivements: 'achievements',
+  achievment: 'achievement',
+  achievments: 'achievements',
+  acommplish: 'accomplish',
+  aquire: 'acquire',
+  aquired: 'acquired',
+  aquisition: 'acquisition',
+  adress: 'address',
+  adressed: 'addressed',
+  alot: 'a lot',
+  analize: 'analyze',
+  analized: 'analyzed',
+  anual: 'annual',
+  apparant: 'apparent',
+  aswell: 'as well',
+  begining: 'beginning',
+  beleive: 'believe',
+  benifit: 'benefit',
+  benifits: 'benefits',
+  buisness: 'business',
+  calender: 'calendar',
+  catagory: 'category',
+  catagories: 'categories',
+  cheif: 'chief',
+  collegue: 'colleague',
+  collegues: 'colleagues',
+  comittee: 'committee',
+  commited: 'committed',
+  communciation: 'communication',
+  comunication: 'communication',
+  competance: 'competence',
+  completly: 'completely',
+  concious: 'conscious',
+  consistant: 'consistent',
+  curiculum: 'curriculum',
+  definately: 'definitely',
+  develope: 'develop',
+  developement: 'development',
+  developped: 'developed',
+  diffrent: 'different',
+  dilligent: 'diligent',
+  efficent: 'efficient',
+  enviroment: 'environment',
+  enviroments: 'environments',
+  excelent: 'excellent',
+  experiance: 'experience',
+  experianced: 'experienced',
+  expierence: 'experience',
+  familar: 'familiar',
+  finacial: 'financial',
+  finantial: 'financial',
+  foriegn: 'foreign',
+  futher: 'further',
+  goverment: 'government',
+  gaurantee: 'guarantee',
+  garantee: 'guarantee',
+  greatful: 'grateful',
+  harrass: 'harass',
+  immediatly: 'immediately',
+  implemention: 'implementation',
+  improvment: 'improvement',
+  improvments: 'improvements',
+  independant: 'independent',
+  initated: 'initiated',
+  inovative: 'innovative',
+  intergrated: 'integrated',
+  intrest: 'interest',
+  knowlege: 'knowledge',
+  knowledgable: 'knowledgeable',
+  liason: 'liaison',
+  lisence: 'license',
+  maintainance: 'maintenance',
+  maintenence: 'maintenance',
+  managment: 'management',
+  mangement: 'management',
+  marketting: 'marketing',
+  neccessary: 'necessary',
+  necessery: 'necessary',
+  noticable: 'noticeable',
+  occassion: 'occasion',
+  occassionally: 'occasionally',
+  occured: 'occurred',
+  occurence: 'occurrence',
+  oppurtunity: 'opportunity',
+  oppurtunities: 'opportunities',
+  opportunty: 'opportunity',
+  orginization: 'organization',
+  orginized: 'organized',
+  paralel: 'parallel',
+  perfomance: 'performance',
+  performace: 'performance',
+  personel: 'personnel',
+  persue: 'pursue',
+  persued: 'pursued',
+  posession: 'possession',
+  postion: 'position',
+  postions: 'positions',
+  practicle: 'practical',
+  prefered: 'preferred',
+  presense: 'presence',
+  priortize: 'prioritize',
+  priortized: 'prioritized',
+  proffesional: 'professional',
+  profesional: 'professional',
+  proffit: 'profit',
+  programing: 'programming',
+  prominant: 'prominent',
+  quater: 'quarter',
+  quaterly: 'quarterly',
+  recieve: 'receive',
+  recieved: 'received',
+  recomend: 'recommend',
+  recomended: 'recommended',
+  reccomend: 'recommend',
+  reccomended: 'recommended',
+  refered: 'referred',
+  relevent: 'relevant',
+  responsable: 'responsible',
+  responsibilty: 'responsibility',
+  responsiblity: 'responsibility',
+  responsibilites: 'responsibilities',
+  responsiblities: 'responsibilities',
+  resturant: 'restaurant',
+  schedual: 'schedule',
+  seperate: 'separate',
+  seperated: 'separated',
+  seperately: 'separately',
+  similiar: 'similar',
+  sucess: 'success',
+  sucessful: 'successful',
+  successfull: 'successful',
+  succesful: 'successful',
+  sucessfully: 'successfully',
+  successfuly: 'successfully',
+  succesfully: 'successfully',
+  supercede: 'supersede',
+  supervized: 'supervised',
+  targetted: 'targeted',
+  technolgy: 'technology',
+  technolgies: 'technologies',
+  transfered: 'transferred',
+  truely: 'truly',
+  untill: 'until',
+  upto: 'up to',
+  wich: 'which',
+  writen: 'written',
+};
+
 const FIRST_PERSON = /\b(i|i'm|i've|my|me|myself)\b/i;
 
 // "was deployed", "were reviewed", "been migrated" — the achievement happening
@@ -255,6 +413,28 @@ export const lintSources = (sources, summaryText = null) => {
       }
 
       const words = lower.match(/[a-z']+/g) || [];
+
+      // One spelling issue per bullet, naming every misspelt word in it —
+      // per-word issues would let two typos in one line dominate the score.
+      const misspelt = [];
+      for (const w of words) {
+        const bare = w.replace(/^'+|'+$/g, '').replace(/'s$/, '');
+        const correct = MISSPELLINGS[bare];
+        if (correct && !misspelt.some(([from]) => from === bare)) {
+          misspelt.push([bare, correct]);
+        }
+      }
+      if (misspelt.length > 0) {
+        issues.push(
+          issue('high', 'spelling', source,
+            misspelt.length === 1
+              ? `Possible spelling mistake: "${misspelt[0][0]}"`
+              : `Possible spelling mistakes: ${misspelt.map(([from]) => `"${from}"`).join(', ')}`,
+            misspelt.map(([from, to]) => `"${from}" → "${to}"`).join(', '),
+            shorten(line))
+        );
+      }
+
       if (words.length > LONG_BULLET_WORDS) {
         issues.push(
           issue('low', 'too-long', source,

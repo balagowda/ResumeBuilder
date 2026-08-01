@@ -15,7 +15,7 @@ export const BRAND = 'HatchResume';
  * build date: stamping every URL as modified on every deploy tells search
  * engines nothing, and they learn to discount it.
  */
-export const CONTENT_UPDATED = '2026-07-31';
+export const CONTENT_UPDATED = '2026-08-01';
 
 export const templatePageMeta = (template) => ({
   title: `${template.name} Resume Template — Free Download | ${BRAND}`,

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ResumeCompare from './ResumeCompare';
 
 /**
  * Switcher for the user's saved resumes, so one person can keep a version per
@@ -16,6 +17,7 @@ const ResumeVersions = ({
 }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [draftName, setDraftName] = useState('');
+  const [isComparing, setIsComparing] = useState(false);
 
   const startRename = () => {
     setDraftName(active ? active.name : '');
@@ -82,10 +84,23 @@ const ResumeVersions = ({
         <button type="button" onClick={startRename} title="Rename this resume">
           <i className="fas fa-pen"></i> Rename
         </button>
+        {resumes.length > 1 && (
+          <button
+            type="button"
+            onClick={() => setIsComparing(true)}
+            title="See what differs between this resume and another version"
+          >
+            <i className="fas fa-code-compare"></i> Compare
+          </button>
+        )}
         <button type="button" className="resume-versions-delete" onClick={handleDelete} title="Delete this resume">
           <i className="fas fa-trash"></i>
         </button>
       </div>
+
+      {isComparing && active && (
+        <ResumeCompare resumes={resumes} active={active} onClose={() => setIsComparing(false)} />
+      )}
     </div>
   );
 };
