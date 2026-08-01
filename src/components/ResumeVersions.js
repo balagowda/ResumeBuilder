@@ -84,15 +84,14 @@ const ResumeVersions = ({
         <button type="button" onClick={startRename} title="Rename this resume">
           <i className="fas fa-pen"></i> Rename
         </button>
-        {resumes.length > 1 && (
-          <button
-            type="button"
-            onClick={() => setIsComparing(true)}
-            title="See what differs between this resume and another version"
-          >
-            <i className="fas fa-code-compare"></i> Compare
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setIsComparing(true)}
+          title="See what differs between this resume and another version"
+          disabled={resumes.length <= 1}
+        >
+          <i className="fas fa-code-compare"></i> Compare
+        </button>
         <button type="button" className="resume-versions-delete" onClick={handleDelete} title="Delete this resume">
           <i className="fas fa-trash"></i>
         </button>
