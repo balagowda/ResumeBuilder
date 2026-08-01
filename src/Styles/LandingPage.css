@@ -963,7 +963,7 @@
 .about-strip {
   position: relative;
   width: 100%;
-  padding: 78px 0 86px;
+  padding: 78px 0 6px;
   background: var(--surface);
   /* Contains the pattern's negative z-index so it lands above this section's
      own white background instead of falling behind the page. */
@@ -1153,6 +1153,7 @@
 .cta-section {
   padding: 80px 0;
   width: 100%;
+  overflow: hidden;
 }
 
 /* The page's one gradient block: copy on the left, fan of resume sheets on

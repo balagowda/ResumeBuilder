@@ -18,6 +18,7 @@
      the decoration's negative z-index would drop it behind the page itself
      rather than behind just the card. */
   isolation: isolate;
+  overflow: hidden;
 }
 
 .feedback-intro {

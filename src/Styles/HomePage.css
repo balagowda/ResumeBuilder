@@ -7,6 +7,36 @@
   position: relative;
 }
 
+.templates-page-container::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  width: 100vw;
+  height: 880px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background-image: linear-gradient(to right, rgba(18, 24, 29, 0.04) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(18, 24, 29, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center top;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,1) 15%,
+    rgba(0,0,0,1) 50%,
+    rgba(0,0,0,0) 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,1) 15%,
+    rgba(0,0,0,1) 50%,
+    rgba(0,0,0,0) 100%
+  );
+  z-index: -2;
+}
+
 /* Background wash — same treatment as the landing hero: confined to the top of
    the page and faint, so it is atmosphere behind the header rather than two
    coloured smudges floating beside the template grid. */
@@ -16,6 +46,12 @@
   filter: blur(60px);
   z-index: -1;
   pointer-events: none;
+  animation: float-breath 8s ease-in-out infinite alternate;
+}
+
+@keyframes float-breath {
+  0% { transform: scale(1) translateY(0); opacity: 0.7; }
+  100% { transform: scale(1.15) translateY(-30px); opacity: 1; }
 }
 
 .templates-page-container .blob-1 {
@@ -58,20 +94,19 @@
 /* Capped measure: at full width the title ran as one 1150px line, which is
    past the point where a heading reads as a unit rather than as a banner. */
 .templates-header h1 {
-  font-size: clamp(2rem, 4vw, 2.3rem);
-  font-weight: 600;
+  font-size: clamp(2.4rem, 4vw, 3rem);
+  font-weight: 700;
   color: var(--ink-900);
-  /* max-width: 22ch; */
   margin: 0 auto 16px;
-  letter-spacing: var(--tracking-display);
-  line-height: 1.12;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   text-wrap: balance;
 }
 
 .templates-header p {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: var(--ink-500);
-  max-width: 60ch;
+  max-width: 65ch;
   margin: 0 auto;
   line-height: 1.7;
 }
@@ -90,17 +125,23 @@
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--ink-600);
-  background-color: var(--surface);
+  background-color: rgba(255, 255, 255, 0.65);
   border: 1px solid var(--line);
   border-radius: 999px;
   cursor: pointer;
-  transition: color 0.2s var(--ease), background-color 0.2s var(--ease),
-              border-color 0.2s var(--ease);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .templates-filter-button:hover {
   border-color: var(--ink-300);
   color: var(--ink-900);
+  background-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.templates-filter-button:active {
+  transform: translateY(0);
 }
 
 /* Ink, not indigo. The active filter needs to be unmistakable at a glance
@@ -110,6 +151,8 @@
   background-color: var(--ink-900);
   color: #ffffff;
   border-color: var(--ink-900);
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 /* Grid & Cards Section */
@@ -223,18 +266,16 @@
 
 /* Front Hover Overlay
    ------------------------------------------------------------------
-   Ink scrim, not indigo. A 45%-opacity brand-coloured wash tinted the whole
-   template preview underneath it — the one thing the visitor is trying to
-   look at — so every design read as vaguely purple on hover. */
+   Vibrant brand-colored overlay to replace the plain dark ink scrim. */
 .template-preview-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, rgba(18, 24, 29, 0.28) 0%, rgba(18, 24, 29, 0.55) 100%);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.4) 0%, rgba(49, 46, 129, 0.85) 100%);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -249,16 +290,16 @@
 
 .btn-preview-customize {
   background-color: #ffffff;
-  color: var(--ink-900);
+  color: var(--brand);
   padding: 12px 22px;
   font-weight: 600;
   font-size: 0.92rem;
   letter-spacing: var(--tracking-tight);
   border-radius: var(--radius-xs);
   text-decoration: none;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 24px rgba(49, 46, 129, 0.4);
   transform: translateY(10px);
-  transition: transform 0.3s var(--ease), background-color 0.2s var(--ease);
+  transition: transform 0.3s var(--ease), background-color 0.2s var(--ease), color 0.2s var(--ease);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -270,11 +311,14 @@
 
 .btn-preview-customize:hover {
   background-color: var(--surface-2);
+  color: var(--brand-ink);
 }
 
 /* Back Face Styling */
 .card-back {
-  background-color: var(--surface);
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   padding: 28px;
   justify-content: space-between;
   border-color: var(--line);
@@ -332,6 +376,14 @@
   padding: 4px 10px;
   border-radius: 999px;
   letter-spacing: 0.03em;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s var(--ease), color 0.2s var(--ease);
+  cursor: default;
+}
+
+.template-badge-tag:hover {
+  transform: translateY(-2px);
+  background-color: var(--brand-tint);
+  color: var(--brand-ink);
 }
 
 .premium-template-card-container:nth-child(1) .template-badge-tag {
@@ -449,6 +501,16 @@
 
 /* Responsive Styles */
 @media (max-width: 768px) {
+  .templates-page-container::before {
+    width: 100%;
+    left: 0;
+    transform: none;
+  }
+  
+  .templates-page-container .glow-blob {
+    display: none;
+  }
+
   .templates-header h1 {
     font-size: 2.2rem;
   }
@@ -571,30 +633,28 @@
 
 .templates-toolbar {
   position: sticky;
-  /* Matches the sticky app header's real height (14px padding x2 + a 43px
-     row). It was 64px, which let the toolbar's first 10px slide underneath. */
-  top: 71px;
+  top: 80px;
   z-index: 50;
-  background-color: rgba(255, 255, 255, 0.82);
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
-  padding: 14px 24px 4px;
-  margin-bottom: 28px;
-  border-bottom: 1px solid var(--line);
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  padding: 16px 24px 8px;
+  margin-bottom: 32px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(18, 24, 29, 0.06), 0 1px 3px rgba(18, 24, 29, 0.04);
 }
 
-/* Not sticky on a phone. Two things break down there: the app header stacks to
-   roughly 150px, so a bar pinned 64px from the top slides underneath it and
-   loses its first row, and the filters lay out as a full-width column that is
-   ~480px tall — about two thirds of the viewport, permanently, with the card
-   previews smeared behind its blur. Filters that are always in reach are not
-   worth that, so the bar scrolls away and the templates get the room.
-   Placed after the rule above because it has the same specificity. */
+/* Not sticky on a phone. */
 @media (max-width: 768px) {
   .templates-toolbar {
     position: static;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+    background-color: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
   }
 }
 
@@ -616,16 +676,18 @@
   display: flex;
   align-items: center;
   width: min(520px, 100%);
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.65);
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 0 16px;
-  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease);
 }
 
 .templates-search-box:focus-within {
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px var(--brand-tint);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15), 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .templates-search-box i {

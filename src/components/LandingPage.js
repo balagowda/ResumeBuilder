@@ -550,7 +550,7 @@ const LandingPage = () => {
             What early users <span className="gradient-text">told us</span>
           </h2>
           <p className="testimonials-intro">
-            Friends and colleagues who built their own resume on HatchResume, in their words.
+            Users who built their own resume on HatchResume, in their words.
           </p>
         </div>
 
