@@ -159,6 +159,37 @@ export default function useResumeStore(makeEmpty) {
     [commit]
   );
 
+  /**
+   * Restore resumes from a backup file. Records are rebuilt through
+   * createResumeRecord so imported ids can never collide with existing ones,
+   * and pristine empty resumes (the blank "My resume" a fresh visit creates)
+   * are dropped rather than left beside the restored ones. One commit, so a
+   * single undo reverses the whole restore.
+   */
+  const importResumes = useCallback(
+    (records, preferredActiveId) => {
+      const rebuilt = records.map((r) =>
+        createResumeRecord(r.name, r.data, {
+          sectionOrder: Array.isArray(r.sectionOrder) ? r.sectionOrder : null,
+          experienceHeading: typeof r.experienceHeading === 'string' ? r.experienceHeading : null,
+          templateId: r.templateId || null,
+        })
+      );
+      if (rebuilt.length === 0) return null;
+      const idx = records.findIndex((r) => r.id && r.id === preferredActiveId);
+      const nextActive = rebuilt[idx >= 0 ? idx : 0];
+      commit(
+        (doc) => ({
+          resumes: [...doc.resumes.filter((r) => hasContent(r.data)), ...rebuilt],
+          activeId: nextActive.id,
+        }),
+        { label: 'restore backup' }
+      );
+      return nextActive;
+    },
+    [commit]
+  );
+
   const duplicateResume = useCallback(
     (id) => {
       const source = resumes.find((r) => r.id === id);
@@ -269,6 +300,7 @@ export default function useResumeStore(makeEmpty) {
     updateActive,
     createResume,
     createResumeFrom,
+    importResumes,
     duplicateResume,
     renameResume,
     deleteResume,

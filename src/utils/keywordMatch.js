@@ -105,20 +105,57 @@ const SKILL_TOKENS = new Set([
   'zustand', 'recoil', 'mobx', 'vitest', 'turborepo', 'nx', 'bun', 'pnpm'
 ]);
 
-// Map common synonyms to a canonical term so "reactjs" matches "react"
+// Map common synonyms to a canonical term so "reactjs" matches "react".
+// Applied to both the job description and the resume, so which side of a pair
+// is canonical does not matter — but the canonical form should be the short,
+// recognisable one, since it is what the "missing keywords" list displays.
+// Multi-word keys are replaced before shorter ones (insertion order), so put
+// the longest spelling of a term first.
 const SYNONYMS = {
   'reactjs': 'react',
   'react.js': 'react',
-  'node.js': 'node',
   'nodejs': 'node',
   'vuejs': 'vue',
   'vue.js': 'vue',
+  'angularjs': 'angular',
+  'angular.js': 'angular',
+  'nextjs': 'next.js',
+  'nuxtjs': 'nuxt',
+  'nuxt.js': 'nuxt',
+  'expressjs': 'express',
+  'express.js': 'express',
+  'nestjs': 'nest',
+  'nest.js': 'nest',
   'golang': 'go',
   'k8s': 'kubernetes',
-  'aws': 'amazon web services',
-  'gcp': 'google cloud',
+  'amazon web services': 'aws',
+  'google cloud platform': 'gcp',
+  'microsoft azure': 'azure',
   'postgres': 'postgresql',
-  'tailwindcss': 'tailwind css'
+  'tailwindcss': 'tailwind css',
+  'js': 'javascript',
+  'ts': 'typescript',
+  'py': 'python',
+  'ml': 'machine learning',
+  'nlp': 'natural language processing',
+  'scikit learn': 'scikit-learn',
+  'power bi': 'powerbi',
+  'ms excel': 'excel',
+  'microsoft excel': 'excel',
+  'google sheets': 'sheets',
+  'github actions': 'github actions',
+  'vs code': 'vscode',
+  'objective c': 'objective-c',
+  'dot net': 'dotnet',
+  'ux': 'user experience',
+  'ui': 'user interface',
+  'oop': 'object oriented',
+  'tdd': 'test driven development',
+  'qa': 'quality assurance',
+  'sdlc': 'software development lifecycle',
+  'poc': 'proof of concept',
+  'kpis': 'kpi',
+  'okrs': 'okr',
 };
 
 /** Lowercase and strip punctuation, keeping the characters that live inside
@@ -151,17 +188,28 @@ const tokenize = (text) =>
  *  sides of every comparison, so exactness matters less than consistency. */
 const stem = (word) => {
   if (word.length <= 4) return word;
-  if (word.endsWith('ies')) return `${word.slice(0, -3)}y`;
-  if (word.endsWith('ing') && word.length > 5) {
-     // e.g. "optimizing" -> "optimiz", "building" -> "build"
-     return word.slice(0, -3);
+  let out = word;
+  if (out.endsWith('ies')) {
+    out = `${out.slice(0, -3)}y`;
+  } else if (out.endsWith('ing') && out.length > 5) {
+    // e.g. "optimizing" -> "optimiz", "building" -> "build"
+    out = out.slice(0, -3);
+  } else if (out.endsWith('ed') && out.length > 4) {
+    out = out.slice(0, -2);
+  } else if (out.endsWith('es') && out.length > 5) {
+    out = out.slice(0, -2);
+  } else if (out.endsWith('s') && !out.endsWith('ss')) {
+    out = out.slice(0, -1);
   }
-  if (word.endsWith('ed') && word.length > 4) {
-     return word.slice(0, -2);
+  // "planning" -> "plann" -> "plan", "planned" -> "plann" -> "plan"
+  if (out.length > 3 && out[out.length - 1] === out[out.length - 2] && /[bdgmnprt]/.test(out[out.length - 1])) {
+    out = out.slice(0, -1);
   }
-  if (word.endsWith('es') && word.length > 5) return word.slice(0, -2);
-  if (word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
-  return word;
+  // "optimize"/"optimizing" both land on "optimiz"; "manage"/"managing" on "manag"
+  if (out.length > 4 && out.endsWith('e')) {
+    out = out.slice(0, -1);
+  }
+  return out;
 };
 
 /** Flatten every piece of resume content into one searchable string. */

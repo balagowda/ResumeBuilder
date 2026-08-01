@@ -1,9 +1,15 @@
 import React from 'react';
 
+// Inter, Lato, and Source Serif 4 are bundled (see Styles/fonts.css), so they
+// render identically on every visitor's machine and in the exports; the rest
+// are system stacks.
 const HEADER_FONTS = [
   { name: 'Helvetica', value: 'Helvetica, Arial, sans-serif' },
   { name: 'Arial', value: 'Arial, Helvetica, sans-serif' },
+  { name: 'Inter', value: "'Inter', Helvetica, Arial, sans-serif" },
+  { name: 'Lato', value: "'Lato', Helvetica, Arial, sans-serif" },
   { name: 'Georgia', value: 'Georgia, serif' },
+  { name: 'Source Serif', value: "'Source Serif 4', Georgia, serif" },
   { name: 'Gill Sans', value: "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif" },
   { name: 'Garamond', value: 'Garamond, serif' }
 ];
@@ -13,7 +19,10 @@ const SUBHEADER_FONTS = [
   { name: 'Tahoma', value: 'Tahoma, Verdana, sans-serif' },
   { name: 'Cambria', value: 'Cambria, Georgia, serif' },
   { name: 'Helvetica', value: 'Helvetica, Arial, sans-serif' },
-  { name: 'Arial', value: 'Arial, Helvetica, sans-serif' }
+  { name: 'Arial', value: 'Arial, Helvetica, sans-serif' },
+  { name: 'Inter', value: "'Inter', Helvetica, Arial, sans-serif" },
+  { name: 'Lato', value: "'Lato', Helvetica, Arial, sans-serif" },
+  { name: 'Source Serif', value: "'Source Serif 4', Georgia, serif" }
 ];
 
 const ACCENT_COLORS = [
@@ -32,7 +41,10 @@ const TEXT_FONTS = [
   { name: 'Calibri', value: "Calibri, 'Helvetica Neue', Helvetica, sans-serif" },
   { name: 'Verdana', value: 'Verdana, Geneva, sans-serif' },
   { name: 'Arial', value: 'Arial, Helvetica, sans-serif' },
-  { name: 'Helvetica', value: 'Helvetica, Arial, sans-serif' }
+  { name: 'Helvetica', value: 'Helvetica, Arial, sans-serif' },
+  { name: 'Inter', value: "'Inter', Helvetica, Arial, sans-serif" },
+  { name: 'Lato', value: "'Lato', Helvetica, Arial, sans-serif" },
+  { name: 'Source Serif', value: "'Source Serif 4', Georgia, serif" }
 ];
 
 // Matches MIN_SCALE in TemplateWorkspace — below 70% the type stops being
@@ -142,7 +154,7 @@ export default function StylingControls({ formData, handleChange }) {
 
       <div style={formGroupStyle}>
         <label style={labelStyle}>Accent Color</label>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
           {ACCENT_COLORS.map((c) => {
             const selected = (formData.accentColor || '') === c.value;
             return (
@@ -164,9 +176,59 @@ export default function StylingControls({ formData, handleChange }) {
               />
             );
           })}
+          {(() => {
+            // The picker doubles as the swatch for whatever custom color is
+            // active, so a hand-picked shade shows selected the same way a
+            // preset does.
+            const isCustom =
+              !!formData.accentColor &&
+              !ACCENT_COLORS.some((c) => c.value === formData.accentColor);
+            return (
+              <label
+                title="Pick any color"
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: isCustom
+                    ? formData.accentColor
+                    : 'conic-gradient(#ef4444, #f59e0b, #22c55e, #3b82f6, #a855f7, #ef4444)',
+                  border: isCustom ? '3px solid var(--primary-color)' : '2px solid #e2e8f0',
+                  boxShadow: isCustom ? '0 0 0 2px #fff inset' : 'none',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {!isCustom && (
+                  <i className="fas fa-plus" style={{ color: '#fff', fontSize: '0.7rem', textShadow: '0 0 2px rgba(0,0,0,0.6)' }}></i>
+                )}
+                <input
+                  type="color"
+                  aria-label="Custom accent color"
+                  value={isCustom ? formData.accentColor : '#4f46e5'}
+                  onChange={(e) => handleChange({ target: { name: 'accentColor', value: e.target.value } })}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    opacity: 0,
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'pointer',
+                    border: 'none',
+                    padding: 0,
+                  }}
+                />
+              </label>
+            );
+          })()}
         </div>
         <p style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '8px', marginBottom: 0 }}>
-          Recolors headings, rules, and header bands. "Template default" restores the original palette.
+          Recolors headings, rules, and header bands. The rainbow swatch picks any custom color; "Template default" restores the original palette.
         </p>
       </div>
 

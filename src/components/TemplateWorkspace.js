@@ -17,6 +17,7 @@ import StorageNotice from './StorageNotice';
 import ContentReview from './ContentReview';
 import useResumeStore from '../hooks/useResumeStore';
 import { takePendingExample } from '../utils/pendingExample';
+import generateAtsPdf from '../utils/textPdf';
 import '../Styles/TemplateWorkspace.css';
 
 // Preview sheet geometry. The sheet is 560x794 CSS px (A4 at the preview's
@@ -667,9 +668,19 @@ export default function TemplateWorkspace({ templateId }) {
     }
   };
 
-  // Text-based export through the browser's print-to-PDF pipeline.
-  // Unlike the image capture, the resulting PDF has selectable text that
-  // ATS parsers can actually read.
+  // One-click text-based export: a real text-layer PDF built with jsPDF, so
+  // the text is selectable and ATS parsers can read it — no print dialog.
+  const handleDownloadTextPDF = () => {
+    try {
+      generateAtsPdf({ formData, sectionOrder, experienceHeading });
+    } catch (error) {
+      console.error('Error generating ATS PDF:', error);
+      alert(`Failed to download ATS PDF. Error: ${error.message}`);
+    }
+  };
+
+  // Kept as a fallback: the browser's print-to-PDF pipeline renders the
+  // template exactly as styled, also with selectable text.
   const handlePrintPDF = () => {
     window.print();
   };
@@ -705,12 +716,24 @@ export default function TemplateWorkspace({ templateId }) {
     setFormData({ ...formData, ...SAMPLE_DATA }, { label: 'load sample' });
   };
 
+  // Backs up the whole store — every resume, with its name, section order,
+  // heading, and template — not just the open form. Old backups held a single
+  // formData object; handleImportJSON still accepts those.
   const handleExportJSON = () => {
-    const blob = new Blob([JSON.stringify(formData, null, 2)], { type: 'application/json' });
+    const payload = {
+      app: 'hatchresume',
+      schema: 1,
+      exportedAt: new Date().toISOString(),
+      activeId: store.activeId,
+      // templateId is normally recorded on switch, so stamp the open resume
+      // with the template it is on right now.
+      resumes: store.resumes.map((r) => (r.id === store.activeId ? { ...r, templateId } : r)),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'resume'}_backup.json`;
+    link.download = 'hatchresume_backup.json';
     link.click();
     URL.revokeObjectURL(url);
     // Clears the "not backed up" warning and the close prompt.
@@ -727,7 +750,20 @@ export default function TemplateWorkspace({ templateId }) {
         if (typeof imported !== 'object' || imported === null || Array.isArray(imported)) {
           throw new Error('Not a resume backup file');
         }
-        setFormData((prev) => ({ ...prev, ...imported }), { label: 'restore backup' });
+        if (Array.isArray(imported.resumes)) {
+          // Full-store backup: restore every resume it holds.
+          const records = imported.resumes.filter(
+            (r) => r && typeof r === 'object' && r.data && typeof r.data === 'object' && !Array.isArray(r.data)
+          );
+          if (records.length === 0) throw new Error('Backup holds no resumes');
+          const restored = store.importResumes(records, imported.activeId);
+          if (restored && restored.templateId && restored.templateId !== templateId) {
+            navigate(`/template${restored.templateId}`);
+          }
+        } else {
+          // Legacy backup: one bare formData object, merged into the open resume.
+          setFormData((prev) => ({ ...prev, ...imported }), { label: 'restore backup' });
+        }
       } catch (err) {
         alert('Could not import this file. Please choose a resume backup (.json) exported from this site.');
       }
@@ -1204,7 +1240,7 @@ export default function TemplateWorkspace({ templateId }) {
             </div>
           </div>
           <div className="download-actions">
-            <button className="download-btn download-btn-ats" onClick={handlePrintPDF} title="Opens your browser's print dialog — choose 'Save as PDF'. Text stays selectable, so ATS software can read it.">
+            <button className="download-btn download-btn-ats" onClick={handleDownloadTextPDF} title="Downloads a clean single-column PDF with selectable text — the format ATS software reads most reliably.">
               <i className="fas fa-robot"></i> Download ATS PDF
             </button>
             <button className="download-btn" onClick={handleDownloadPDF} title="Exact snapshot of the preview as an image-based PDF">
@@ -1212,7 +1248,11 @@ export default function TemplateWorkspace({ templateId }) {
             </button>
           </div>
           <p className="ats-hint">
-            <i className="fas fa-circle-info"></i> ATS PDF keeps text selectable so recruiting software can parse it — in the print dialog, choose "Save as PDF".
+            <i className="fas fa-circle-info"></i> ATS PDF downloads instantly with selectable text so recruiting software can parse it. Prefer the styled layout with selectable text?{' '}
+            <button type="button" className="ats-hint-link" onClick={handlePrintPDF}>
+              Print / Save as PDF
+            </button>{' '}
+            uses your browser's print dialog.
           </p>
         </div>
       </div>
