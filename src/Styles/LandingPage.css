@@ -585,6 +585,295 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
+/* Testimonials
+   ------------------------------------------------------------------
+   An infinite right-to-left marquee. The track holds the list twice, so
+   sliding it left by exactly one copy lands on a frame identical to the
+   start and the loop is invisible. */
+.testimonials-section {
+  position: relative;
+  padding: 20px 0 90px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.testimonials-intro {
+  text-align: center;
+  max-width: 640px;
+  /* Pulls up under .section-title's 50px gap, same as .feedback-intro. */
+  margin: -30px auto 44px;
+  color: #64748b;
+  font-size: 1.05rem;
+}
+
+/* Colour wash behind the cards. Purely decorative and non-interactive. */
+.testimonials-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.t-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.26;
+}
+
+.t-blob-a {
+  width: 460px;
+  height: 340px;
+  background: radial-gradient(circle, #c7d2fe 0%, rgba(199, 210, 254, 0) 70%);
+  top: 30%;
+  left: -60px;
+}
+
+.t-blob-b {
+  width: 520px;
+  height: 380px;
+  background: radial-gradient(circle, #fbcfe8 0%, rgba(251, 207, 232, 0) 70%);
+  top: 20%;
+  left: 28%;
+}
+
+.t-blob-c {
+  width: 440px;
+  height: 360px;
+  background: radial-gradient(circle, #fed7aa 0%, rgba(254, 215, 170, 0) 70%);
+  bottom: 5%;
+  right: 22%;
+}
+
+.t-blob-d {
+  width: 400px;
+  height: 320px;
+  background: radial-gradient(circle, #99f6e4 0%, rgba(153, 246, 228, 0) 70%);
+  top: 35%;
+  right: -40px;
+}
+
+/* Full-bleed viewport strip; the cards run past both edges by design. */
+.testimonials-marquee {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  overflow: hidden;
+  padding: 10px 0;
+  /* Cards dissolve into the page at both ends instead of being chopped off. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.testimonials-track {
+  display: flex;
+  align-items: stretch;
+  /* Wider than a normal card gap: the skewed edges lean toward each other, so
+     they need room not to look like they are colliding. */
+  gap: 44px;
+  width: max-content;
+  animation: testimonial-scroll var(--marquee-duration, 40s) linear infinite;
+}
+
+/* --marquee-shift is one full copy of the list, measured in JS. Landing there
+   puts the row in a state identical to the start, so the restart is invisible
+   and there is no pause at the end. */
+@keyframes testimonial-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(var(--marquee-shift, 0px) * -1));
+  }
+}
+
+/* Stop for anyone reading a card, by pointer or by keyboard. */
+.testimonials-marquee:hover .testimonials-track,
+.testimonials-marquee:focus-within .testimonials-track {
+  animation-play-state: paused;
+}
+
+/* The card is a parallelogram: the whole thing leans, and .testimonial-inner
+   takes the opposite skew so the text sits square. Corners stay lightly
+   rounded so the slant reads as designed rather than as a clipping bug. */
+.testimonial-card {
+  position: relative;
+  display: flex;
+  /* Fixed width keeps every card the same size and the loop distance exact. */
+  flex: 0 0 340px;
+  margin: 0;
+  background: linear-gradient(160deg, #ffffff 0%, #fdfdff 100%);
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.07);
+  transform: skewX(-7deg);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  overflow: hidden;
+}
+
+/* Accent stripe down the leading edge — the detail that makes the slant look
+   deliberate. */
+.testimonial-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  /* Fades out toward the bottom so the edge reads as a highlight rather than
+     a saturated bar running the full height of the card. */
+  background: linear-gradient(
+    180deg,
+    var(--accent, #4f46e5) 0%,
+    var(--accent-2, #7c3aed) 55%,
+    var(--accent-edge, rgba(79, 70, 229, 0.32)) 100%
+  );
+}
+
+/* Soft wash of the card's own colour, bleeding down from the top corner. */
+.testimonial-card::before {
+  content: '';
+  position: absolute;
+  top: -70px;
+  right: -50px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent, #4f46e5) 0%, transparent 70%);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.testimonial-card:hover {
+  transform: skewX(-7deg) translateY(-8px);
+  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.13);
+  border-color: #e2e8f0;
+}
+
+.testimonial-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 30px 30px 26px;
+  /* Undoes the card's lean so nothing inside is italicised by the transform. */
+  transform: skewX(7deg);
+}
+
+.testimonial-quote-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+  color: var(--accent, #4f46e5);
+  background: var(--accent-soft, rgba(79, 70, 229, 0.11));
+  box-shadow: inset 0 0 0 1px var(--accent-edge, rgba(79, 70, 229, 0.32));
+}
+
+.testimonial-text {
+  position: relative;
+  margin: 0 0 26px;
+  /* Pushes the author block to the bottom so the names line up across cards
+     of unequal quote length. */
+  flex: 1;
+  color: #44506b;
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.testimonial-author {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 20px;
+}
+
+/* Rule that fades out, tinted by the card's accent — a flat grey line was the
+   flattest part of the old card. A pseudo-element rather than border-image,
+   which behaves inconsistently when only one side has a width. */
+.testimonial-author::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-edge, rgba(79, 70, 229, 0.32)),
+    rgba(226, 232, 240, 0)
+  );
+}
+
+/* Tinted rather than filled: a solid gradient block with a coloured glow was
+   the heaviest thing on the card and pulled the eye off the quote. The icon
+   carries the accent instead, at the same weight as the role chip beside it. */
+.testimonial-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: var(--accent-soft, rgba(79, 70, 229, 0.11));
+  box-shadow: inset 0 0 0 1px var(--accent-edge, rgba(79, 70, 229, 0.32));
+  color: var(--accent-ink, #323191);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.testimonial-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  line-height: 1.2;
+}
+
+.testimonial-name {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+/* The role is a chip rather than a second grey line. */
+.testimonial-role {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  /* A pill that wraps stops looking like a pill — narrow cards were breaking
+     "Software Engineer" across two lines. */
+  white-space: nowrap;
+  color: var(--accent-ink, #323191);
+  background: var(--accent-soft, rgba(79, 70, 229, 0.11));
+}
+
+/* Motion is decoration here, so drop it outright and hand the row back to the
+   user as something they scroll themselves. */
+@media (prefers-reduced-motion: reduce) {
+  .testimonials-track {
+    animation: none;
+  }
+
+  .testimonials-marquee {
+    overflow-x: auto;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .hero-container {
@@ -646,6 +935,25 @@
 
   .features-grid {
     padding: 0 10px;
+  }
+
+  .testimonial-card {
+    flex: 0 0 280px;
+  }
+
+  /* Padding belongs to the inner element — putting it on the card as well
+     stacked two paddings and squeezed the author row. */
+  .testimonial-inner {
+    padding: 26px 24px 22px;
+  }
+
+  /* The chip cannot wrap, so on the narrow card it has to earn its width back.
+     "Automation Engineer" cleared the edge by 1.5px at full size — enough to
+     clip on a slightly different font render or a longer role later. */
+  .testimonial-role {
+    font-size: 0.67rem;
+    letter-spacing: 0.03em;
+    padding: 3px 9px;
   }
 
   .stat-divider {

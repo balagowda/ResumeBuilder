@@ -3,6 +3,206 @@ import { Link, useLocation } from 'react-router-dom';
 import FeedbackForm from './FeedbackForm';
 import '../Styles/LandingPage.css';
 
+// Early users who built their own resume on the site. Kept as data rather than
+// markup so adding one is a single entry, and so the quotes stay in one place
+// where they can be checked against what the people actually said.
+//
+// `accent` is the card's colour pair — it drives the avatar, the quote mark and
+// the glow, so the row reads as lively rather than four identical indigo cards.
+const TESTIMONIALS = [
+  {
+    name: 'Ganesh',
+    role: 'Backend Engineer',
+    accent: ['#4f46e5', '#7c3aed'],
+    quote:
+      'I opened the site and started typing — no sign-up, no email to verify first. A clean one-page PDF was ready in about ten minutes.',
+  },
+  {
+    name: 'Tejas',
+    role: 'Automation Engineer',
+    accent: ['#0ea5e9', '#06b6d4'],
+    quote:
+      'The live preview is what I keep coming back for. You can see exactly where the page ends, so nothing spills onto a second page by surprise.',
+  },
+  {
+    name: 'Narasimha',
+    role: 'Backend Engineer',
+    accent: ['#f43f5e', '#f97316'],
+    quote:
+      'I pasted a job posting and it listed the keywords I had left out. Fixing those took a few minutes and the resume read much closer to the role.',
+  },
+  {
+    name: 'Kiruthika',
+    role: 'Quality Engineer',
+    accent: ['#a855f7', '#d946ef'],
+    quote:
+      'The writing review flagged bullets I had opened the same way three times over, and a few vague ones I had stopped noticing. Small edits, much tighter result.',
+  },
+  {
+    name: 'Varun',
+    role: 'Software Engineer',
+    accent: ['#10b981', '#14b8a6'],
+    quote:
+      'Knowing the details stay in my own browser made me comfortable putting real information in. I keep a few versions saved for different applications.',
+  },
+];
+
+// How fast the row travels, in CSS px per second. Duration is derived from it
+// so the speed stays the same however many cards there are.
+const MARQUEE_SPEED = 45;
+
+const hexToRgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+/** The accent at low opacity — backgrounds, hairlines, glows. */
+const tint = (hex, alpha) => `rgba(${hexToRgb(hex).join(', ')}, ${alpha})`;
+
+/**
+ * The accent pulled toward the body ink.
+ *
+ * Small uppercase text set in the raw accent fails contrast on a pale tint of
+ * itself — emerald on mint is around 2.4:1. Darkening it first keeps every
+ * card's role chip readable without giving them all the same colour.
+ */
+const deepen = (hex, amount = 0.45) => {
+  const toward = [15, 23, 42]; // #0f172a, the site's darkest text colour
+  const mixed = hexToRgb(hex).map((c, i) => Math.round(c + (toward[i] - c) * amount));
+  return `rgb(${mixed.join(', ')})`;
+};
+
+/** Every colour a card needs, derived from its two accent stops. */
+const accentVars = ([base, second]) => ({
+  '--accent': base,
+  '--accent-2': second,
+  '--accent-soft': tint(base, 0.11),
+  '--accent-edge': tint(base, 0.32),
+  '--accent-glow': tint(base, 0.35),
+  '--accent-ink': deepen(base),
+});
+
+/**
+ * One testimonial card.
+ *
+ * The card itself is skewed into a parallelogram; .testimonial-inner takes the
+ * opposite skew so the text inside stays upright.
+ *
+ * Copies after the first are passed `duplicate` and hidden from assistive tech —
+ * a screen reader should hear each person once, not once per copy.
+ */
+const TestimonialCard = ({ person, duplicate }) => (
+  <figure
+    className="testimonial-card"
+    style={accentVars(person.accent)}
+    aria-hidden={duplicate || undefined}
+  >
+    <div className="testimonial-inner">
+      <span className="testimonial-quote-mark" aria-hidden="true">
+        <i className="fas fa-quote-right"></i>
+      </span>
+      <blockquote className="testimonial-text">{person.quote}</blockquote>
+      <figcaption className="testimonial-author">
+        <span className="testimonial-avatar" aria-hidden="true">
+          <i className="fas fa-user"></i>
+        </span>
+        <span className="testimonial-meta">
+          <span className="testimonial-name">{person.name}</span>
+          <span className="testimonial-role">{person.role}</span>
+        </span>
+      </figcaption>
+    </div>
+  </figure>
+);
+
+/**
+ * The scrolling row.
+ *
+ * The loop works by rendering the list several times and sliding left by
+ * exactly one copy — at that point the row is pixel-identical to where it
+ * started, so the jump back is invisible.
+ *
+ * How many copies is a measurement, not a constant. One copy of four cards is
+ * about 1500px, so on any monitor wider than that a fixed two copies runs out
+ * of cards before the reset and leaves a visible empty stretch. The count is
+ * whatever it takes to keep the row covered at the moment it resets.
+ */
+const TestimonialMarquee = () => {
+  const wrapRef = useRef(null);
+  const trackRef = useRef(null);
+  const [loop, setLoop] = useState({ copies: 2, shift: 0, duration: 0 });
+
+  useEffect(() => {
+    const measure = () => {
+      const wrap = wrapRef.current;
+      const track = trackRef.current;
+      const card = track && track.querySelector('.testimonial-card');
+      if (!wrap || !card) return;
+
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      // offsetWidth, not getBoundingClientRect: the cards are skewed, and a
+      // client rect reports the sheared bounding box (a 280px card measures
+      // ~338px at -7deg). Layout width is what the flex row actually advances
+      // by, so it is the only correct basis for the loop distance.
+      const copyWidth = TESTIMONIALS.length * (card.offsetWidth + gap);
+      if (!(copyWidth > 0)) return;
+
+      const visible = wrap.offsetWidth;
+      // One copy scrolls away, so the rest have to fill the viewport behind it.
+      // The `+ gap` covers the exact-multiple case: the last card has no gap
+      // after it, which would otherwise leave one gap's worth of empty edge.
+      const copies = Math.max(2, Math.ceil((visible + gap) / copyWidth) + 1);
+
+      setLoop((prev) =>
+        prev.copies === copies && prev.shift === copyWidth
+          ? prev
+          : { copies, shift: copyWidth, duration: copyWidth / MARQUEE_SPEED }
+      );
+    };
+
+    measure();
+    window.addEventListener('resize', measure);
+
+    // Both elements matter and they change independently: the wrapper follows
+    // the viewport (which decides how many copies are needed), the track
+    // follows card metrics (which decide the shift). Watching only the track
+    // misses every resize, because fixed-width cards keep the track the same
+    // width no matter how wide the screen gets. Re-entry is safe: measure()
+    // returns the same object when nothing it reads has changed.
+    let observer;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(measure);
+      if (wrapRef.current) observer.observe(wrapRef.current);
+      if (trackRef.current) observer.observe(trackRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', measure);
+      if (observer) observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className="testimonials-marquee" ref={wrapRef}>
+      <div
+        className="testimonials-track"
+        ref={trackRef}
+        style={{
+          '--marquee-shift': `${loop.shift}px`,
+          '--marquee-duration': `${loop.duration}s`,
+        }}
+      >
+        {Array.from({ length: loop.copies }, (_, copy) =>
+          TESTIMONIALS.map((person) => (
+            <TestimonialCard
+              key={`${copy}-${person.name}`}
+              person={person}
+              duplicate={copy > 0}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
 const LandingPage = () => {
   const cardRef = useRef(null);
   const [tiltStyle, setTiltStyle] = useState({});
@@ -279,6 +479,32 @@ const LandingPage = () => {
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* What early users said after building a resume here. Plain quotes about
+          features that actually exist — no ratings, no employer claims.
+
+          The cards scroll right-to-left forever and stop on hover or keyboard
+          focus, so anyone who wants to finish reading one can. */}
+      <section className="testimonials-section">
+        {/* Soft mesh-gradient wash behind the row. */}
+        <div className="testimonials-glow" aria-hidden="true">
+          <span className="t-blob t-blob-a"></span>
+          <span className="t-blob t-blob-b"></span>
+          <span className="t-blob t-blob-c"></span>
+          <span className="t-blob t-blob-d"></span>
+        </div>
+
+        <div className="landing-section-inner">
+          <h2 className="section-title">
+            What early users <span className="gradient-text">told us</span>
+          </h2>
+          <p className="testimonials-intro">
+            Friends and colleagues who built their own resume on HatchResume, in their words.
+          </p>
+        </div>
+
+        <TestimonialMarquee />
       </section>
 
       {/* Suggestions / bug reports */}

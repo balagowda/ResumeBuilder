@@ -125,7 +125,7 @@ function App() {
               </nav>
 
               <nav className="footer-col" aria-label="Resume examples by job title">
-                <div className="footer-col-title">Examples</div>
+                <div className="footer-col-title">Some Examples</div>
                 <ul>
                   {EXAMPLE_RESUMES.map((example) => (
                     <li key={example.slug}>
