@@ -11,6 +11,7 @@ import Projects from './Projects';
 import Skills from './Skills';
 import Others from './Others';
 import JobMatch from './JobMatch';
+import AtsScorePanel from './AtsScorePanel';
 import StylingControls from './StylingControls';
 import ResumeVersions from './ResumeVersions';
 import StorageNotice from './StorageNotice';
@@ -105,10 +106,14 @@ export default function TemplateWorkspace({ templateId }) {
     others: true,
     jobMatch: true,
     contentReview: true,
+    atsCheck: true,
   });
 
   const resumeRef = useRef();
   const importInputRef = useRef();
+  const importResumeInputRef = useRef();
+  const [isImporting, setIsImporting] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const panelRef = useRef();
   const navigate = useNavigate();
 
@@ -510,14 +515,17 @@ export default function TemplateWorkspace({ templateId }) {
     }
   };
 
-  const addEntry = (section) => {
+  // `preset` lets a caller prefill the new entry — the "Additional Sections"
+  // quick-add chips use it to create a pre-titled Certifications/Languages/…
+  // entry in one click.
+  const addEntry = (section, preset = {}) => {
     setFormData({
       ...formData,
       [section]: [...formData[section],
-        section === 'education' ? { studyTitle: '', school: '', date: '', score: '' } :
-        section === 'experiences' ? { title: '', company: '', dates: '', description: '' } :
-        section === 'projects' ? { title: '', description: '', dates: '' } :
-        { title: '', description: '' }],
+        section === 'education' ? { studyTitle: '', school: '', date: '', score: '', ...preset } :
+        section === 'experiences' ? { title: '', company: '', dates: '', description: '', ...preset } :
+        section === 'projects' ? { title: '', description: '', dates: '', ...preset } :
+        { title: '', description: '', ...preset }],
     }, { label: `add ${section}` });
   };
 
@@ -772,6 +780,69 @@ export default function TemplateWorkspace({ templateId }) {
     e.target.value = '';
   };
 
+  // Import an existing resume file (PDF/DOCX/TXT): extract its text, parse it
+  // into form fields, and land it in a NEW resume so nothing current is
+  // overwritten. Extraction libraries load on demand; the file stays local.
+  // Reached from both the drop zone (drag & drop) and its file picker.
+  const importResumeFile = async (file) => {
+    if (!file || isImporting) return;
+
+    setIsImporting(true);
+    try {
+      const [{ extractTextFromFile }, { parseResumeText }] = await Promise.all([
+        import('../utils/resumeImportFiles'),
+        import('../utils/resumeImport'),
+      ]);
+      const text = await extractTextFromFile(file);
+      const { data, stats } = parseResumeText(text);
+      if (!stats.foundAnything) {
+        throw new Error(
+          'No resume content could be read from this file. If it is a scanned image PDF, the text is not extractable — try pasting the text into a TXT file instead.'
+        );
+      }
+
+      // Keep the outgoing resume's template, then open the import as its own
+      // resume — same pattern as handleCreateResume.
+      updateActive({ templateId });
+      const name = file.name.replace(/\.(pdf|docx|txt)$/i, '') || 'Imported resume';
+      store.createResumeFrom(name, { ...createEmptyFormData(), ...data });
+
+      const found = [
+        stats.name && 'name',
+        stats.contactParts > 0 && `${stats.contactParts} contact detail${stats.contactParts === 1 ? '' : 's'}`,
+        stats.summary && 'summary',
+        stats.experiences > 0 && `${stats.experiences} experience entr${stats.experiences === 1 ? 'y' : 'ies'}`,
+        stats.education > 0 && `${stats.education} education entr${stats.education === 1 ? 'y' : 'ies'}`,
+        stats.projects > 0 && `${stats.projects} project${stats.projects === 1 ? '' : 's'}`,
+        stats.skills && 'skills',
+        stats.others > 0 && `${stats.others} other section${stats.others === 1 ? '' : 's'}`,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      alert(
+        `Imported "${file.name}" as a new resume.\n\nFound: ${found}.\n\nImports are never perfect — check each section against the preview and fix anything that landed in the wrong place.`
+      );
+    } catch (err) {
+      console.error('Resume import failed:', err);
+      alert(err && err.message ? err.message : 'Could not import this file.');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleImportResumeInput = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    importResumeFile(file);
+  };
+
+  const handleImportDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    importResumeFile(file);
+  };
+
   const handleClearData = () => {
     if (window.confirm('Clear every resume you have here? This cannot be undone — download a backup first if you want to keep them.')) {
       clearEverything();
@@ -942,62 +1013,121 @@ export default function TemplateWorkspace({ templateId }) {
             storageError={storageError}
           />
 
-          <ResumeVersions
-            resumes={store.resumes}
-            activeId={store.activeId}
-            active={store.active}
-            onSwitch={handleSwitchResume}
-            onCreate={handleCreateResume}
-            onDuplicate={store.duplicateResume}
-            onRename={store.renameResume}
-            onDelete={store.deleteResume}
-          />
+          <div className="document-settings-col">
+            <div className="doc-setting-item template-select-item">
+              <label htmlFor="template-switcher"><i className="fas fa-layer-group"></i> Template</label>
+              <select
+                id="template-switcher"
+                className="template-switcher-select"
+                value={templateId}
+                onChange={handleSwitchTemplate}
+                title="Switch Template"
+              >
+                {TEMPLATES.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="doc-setting-item">
+              <ResumeVersions
+                resumes={store.resumes}
+                activeId={store.activeId}
+                active={store.active}
+                onSwitch={handleSwitchResume}
+                onCreate={handleCreateResume}
+                onDuplicate={store.duplicateResume}
+                onRename={store.renameResume}
+                onDelete={store.deleteResume}
+              />
+            </div>
+          </div>
 
-          <div className="template-switcher-row">
-            <label htmlFor="template-switcher"><i className="fas fa-layer-group"></i> Template</label>
-            <select
-              id="template-switcher"
-              className="template-switcher-select"
-              value={templateId}
-              onChange={handleSwitchTemplate}
-            >
-              {TEMPLATES.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
+          <div className="tools-import-section">
+            <div className="tools-import-header-static">
+              <span><i className="fas fa-toolbox"></i> Advanced Tools & Import</span>
+            </div>
+            <div className="tools-import-content">
+              <div className="data-tools-row">
+                <button className="data-tool-btn" onClick={handleLoadSample} title="Fill the form with example content">
+                  <i className="fas fa-magic"></i> Sample
+                </button>
+                <button className="data-tool-btn" onClick={handleExportJSON} title="Download your data as a backup file">
+                  <i className="fas fa-file-export"></i> Backup
+                </button>
+                <button className="data-tool-btn" onClick={() => importInputRef.current && importInputRef.current.click()} title="Restore data from a backup file">
+                  <i className="fas fa-file-import"></i> Restore
+                </button>
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  ref={importInputRef}
+                  onChange={handleImportJSON}
+                  style={{ display: 'none' }}
+                />
+              </div>
+
+              {/* Drop zone for importing an existing resume. */}
+              <div
+                className={`resume-import-zone ${isDragOver ? 'drag-over' : ''} ${isImporting ? 'importing' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-label="Import your existing resume — drag and drop a PDF, DOCX, or TXT file, or press Enter to browse"
+                onClick={() => !isImporting && importResumeInputRef.current && importResumeInputRef.current.click()}
+                onKeyDown={(e) => {
+                  if ((e.key === 'Enter' || e.key === ' ') && !isImporting) {
+                    e.preventDefault();
+                    if (importResumeInputRef.current) importResumeInputRef.current.click();
+                  }
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(true);
+                }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleImportDrop}
+              >
+                <div className="beta-badge-corner"><i className="fas fa-sparkles"></i> BETA</div>
+                <div className="import-icon-wrapper">
+                  <i className={`fas ${isImporting ? 'fa-spinner fa-spin' : 'fa-plus'}`} aria-hidden="true"></i>
+                </div>
+                <div className="resume-import-zone-text">
+                  {isImporting ? (
+                    <strong>Reading your resume…</strong>
+                  ) : (
+                    <>
+                      <strong>Drop your old resume here</strong>
+                      <span>
+                        PDF, DOCX, TXT or <span className="resume-import-browse">browse</span>
+                      </span>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  ref={importResumeInputRef}
+                  onChange={handleImportResumeInput}
+                  style={{ display: 'none' }}
+                  tabIndex={-1}
+                />
+              </div>
+            </div>
           </div>
-          <div className="data-tools-row">
-            <button className="data-tool-btn" onClick={handleLoadSample} title="Fill the form with example content">
-              <i className="fas fa-magic"></i> Sample
-            </button>
-            <button className="data-tool-btn" onClick={handleExportJSON} title="Download your data as a backup file">
-              <i className="fas fa-file-export"></i> Backup
-            </button>
-            <button className="data-tool-btn" onClick={() => importInputRef.current && importInputRef.current.click()} title="Restore data from a backup file">
-              <i className="fas fa-file-import"></i> Restore
-            </button>
-            <input
-              type="file"
-              accept="application/json,.json"
-              ref={importInputRef}
-              onChange={handleImportJSON}
-              style={{ display: 'none' }}
-            />
-          </div>
-          <div className="strength-meter-container">
+
+          <div className="strength-meter-slim">
             <div className="strength-meter-header">
               <span>Resume Strength</span>
-              <span>{completeness}%</span>
+              <span className="strength-percentage">{completeness}%</span>
             </div>
             <div className="strength-meter-bar">
               <div className="strength-meter-fill" style={{ width: `${completeness}%` }}></div>
             </div>
             {completeness < 100 && (
-              <ul className="strength-tips">
-                {getStrengthTips().map((tip) => (
-                  <li key={tip.label}><i className="fas fa-plus-circle"></i> {tip.label} <span className="tip-pts">+{tip.pts}%</span></li>
-                ))}
-              </ul>
+              <div className="strength-tips-dropdown">
+                <i className="fas fa-lightbulb"></i>
+                <span className="tips-label">Tips to improve:</span>
+                <span className="tips-text">{getStrengthTips().map(t => t.label).join(', ')}</span>
+              </div>
             )}
             {savedAt && (
               <p className="autosave-note">
@@ -1006,6 +1136,14 @@ export default function TemplateWorkspace({ templateId }) {
             )}
           </div>
         </div>
+
+        <AtsScorePanel
+          formData={formData}
+          sectionOrder={sectionOrder}
+          experienceHeading={experienceHeading}
+          collapsed={collapsedSections.atsCheck}
+          toggleSection={() => toggleSection('atsCheck')}
+        />
 
         <ContentReview
           formData={formData}

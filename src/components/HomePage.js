@@ -103,7 +103,7 @@ const HomePage = () => {
         <span className="templates-tagline">✨ {TEMPLATES.length} Professional Templates</span>
         {/* Wording matches the pre-rendered /templates/ page so crawlers and
             visitors see the same heading. */}
-        <h1>Free Resume Templates — {TEMPLATES.length} ATS-Friendly Designs</h1>
+        <h1>Resume Templates — ATS-Friendly Designs</h1>
         <p>Every layout is recruiter-approved. ATS-Optimized templates follow the single-column standard preferred by FAANG and top MNC recruiting systems. You can switch templates at any time without losing your data.</p>
       </section>
 
