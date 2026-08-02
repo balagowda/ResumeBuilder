@@ -504,11 +504,11 @@ export const EXAMPLE_RESUMES = [
     published: '2026-08-01',
     updated: '2026-08-01',
     navLabel: 'Financial analyst',
-    templateId: 8,
-    templateNote: 'Harvard Classic — the format finance and consulting recruiters expect',
+    templateId: 30,
+    templateNote: 'Finance Standard — the serif, double-ruled format banking and consulting expect',
     summaryLine: 'Modelling and reporting work stated in decisions funded and dollars found.',
     intro:
-      'A complete financial analyst resume example in the conservative Harvard format finance recruiters expect. The bullets do what finance resumes must: name the model, the decision it informed, and the dollars involved. Open it in the editor, replace the content with your own, and export a PDF.',
+      'A complete financial analyst resume example in the conservative serif format finance recruiters expect. The bullets do what finance resumes must: name the model, the decision it informed, and the dollars involved. Open it in the editor, replace the content with your own, and export a PDF.',
     whatWorks: [
       'Every bullet names the decision the analysis informed, with the dollar amount attached',
       'Modelling skill is shown through the model built, not the phrase "financial modelling"',
@@ -576,8 +576,8 @@ export const EXAMPLE_RESUMES = [
     published: '2026-08-01',
     updated: '2026-08-01',
     navLabel: 'Registered nurse',
-    templateId: 16,
-    templateNote: 'Corporate Blue — a familiar, trusted format that reads well to clinical recruiters',
+    templateId: 29,
+    templateNote: 'Clinical Professional — credentials under the name and a section for licences',
     summaryLine: 'Clinical experience with the license, unit type and patient ratios screeners scan for.',
     intro:
       'A complete registered nurse resume example. Nursing screeners look for four things in seconds — license, unit type, patient ratio, certifications — so this resume puts all four where they cannot be missed. Open it in the editor, replace the content with your own, and export a PDF.',
@@ -840,6 +840,165 @@ export const EXAMPLE_RESUMES = [
           school: 'Mesa Community College',
           date: '2019 – 2021',
           score: 'GPA 3.6/4.0',
+        },
+      ],
+    },
+  },
+
+  {
+    slug: 'teacher',
+    role: 'Teacher',
+    year: '2026',
+    published: '2026-08-02',
+    updated: '2026-08-02',
+    navLabel: 'Teacher',
+    templateId: 32,
+    templateNote: 'Bordered Classic — the conventional document look district hiring panels expect',
+    summaryLine: 'Classroom experience with the licence, grade bands and growth data a principal looks for.',
+    intro:
+      'A complete teacher resume example. A hiring principal reads for four things before anything else — what you are licensed to teach, which grades and subjects you have actually taught, what happened to student outcomes, and whether you take on work beyond your own classroom. This resume states all four. Open it in the editor, replace the content with your own, and export a PDF.',
+    whatWorks: [
+      'Licence and endorsements sit in their own section, with the state and the grade bands spelled out',
+      'Each role names the grade, subject and class size instead of describing teaching in general terms',
+      'Student outcomes are quantified — proficiency growth, pass rates, attendance — the way school data reports state them',
+      'Curriculum and committee work shows leadership without needing an administrator title',
+      'A conventional bordered layout: district applicant systems and hiring panels both read it without trouble',
+    ],
+    data: {
+      ...baseFields,
+      fullName: 'Priya Raghavan',
+      professionalTitle: 'Middle School Mathematics Teacher',
+      mail: 'priya.raghavan@email.com',
+      mobile: '+1 (614) 555-0143',
+      linkedin: 'linkedin.com/in/priyaraghavan',
+      github: '',
+      summary:
+        'Licensed middle school mathematics teacher with 7 years across grades 6–8 in Title I schools. Raised end-of-year proficiency 22 points across three cohorts and lead the district\'s vertical alignment work for grades 6–9.',
+      skills:
+        'Differentiated Instruction, Standards-Based Grading, IEP and 504 Implementation, Small-Group Intervention, Formative Assessment, Data-Driven Instruction, Classroom Management, Google Classroom, Desmos, Curriculum Design',
+      experiences: [
+        {
+          title: 'Mathematics Teacher — Grades 7 and 8',
+          company: 'Wexford Middle School, Columbus, OH',
+          dates: 'Aug 2021 – Present',
+          description:
+            'Teach five sections of 28–32 students, including two co-taught inclusion sections serving 14 students on IEPs\nRaised grade 8 state assessment proficiency from 54% to 76% over three years, the largest gain in the building\nBuilt and lead a twice-weekly intervention block that moved 41 of 58 below-grade-level students up a performance band in a year\nChair the grades 6–9 vertical alignment team and mentor two first-year teachers annually through district induction',
+        },
+        {
+          title: 'Mathematics Teacher — Grade 6',
+          company: 'Linden Park Intermediate, Columbus, OH',
+          dates: 'Aug 2019 – Jul 2021',
+          description:
+            'Taught four sections of grade 6 mathematics, 30 students each, where 71% of students qualified for free or reduced lunch\nMoved the grade 6 team to standards-based grading, cutting failure rates from 18% to 7% across the cohort',
+        },
+      ],
+      projects: [
+        {
+          title: 'Family maths night',
+          dates: '2023 – 2024',
+          description:
+            'Ran a termly family maths evening in English and Spanish for 180+ families; the participating cohort\'s homework completion rose 15 points',
+        },
+      ],
+      education: [
+        {
+          studyTitle: 'M.Ed. Curriculum and Instruction',
+          school: 'The Ohio State University',
+          date: '2017 – 2019',
+          score: 'GPA 3.9/4.0',
+        },
+        {
+          studyTitle: 'B.S. Mathematics',
+          school: 'Miami University',
+          date: '2013 – 2017',
+          score: 'GPA 3.6/4.0',
+        },
+      ],
+      others: [
+        {
+          title: 'Licences & Certifications',
+          description:
+            'Ohio Professional Educator Licence — Mathematics, grades 4–9 — active through 2029\nReading Endorsement, Ohio Department of Education, 2022',
+        },
+      ],
+    },
+  },
+
+  {
+    slug: 'accountant',
+    role: 'Accountant',
+    year: '2026',
+    published: '2026-08-02',
+    updated: '2026-08-02',
+    navLabel: 'Accountant',
+    templateId: 38,
+    templateNote: 'Office Classic — the Cambria and Calibri pairing finance departments read every day',
+    summaryLine: 'Close cycles, reconciliations and audit results stated as numbers, not duties.',
+    intro:
+      'A complete accountant resume example. Accounting is one of the few fields where the work is already measured — days to close, accounts reconciled, variances found, audit adjustments — and a resume that reports those numbers reads as competence rather than a job description. This one does, and keeps its licence status and systems where a controller will see them. Open it in the editor, replace the content with your own, and export a PDF.',
+    whatWorks: [
+      'Every bullet carries an accounting metric — close days, reconciliation volume, audit adjustments, dollar impact',
+      'CPA status and licence state are stated plainly rather than left for the reader to infer',
+      'ERP and reporting systems (NetSuite, SAP, Excel modelling) are named for keyword filters',
+      'Process improvements are quantified in time saved, which is how accounting managers judge them',
+      'A plain, conventional layout — finance departments treat decorative resumes as a warning sign',
+    ],
+    data: {
+      ...baseFields,
+      fullName: 'Daniel Okafor',
+      professionalTitle: 'Senior Accountant, CPA',
+      mail: 'daniel.okafor@email.com',
+      mobile: '+1 (312) 555-0188',
+      linkedin: 'linkedin.com/in/danielokafor',
+      github: '',
+      summary:
+        'Senior accountant and licensed CPA with 6 years across public audit and corporate accounting. Cut the monthly close from 9 days to 5, own 40+ balance sheet reconciliations, and closed two consecutive audits with zero adjustments.',
+      skills:
+        'US GAAP, Month-End Close, Account Reconciliation, Journal Entries, Financial Reporting, Accruals and Prepaids, Fixed Assets, Audit Support, Internal Controls (SOX), NetSuite, SAP, Advanced Excel',
+      experiences: [
+        {
+          title: 'Senior Accountant',
+          company: 'Meridian Logistics Group',
+          dates: 'Mar 2022 – Present',
+          description:
+            'Own the monthly close for three entities with $180M combined revenue, cutting the cycle from 9 days to 5 by rebuilding the checklist and automating recurring entries\nReconcile 40+ balance sheet accounts monthly, clearing a $310K aged reconciling balance inherited at handover within two quarters\nPrepare consolidated reporting packages and CFO variance analysis on any line moving more than 5% against budget\nSupported two external audits as primary contact, both closed with zero adjustments and no management letter comments',
+        },
+        {
+          title: 'Staff Accountant',
+          company: 'Halstead Manufacturing',
+          dates: 'Jul 2020 – Feb 2022',
+          description:
+            'Prepared journal entries, accruals and prepaid schedules for a $60M manufacturer, closing the books on the third business day each month\nBuilt the intercompany reconciliation template still used across four subsidiaries, and recovered $47K by catching a duplicate vendor payment pattern in a routine AP review',
+        },
+        {
+          title: 'Audit Associate',
+          company: 'Brennan & Fitch LLP',
+          dates: 'Aug 2019 – Jun 2020',
+          description:
+            'Executed audit fieldwork across 11 privately held manufacturing and distribution clients, testing revenue, inventory and payroll cycles',
+        },
+      ],
+      projects: [
+        {
+          title: 'Close automation in NetSuite',
+          dates: '2024',
+          description:
+            'Implemented recurring journal templates, automated bank feeds and a close dashboard, saving ~30 manual hours a month',
+        },
+      ],
+      education: [
+        {
+          studyTitle: 'B.S. Accountancy',
+          school: 'University of Illinois Urbana-Champaign',
+          date: '2015 – 2019',
+          score: 'GPA 3.8/4.0',
+        },
+      ],
+      others: [
+        {
+          title: 'Licences & Certifications',
+          description:
+            'Certified Public Accountant (CPA), State of Illinois — active through 2027',
         },
       ],
     },

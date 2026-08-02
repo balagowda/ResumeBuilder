@@ -669,6 +669,17 @@ const renderSingleColumn = (ctx, opts) => {
         </div>
       );
     }
+    // A grid of skills scans faster than one long comma line, and stays a plain
+    // <ul> — a parser still gets one skill per list item either way.
+    if (opts.skillsAs === 'columns') {
+      return (
+        <ul className="sc-skill-grid">
+          {formData.skills.split(',').map((skill, i) => skill.trim() && (
+            <li key={i}>{skill.trim()}</li>
+          ))}
+        </ul>
+      );
+    }
     return <p className="sc-skills-line">{formData.skills}</p>;
   };
 
@@ -697,10 +708,14 @@ const renderSingleColumn = (ctx, opts) => {
           </div>
         </div>
       </div>
+      {/* Each block carries its own `sc-<section>` class alongside the shared
+          one, so a variant can style a single section — a highlighted profile
+          box, say — without the renderer needing to know which design wants
+          it. */}
       {sectionOrder.map((section) => {
         if (section === 'summary' && formData.summary) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.summary || 'Summary'}</h3>
               {formatTextToList(formData.summary)}
             </div>
@@ -708,7 +723,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'skills' && formData.skills) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.skills || 'Skills'}</h3>
               {renderSkills()}
             </div>
@@ -716,7 +731,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'experiences' && formData.experiences.length > 0 && formData.experiences[0].title) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{experienceHeading}</h3>
               {formData.experiences.map((exp, idx) => exp.title && (
                 <div key={idx} className="sc-entry">
@@ -733,7 +748,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'projects' && formData.projects.length > 0 && formData.projects[0].title) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.projects || 'Projects'}</h3>
               {formData.projects.map((proj, idx) => proj.title && (
                 <div key={idx} className="sc-entry">
@@ -749,7 +764,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'education' && formData.education.length > 0 && formData.education[0].studyTitle) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.education || 'Education'}</h3>
               {formData.education.map((edu, idx) => edu.studyTitle && (
                 <div key={idx} className="sc-entry">
@@ -765,7 +780,7 @@ const renderSingleColumn = (ctx, opts) => {
         }
         if (section === 'others' && formData.others.length > 0 && formData.others[0].title) {
           return (
-            <div key={section} className="sc-section">
+            <div key={section} className={`sc-section sc-${section}`}>
               <h3>{headings.others || 'Additional'}</h3>
               {formData.others.map((oth, idx) => oth.title && (
                 <div key={idx} className="sc-entry">
@@ -782,20 +797,61 @@ const renderSingleColumn = (ctx, opts) => {
   );
 };
 
-/* --- Templates 13 & 21: two-column layouts (light rail right / Deedy left) */
+/* --- Two-column layouts: light rail right, Deedy left, or under a banner --- */
 
-const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
+/**
+ * @param banner  Put the name, title and contact in a full-width block above
+ *                both columns instead of at the top of the main one. The
+ *                sidebar then drops its own Contact list, since the details
+ *                are already in the banner — printing them twice is the kind
+ *                of duplication that confuses a parser as much as a reader.
+ * @param profileBand  Pull the summary out of the main column and run it the
+ *                full width of the sheet, under the banner and above the
+ *                columns.
+ */
+const renderTwoColumn = (
+  ctx,
+  { className = '', sideFirst = false, banner = false, profileBand = false } = {}
+) => {
   const { formData, sectionOrder, experienceHeading, formatTextToList } = ctx;
   const profTitle = getProfessionalTitle(formData);
 
+  const bannerBlock = banner ? (
+    <div className="rb-banner" key="banner">
+      <h1>{formData.fullName || 'Your Name'}</h1>
+      {profTitle && <p className="rb-prof-title">{profTitle}</p>}
+      <div className="rb-banner-contact">
+        {formData.mail && <span>{formData.mail}</span>}
+        {formData.mobile && <span>{formData.mobile}</span>}
+        {[['linkedin', 'LinkedIn'], ['github', 'GitHub'], ['other', 'Portfolio']].map(
+          ([field, label]) =>
+            formData[field] && (
+              <a key={field} href={formData[field]} target="_blank" rel="noopener noreferrer">
+                {label}
+              </a>
+            )
+        )}
+      </div>
+    </div>
+  ) : null;
+
+  const profileBlock = profileBand && formData.summary ? (
+    <div className="rb-profile" key="profile">
+      <h3>Profile</h3>
+      {formatTextToList(formData.summary)}
+    </div>
+  ) : null;
+
   const mainCol = (
         <div className="rb-main" key="main">
+          {!banner && (
           <div className="rb-header">
             <h1>{formData.fullName || 'Your Name'}</h1>
             {profTitle && <p className="rb-prof-title">{profTitle}</p>}
           </div>
+          )}
           {sectionOrder.map((section) => {
-            if (section === 'summary' && formData.summary) {
+            if (section === 'summary' && formData.summary && !profileBand) {
               return (
                 <div key={section} className="rb-section">
                   <h3>Profile</h3>
@@ -836,6 +892,7 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
 
   const sideCol = (
         <div className="rb-side" key="side">
+          {!banner && (
           <div className="rb-side-section">
             <h4>Contact</h4>
             <ul>
@@ -846,6 +903,7 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
               {formData.other && <li><a href={formData.other} target="_blank" rel="noopener noreferrer">Portfolio</a></li>}
             </ul>
           </div>
+          )}
           {sectionOrder.map((section) => {
             if (section === 'skills' && formData.skills) {
               return (
@@ -893,6 +951,8 @@ const renderTwoColumn = (ctx, { className = '', sideFirst = false } = {}) => {
 
   return (
     <div className={`resume-content tmpl-rightbar ${className}`}>
+      {bannerBlock}
+      {profileBlock}
       <div className="rb-container">
         {sideFirst ? [sideCol, mainCol] : [mainCol, sideCol]}
       </div>
@@ -1028,6 +1088,147 @@ const SINGLE_COLUMN_VARIANTS = {
     skillsAs: 'line',
     headings: { summary: 'Profile' },
   },
+  26: {
+    className: 'tmpl-chrono',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
+  27: {
+    className: 'tmpl-graphite',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'line',
+    headings: { summary: 'Profile', skills: 'Core Skills' },
+  },
+  28: {
+    className: 'tmpl-matrix',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'columns',
+    headings: { summary: 'Summary', skills: 'Technical Skills' },
+  },
+  29: {
+    className: 'tmpl-clinical',
+    showUrls: false,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: {
+      summary: 'Professional Summary',
+      skills: 'Clinical Skills',
+      others: 'Licenses & Certifications',
+    },
+  },
+  30: {
+    className: 'tmpl-finance',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Summary', skills: 'Skills & Certifications' },
+  },
+  31: {
+    className: 'tmpl-federal',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: {
+      summary: 'Professional Summary',
+      skills: 'Skills & Competencies',
+      others: 'Additional Information',
+    },
+  },
+  32: {
+    className: 'tmpl-bordered',
+    showUrls: false,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
+  33: {
+    className: 'tmpl-spotlight',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'Executive Summary', skills: 'Core Competencies' },
+  },
+  34: {
+    className: 'tmpl-splithead',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Summary', skills: 'Key Skills' },
+  },
+  35: {
+    className: 'tmpl-rail',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'Profile' },
+  },
+  36: {
+    className: 'tmpl-functional',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'columns',
+    headings: { summary: 'Profile', skills: 'Core Skills & Strengths' },
+  },
+  37: {
+    className: 'tmpl-garamond',
+    showUrls: false,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: { summary: 'Summary', skills: 'Areas of Expertise' },
+  },
+  38: {
+    className: 'tmpl-office',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
+  39: {
+    className: 'tmpl-scan',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Summary', skills: 'Key Skills' },
+  },
+  40: {
+    className: 'tmpl-charcoal',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'Profile' },
+  },
+  43: {
+    className: 'tmpl-combo',
+    showUrls: false,
+    contactSep: '|',
+    skillsAs: 'columns',
+    headings: { summary: 'Professional Summary', skills: 'Core Competencies' },
+  },
+  44: {
+    className: 'tmpl-cgrid',
+    showUrls: true,
+    contactSep: '|',
+    skillsAs: 'line',
+    headings: { summary: 'Professional Summary' },
+  },
+  47: {
+    className: 'tmpl-stripe',
+    showUrls: false,
+    contactSep: '·',
+    skillsAs: 'pills',
+    headings: { summary: 'Profile' },
+  },
+  48: {
+    className: 'tmpl-centrules',
+    showUrls: true,
+    contactSep: '•',
+    skillsAs: 'line',
+    headings: { summary: 'Summary' },
+  },
 };
 
 export const renderResumeTemplate = (templateId, ctx) => {
@@ -1039,6 +1240,12 @@ export const renderResumeTemplate = (templateId, ctx) => {
     case 5: return renderTemplate5(ctx);
     case 13: return renderTwoColumn(ctx);
     case 21: return renderTwoColumn(ctx, { className: 'tmpl-deedy', sideFirst: true });
+    case 41: return renderTwoColumn(ctx, { className: 'tmpl-leftbar', sideFirst: true });
+    case 42: return renderTwoColumn(ctx, { className: 'tmpl-banner', banner: true });
+    case 45: return renderTwoColumn(ctx, { className: 'tmpl-bannerside', sideFirst: true, banner: true });
+    case 46: return renderTwoColumn(ctx, { className: 'tmpl-profileband', banner: true, profileBand: true });
+    case 49: return renderTwoColumn(ctx, { className: 'tmpl-tlside' });
+    case 50: return renderTwoColumn(ctx, { className: 'tmpl-serifcol' });
     default: {
       const opts = SINGLE_COLUMN_VARIANTS[templateId];
       return opts ? renderSingleColumn(ctx, opts) : renderTemplate1(ctx);

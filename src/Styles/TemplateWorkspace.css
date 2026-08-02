@@ -788,12 +788,51 @@
   );
 }
 
-.resume:has(.tmpl-rightbar:not(.tmpl-deedy)) {
+.resume:has(.tmpl-rightbar:not(.tmpl-deedy):not(.tmpl-leftbar):not(.tmpl-banner):not(.tmpl-bannerside)) {
   background-image: linear-gradient(
     to right,
     var(--white) 0 386.4px,
     #e2e8f0 386.4px 387.4px,
     #f1f5f9 387.4px
+  );
+}
+
+/* Same trick for the mixed-layout set: a 33% dark rail on the left (41), a
+   white right rail behind a hairline (42), and a 32% light rail on the left
+   under the banner (45). */
+.resume:has(.tmpl-leftbar) {
+  background-image: linear-gradient(
+    to right,
+    var(--accent, #2b3542) 0 184.8px,
+    var(--white) 184.8px
+  );
+}
+
+.resume:has(.tmpl-banner) {
+  background-image: linear-gradient(
+    to right,
+    var(--white) 0 386.4px,
+    #e2e8f0 386.4px 387.4px,
+    var(--white) 387.4px
+  );
+}
+
+.resume:has(.tmpl-bannerside) {
+  background-image: linear-gradient(
+    to right,
+    #f4f6f9 0 179.2px,
+    #e2e8f0 179.2px 180.2px,
+    var(--white) 180.2px
+  );
+}
+
+/* Template 47 is single column: the same technique, but the band is a 16px
+   stripe inside the sheet's left margin rather than a column. */
+.resume:has(.tmpl-stripe) {
+  background-image: linear-gradient(
+    to right,
+    var(--accent, #4338ca) 0 16px,
+    var(--white) 16px
   );
 }
 
@@ -2271,6 +2310,21 @@
   gap: 4px;
 }
 
+/* Skills as a multi-column list. Grid rather than CSS `columns`: html2canvas
+   places every element by its own box, and a fragmented column flow is exactly
+   the layout it gets wrong in the image PDF. */
+.tmpl-single .sc-skill-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 14px;
+  margin: 2px 0;
+  padding-left: 13px;
+}
+
+.tmpl-single .sc-skill-grid li {
+  margin-bottom: 1px;
+}
+
 .tmpl-single .sc-skill-pill {
   padding: 2px 8px;
   border-radius: 10px;
@@ -3081,6 +3135,1004 @@
 }
 
 /* ==========================================================================
+   TEMPLATES 26-30: MORE SINGLE-COLUMN INDUSTRY STANDARDS
+   ========================================================================== */
+
+/* --- Template 26: Chronological Standard ---------------------------------- */
+
+.tmpl-chrono .sc-header {
+  border-bottom: 1px solid #0f172a;
+  padding-bottom: 8px;
+  margin-bottom: 13px;
+}
+
+.tmpl-chrono .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.7rem;
+  color: #0f172a;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 2px;
+}
+
+/* The dates leave the text flow for a fixed gutter, so the career history
+   reads as one column of dates beside one column of roles. Only the painting
+   moves: the markup still runs title, company, dates in reading order, which
+   is what a parser and the text PDF export both go by. */
+.tmpl-chrono .sc-entry {
+  position: relative;
+  padding-left: 100px;
+}
+
+.tmpl-chrono .date-right {
+  position: absolute;
+  float: none;
+  left: 0;
+  top: 0;
+  width: 88px;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* --- Template 27: Graphite Rule ------------------------------------------- */
+
+.tmpl-graphite {
+  color: #3f4750;
+}
+
+.tmpl-graphite .sc-header {
+  border-bottom: 1px solid #dfe4e9;
+  padding-bottom: 9px;
+  margin-bottom: 13px;
+}
+
+.tmpl-graphite .sc-header h1 {
+  font-weight: 600;
+  color: #23282e;
+  letter-spacing: -0.4px;
+}
+
+.tmpl-graphite .sc-prof-title {
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  font-size: 0.6rem;
+  color: #6b7480;
+}
+
+/* Heading, then a hairline taking up whatever width is left. */
+.tmpl-graphite .sc-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-size: 0.66rem;
+  color: #3f4750;
+}
+
+.tmpl-graphite .sc-section h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #d7dde3;
+}
+
+/* --- Template 28: Skills Matrix ------------------------------------------- */
+
+.tmpl-matrix .sc-header {
+  border-bottom: 2px solid #334155;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.tmpl-matrix .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-size: 0.7rem;
+  color: #0f172a;
+}
+
+.tmpl-matrix .sc-section h3::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  background: #334155;
+}
+
+.tmpl-matrix .sc-skill-grid {
+  font-size: 0.62rem;
+}
+
+/* --- Template 29: Clinical Professional ----------------------------------- */
+
+.tmpl-clinical .sc-header h1 {
+  color: #1e3a5f;
+  font-size: 1.4rem;
+}
+
+/* Credentials line — "RN, BSN", "PA-C" — sits directly under the name, which
+   is where a nurse manager looks first. */
+.tmpl-clinical .sc-prof-title {
+  color: #35617f;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+/* Full-bleed contact strip. The -32px matches the sheet's own padding. */
+.tmpl-clinical .sc-contact {
+  background: #eef4f8;
+  border-top: 1px solid #cbdce8;
+  border-bottom: 1px solid #cbdce8;
+  margin: 8px -32px 0;
+  padding: 5px 32px;
+}
+
+.tmpl-clinical .sc-section h3 {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: 0.74rem;
+  color: #1e3a5f;
+  border-bottom: 2px solid #7ba7c7;
+  padding-bottom: 1px;
+}
+
+/* --- Template 30: Finance Standard ---------------------------------------- */
+
+.tmpl-finance,
+.tmpl-finance .sc-header h1,
+.tmpl-finance .sc-section h3,
+.tmpl-finance .entry-header {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.tmpl-finance {
+  color: #1f2328;
+}
+
+.tmpl-finance .sc-header {
+  text-align: center;
+  border-bottom: 3px double #1a1a1a;
+  padding-bottom: 8px;
+  margin-bottom: 13px;
+}
+
+.tmpl-finance .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-finance .sc-header h1 {
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.tmpl-finance .sc-prof-title {
+  font-style: italic;
+  color: #4b5563;
+}
+
+.tmpl-finance .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-size: 0.7rem;
+  color: #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: 1px;
+}
+
+.tmpl-finance .sc-company {
+  font-style: italic;
+  color: #374151;
+}
+
+/* ==========================================================================
+   TEMPLATES 31-35: MORE SINGLE-COLUMN INDUSTRY STANDARDS
+   ========================================================================== */
+
+/* --- Template 31: Federal Standard ---------------------------------------- */
+
+.tmpl-federal {
+  color: #1f2937;
+}
+
+.tmpl-federal .sc-header {
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+}
+
+.tmpl-federal .sc-header h1 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1.3rem;
+}
+
+/* The rule sits above the heading rather than under it — the block-report
+   look of a government application, and it keeps every section visibly
+   separate without shading or colour, neither of which survives the plain
+   text conversion these applications are read through. */
+.tmpl-federal .sc-section {
+  border-top: 1px solid #111827;
+  padding-top: 5px;
+  margin-bottom: 12px;
+}
+
+.tmpl-federal .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 0.72rem;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.tmpl-federal .sc-entry {
+  margin-bottom: 9px;
+}
+
+/* --- Template 32: Bordered Classic ---------------------------------------- */
+
+/* The frame is drawn on the content itself, so a resume that runs to two
+   pages keeps its sides framed all the way down rather than boxing page one
+   and leaving page two bare. */
+.tmpl-bordered {
+  border: 1px solid #94a3b8;
+  padding: 15px 16px;
+}
+
+.tmpl-bordered .sc-header {
+  text-align: center;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 9px;
+  margin-bottom: 12px;
+}
+
+.tmpl-bordered .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-bordered .sc-header h1 {
+  letter-spacing: 0.5px;
+}
+
+.tmpl-bordered .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.71rem;
+  color: #1e293b;
+}
+
+/* --- Template 33: Profile Spotlight --------------------------------------- */
+
+.tmpl-spotlight .sc-header {
+  margin-bottom: 13px;
+}
+
+.tmpl-spotlight .sc-header h1 {
+  color: #1e1b4b;
+}
+
+/* Only the summary is boxed. Anything more and the page turns into a stack
+   of panels, which is the look this template exists to avoid. */
+.tmpl-spotlight .sc-summary {
+  background: #f5f5ff;
+  border-left: 3px solid #4338ca;
+  border-radius: 0 4px 4px 0;
+  padding: 8px 11px;
+}
+
+.tmpl-spotlight .sc-summary h3 {
+  margin-bottom: 3px;
+}
+
+.tmpl-spotlight .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 0.68rem;
+  color: #4338ca;
+}
+
+.tmpl-spotlight .sc-skill-pill {
+  background: #eeeeff;
+  color: #3730a3;
+}
+
+/* --- Template 34: Split Header Modern ------------------------------------- */
+
+/* Name and title in the left column, contact stacked flush right beside it. */
+.tmpl-splithead .sc-header-main {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 20px;
+  align-items: end;
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 8px;
+  margin-bottom: 13px;
+}
+
+.tmpl-splithead .sc-header-main h1 {
+  grid-column: 1;
+}
+
+.tmpl-splithead .sc-prof-title {
+  grid-column: 1;
+  margin-bottom: 0;
+}
+
+.tmpl-splithead .sc-contact {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  text-align: right;
+}
+
+/* The separators only make sense on one line; the stack has the line breaks
+   doing that job. */
+.tmpl-splithead .sc-sep {
+  display: none;
+}
+
+.tmpl-splithead .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 0.69rem;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 3px;
+}
+
+/* --- Template 35: Section Rail -------------------------------------------- */
+
+/* 3px border + 10px padding lines the name up with the section text, which
+   sits behind a 2px rail and 11px of padding. */
+.tmpl-rail .sc-header {
+  border-left: 3px solid #475569;
+  padding-left: 10px;
+  margin-bottom: 14px;
+}
+
+.tmpl-rail .sc-section {
+  border-left: 2px solid #dbe3ec;
+  padding-left: 11px;
+}
+
+.tmpl-rail .sc-section h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #334155;
+  position: relative;
+}
+
+/* A square on the rail marks where each section starts. */
+.tmpl-rail .sc-section h3::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 3px;
+  width: 6px;
+  height: 6px;
+  background: #475569;
+}
+
+.tmpl-rail .sc-skill-pill {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+/* ==========================================================================
+   TEMPLATES 36-40: MORE SINGLE-COLUMN INDUSTRY STANDARDS
+   ========================================================================== */
+
+/* --- Template 36: Functional Skills-First --------------------------------- */
+
+.tmpl-functional .sc-header {
+  border-bottom: 2px solid #334155;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.tmpl-functional .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.7rem;
+  color: #1e293b;
+}
+
+/* Only the strengths get a panel — the point of the functional format is that
+   they are read first. The history keeps its dates and its order underneath,
+   which is what stops the layout from becoming the sort of undated functional
+   resume a parser has nothing to file. */
+.tmpl-functional .sc-skills {
+  background: #f6f8fb;
+  border: 1px solid #dfe6ee;
+  border-radius: 3px;
+  padding: 8px 11px;
+}
+
+.tmpl-functional .sc-skill-grid {
+  grid-template-columns: repeat(2, 1fr);
+  font-size: 0.63rem;
+}
+
+/* The history is supporting evidence here, so it is set tighter than the
+   panel above it. */
+.tmpl-functional .sc-entry {
+  margin-bottom: 6px;
+}
+
+/* --- Template 37: Garamond Executive -------------------------------------- */
+
+.tmpl-garamond,
+.tmpl-garamond .sc-header h1,
+.tmpl-garamond .sc-section h3,
+.tmpl-garamond .entry-header {
+  font-family: Garamond, 'EB Garamond', 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+/* Garamond runs small for its point size — the whole sheet is set a step up
+   so it reads at the same size as the sans templates. */
+.tmpl-garamond {
+  font-size: 0.7rem;
+  color: #262b2f;
+}
+
+.tmpl-garamond .sc-header {
+  margin-bottom: 15px;
+}
+
+.tmpl-garamond .sc-header h1 {
+  font-weight: 600;
+  font-size: 1.55rem;
+  letter-spacing: 0.5px;
+}
+
+.tmpl-garamond .sc-prof-title {
+  font-size: 0.88rem;
+  color: #4b5563;
+}
+
+.tmpl-garamond .sc-section {
+  margin-bottom: 14px;
+}
+
+.tmpl-garamond .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 2.2px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #262b2f;
+  border-bottom: 1px solid #b8bfc6;
+  padding-bottom: 3px;
+  margin-bottom: 7px;
+}
+
+.tmpl-garamond .entry-header {
+  font-size: 0.72rem;
+}
+
+/* --- Template 38: Office Classic ------------------------------------------ */
+
+.tmpl-office {
+  font-family: Calibri, Candara, 'Segoe UI', 'Trebuchet MS', sans-serif;
+  color: #1f2937;
+}
+
+/* The Cambria-over-Calibri pairing is the whole design — it is what a resume
+   written in Word has looked like for fifteen years. */
+.tmpl-office .sc-header h1,
+.tmpl-office .sc-section h3 {
+  font-family: Cambria, 'Hoefler Text', Georgia, serif;
+}
+
+.tmpl-office .sc-header {
+  padding-bottom: 7px;
+  border-bottom: 1px solid #6b7280;
+  margin-bottom: 11px;
+}
+
+.tmpl-office .sc-header h1 {
+  font-weight: 700;
+  font-size: 1.42rem;
+}
+
+.tmpl-office .sc-section h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 2px;
+}
+
+/* --- Template 39: Recruiter Scan ------------------------------------------ */
+
+.tmpl-scan .sc-header {
+  margin-bottom: 18px;
+}
+
+.tmpl-scan .sc-header h1 {
+  font-size: 1.7rem;
+  letter-spacing: -0.5px;
+}
+
+.tmpl-scan .sc-prof-title {
+  font-size: 0.9rem;
+}
+
+/* Headings big enough to find without reading, and enough air between blocks
+   that the eye lands on them one at a time. */
+.tmpl-scan .sc-section {
+  margin-bottom: 17px;
+}
+
+.tmpl-scan .sc-section h3 {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #000000;
+  margin-bottom: 7px;
+}
+
+.tmpl-scan .sc-entry {
+  margin-bottom: 9px;
+}
+
+/* --- Template 40: Charcoal Modern ----------------------------------------- */
+
+/* The block hugs the name rather than spanning the page: a full-width band
+   pushes the contact line into reversed-out small text, which is the first
+   thing to go wrong when a parser reads the header. */
+.tmpl-charcoal .sc-header h1 {
+  display: inline-block;
+  background: #1f2933;
+  color: #ffffff;
+  padding: 5px 12px 6px;
+  letter-spacing: 0.3px;
+}
+
+.tmpl-charcoal .sc-header {
+  margin-bottom: 13px;
+}
+
+.tmpl-charcoal .sc-prof-title {
+  margin-top: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-size: 0.62rem;
+  color: #52606d;
+}
+
+.tmpl-charcoal .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 0.7rem;
+  color: #1f2933;
+  border-bottom: 1px solid #1f2933;
+  padding-bottom: 2px;
+}
+
+.tmpl-charcoal .sc-skill-pill {
+  background: #eef1f4;
+  color: #1f2933;
+}
+
+/* ==========================================================================
+   TEMPLATES 41-45: MIXED LAYOUTS
+   Two of the five are two-column and one puts a banner above the columns,
+   so this block also carries the shared banner rules.
+   ========================================================================== */
+
+/* --- Template 41: Slate Sidebar (dark rail on the left) ------------------- */
+
+.tmpl-rightbar.tmpl-leftbar .rb-side {
+  width: 33%;
+  background: #2b3542;
+  border-left: none;
+  border-right: none;
+  padding: 32px 16px 32px 22px;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-main {
+  padding: 32px 32px 32px 20px;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-side-section h4 {
+  color: #ffffff;
+  border-bottom-color: #4a5765;
+  letter-spacing: 1.2px;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-side-section ul li,
+.tmpl-rightbar.tmpl-leftbar .rb-side-edu .edu-title,
+.tmpl-rightbar.tmpl-leftbar .rb-side-edu .edu-school,
+.tmpl-rightbar.tmpl-leftbar .rb-side-edu .edu-date,
+.tmpl-rightbar.tmpl-leftbar .rb-side-other .oth-title,
+.tmpl-rightbar.tmpl-leftbar .rb-side-other p,
+.tmpl-rightbar.tmpl-leftbar .rb-side-other li {
+  color: #dbe1e8;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-side-edu .edu-title,
+.tmpl-rightbar.tmpl-leftbar .rb-side-other .oth-title {
+  color: #ffffff;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-skill-tag {
+  background: #3d4957;
+  color: #eef2f6;
+}
+
+.tmpl-rightbar.tmpl-leftbar .rb-section h3 {
+  color: #2b3542;
+  border-bottom-color: #2b3542;
+}
+
+/* --- Templates 42 & 45: banner above the columns -------------------------- */
+
+/* The banner is full-bleed, so the container below it drops only its side and
+   bottom offsets — the -32px top the other two-column templates use would
+   pull the columns back over the banner. Keyed on the template rather than on
+   adjacency, since a profile band can sit between the two. */
+.tmpl-banner .rb-container,
+.tmpl-bannerside .rb-container,
+.tmpl-profileband .rb-container {
+  margin: 0 -32px -32px;
+}
+
+.tmpl-rightbar .rb-banner {
+  margin: -32px -32px 0;
+  padding: 22px 32px 16px;
+}
+
+.tmpl-rightbar .rb-banner h1 {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+}
+
+.tmpl-rightbar .rb-banner .rb-prof-title {
+  margin: 2px 0 7px;
+}
+
+.tmpl-rightbar .rb-banner-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 14px;
+  font-size: 0.6rem;
+}
+
+/* --- Template 42: Banner Two-Column (light banner, right rail) ------------ */
+
+.tmpl-banner .rb-banner {
+  background: #f1f5f9;
+  border-bottom: 2px solid #1e293b;
+}
+
+.tmpl-banner .rb-banner-contact {
+  color: #475569;
+}
+
+.tmpl-banner .rb-main {
+  padding-top: 20px;
+}
+
+.tmpl-banner .rb-side {
+  padding-top: 20px;
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+}
+
+/* --- Template 45: Banner Sidebar Executive (dark banner, light left rail) - */
+
+.tmpl-bannerside .rb-banner {
+  background: #1f2933;
+}
+
+.tmpl-bannerside .rb-banner h1 {
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.tmpl-bannerside .rb-banner .rb-prof-title {
+  color: #b9c3ce;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-size: 0.64rem;
+}
+
+.tmpl-bannerside .rb-banner-contact,
+.tmpl-bannerside .rb-banner-contact a {
+  color: #e3e8ee;
+}
+
+.tmpl-bannerside .rb-side {
+  width: 32%;
+  background: #f4f6f9;
+  border-right: 1px solid #e2e8f0;
+  border-left: none;
+  padding: 20px 16px 32px 22px;
+}
+
+.tmpl-bannerside .rb-main {
+  padding: 20px 32px 32px 20px;
+}
+
+.tmpl-bannerside .rb-section h3,
+.tmpl-bannerside .rb-side-section h4 {
+  color: #1f2933;
+  border-bottom-color: #c7cfd8;
+}
+
+/* --- Template 43: Combination Hybrid -------------------------------------- */
+
+.tmpl-combo .sc-header {
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+/* The competencies run full-bleed across the sheet — the visual claim of the
+   combination format, that what you can do carries as much weight as where
+   you did it. The band follows the section wherever the user drags it. */
+.tmpl-combo .sc-skills {
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  margin: 0 -32px 12px;
+  padding: 9px 32px 10px;
+}
+
+.tmpl-combo .sc-skills h3 {
+  margin-bottom: 4px;
+}
+
+.tmpl-combo .sc-skill-grid {
+  font-size: 0.62rem;
+}
+
+.tmpl-combo .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.71rem;
+  color: #1e293b;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 2px;
+}
+
+/* --- Template 44: Contact Grid Classic ------------------------------------ */
+
+.tmpl-cgrid .sc-header {
+  text-align: center;
+  margin-bottom: 13px;
+}
+
+.tmpl-cgrid .sc-header h1 {
+  font-size: 1.4rem;
+}
+
+/* Contact details in a bordered grid rather than one long line: easier to
+   read, and still one plain-text item per cell. */
+.tmpl-cgrid .sc-contact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px 18px;
+  justify-items: center;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.tmpl-cgrid .sc-sep {
+  display: none;
+}
+
+.tmpl-cgrid .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-size: 0.72rem;
+  color: #1e293b;
+  border-bottom: 1px solid #94a3b8;
+  padding-bottom: 2px;
+}
+
+/* ==========================================================================
+   TEMPLATES 46-50: MIXED LAYOUTS, SECOND SET
+   ========================================================================== */
+
+/* --- Template 46: Profile Band Two-Column --------------------------------- */
+
+.tmpl-profileband .rb-banner {
+  background: #ffffff;
+  border-bottom: 3px solid #1e293b;
+  padding-bottom: 12px;
+}
+
+.tmpl-profileband .rb-banner-contact {
+  color: #475569;
+}
+
+/* The summary spans both columns, so it is read as a statement about the
+   whole page rather than as the first item in the left one. */
+.tmpl-profileband .rb-profile {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  margin: 0 -32px;
+  padding: 10px 32px 11px;
+}
+
+.tmpl-profileband .rb-profile h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #1e293b;
+  margin: 0 0 3px;
+}
+
+.tmpl-profileband .rb-main,
+.tmpl-profileband .rb-side {
+  padding-top: 18px;
+}
+
+/* --- Template 47: Edge Stripe Modern -------------------------------------- */
+
+/* The stripe is painted as the sheet background (see the gradient block near
+   the top of this file) so it runs to the bottom of every page; it lives in
+   the sheet's own 32px margin, and the content only steps in far enough to
+   breathe. */
+.tmpl-stripe {
+  padding-left: 8px;
+}
+
+.tmpl-stripe .sc-header {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 9px;
+  margin-bottom: 13px;
+}
+
+.tmpl-stripe .sc-header h1 {
+  color: #312e81;
+}
+
+.tmpl-stripe .sc-prof-title {
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 0.62rem;
+  color: #4338ca;
+  font-weight: 600;
+}
+
+.tmpl-stripe .sc-section h3 {
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  font-size: 0.7rem;
+  color: #312e81;
+}
+
+.tmpl-stripe .sc-skill-pill {
+  background: #eef0ff;
+  color: #3730a3;
+}
+
+/* --- Template 48: Centered Rules Classic ---------------------------------- */
+
+.tmpl-centrules .sc-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.tmpl-centrules .sc-contact {
+  justify-content: center;
+}
+
+.tmpl-centrules .sc-header h1 {
+  letter-spacing: 1px;
+}
+
+/* Heading centered between two rules. Only the heading is centered — running
+   the body text down the middle as well is what makes a resume hard to skim. */
+.tmpl-centrules .sc-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  font-size: 0.68rem;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.tmpl-centrules .sc-section h3::before,
+.tmpl-centrules .sc-section h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #cbd5e1;
+}
+
+/* --- Template 49: Timeline Sidebar ---------------------------------------- */
+
+.tmpl-tlside .rb-section h3 {
+  color: #334155;
+  border-bottom-color: #cbd5e1;
+}
+
+.tmpl-tlside .rb-entry {
+  position: relative;
+  padding-left: 15px;
+}
+
+.tmpl-tlside .rb-entry::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #475569;
+}
+
+/* The connector stops at the last entry of each section rather than running
+   on into the next heading. */
+.tmpl-tlside .rb-entry::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 13px;
+  bottom: -5px;
+  width: 1px;
+  background: #cbd5e1;
+}
+
+.tmpl-tlside .rb-entry:last-child::after {
+  display: none;
+}
+
+/* --- Template 50: Serif Two-Column ---------------------------------------- */
+
+.tmpl-serifcol,
+.tmpl-serifcol .rb-header h1,
+.tmpl-serifcol .rb-section h3,
+.tmpl-serifcol .rb-side-section h4,
+.tmpl-serifcol .entry-header {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.tmpl-serifcol {
+  color: #2b2f33;
+}
+
+.tmpl-serifcol .rb-header h1 {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.tmpl-serifcol .rb-prof-title {
+  font-style: italic;
+}
+
+.tmpl-serifcol .rb-section h3,
+.tmpl-serifcol .rb-side-section h4 {
+  text-transform: none;
+  letter-spacing: 0.2px;
+  color: #2b2f33;
+  border-bottom-color: #b8bfc6;
+}
+
+.tmpl-serifcol .rb-skill-tag {
+  background: #eceef1;
+  color: #2b2f33;
+  border-radius: 3px;
+  font-family: inherit;
+}
+
+/* ==========================================================================
    ACCENT COLOR SYSTEM
    When the user picks an accent, override each template's signature colors.
    ========================================================================== */
@@ -3100,12 +4152,18 @@
 .resume[data-accent='on'] .tmpl-corpblue .sc-header,
 .resume[data-accent='on'] .tmpl-tech .tech-header-band,
 .resume[data-accent='on'] .tmpl-creative .creative-sidebar,
+.resume[data-accent='on'] .tmpl-charcoal .sc-header h1,
+.resume[data-accent='on'] .tmpl-leftbar .rb-side,
+.resume[data-accent='on'] .tmpl-bannerside .rb-banner,
 .resume[data-accent='on'] .tmpl-mono .sc-monogram {
   background-color: var(--accent) !important;
 }
 
+/* Headings sitting on a filled panel keep their reversed-out white; the
+   generic accent-on-h3 rule above would tint them into the panel. */
 .resume[data-accent='on'] .tmpl-corpblue .sc-header h3,
-.resume[data-accent='on'] .tmpl-creative .creative-sidebar h4 {
+.resume[data-accent='on'] .tmpl-creative .creative-sidebar h4,
+.resume[data-accent='on'] .tmpl-leftbar .rb-side-section h4 {
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.5) !important;
 }
@@ -3113,13 +4171,24 @@
 .resume[data-accent='on'] .tmpl-compact .sc-header h1,
 .resume[data-accent='on'] .tmpl-teal .sc-header h1,
 .resume[data-accent='on'] .tmpl-coral .sc-header h1,
+.resume[data-accent='on'] .tmpl-clinical .sc-header h1,
+.resume[data-accent='on'] .tmpl-spotlight .sc-header h1,
 .resume[data-accent='on'] .tmpl-deedy .rb-header h1 {
   color: var(--accent) !important;
 }
 
 .resume[data-accent='on'] .tmpl-accentbar .sc-header h1::after,
-.resume[data-accent='on'] .tmpl-timeline .sc-entry::before {
+.resume[data-accent='on'] .tmpl-timeline .sc-entry::before,
+.resume[data-accent='on'] .tmpl-matrix .sc-section h3::before,
+.resume[data-accent='on'] .tmpl-rail .sc-section h3::before {
   background: var(--accent) !important;
+}
+
+/* The rails and the summary callout carry an accent edge of their own; the
+   generic h3 rule above cannot reach either. */
+.resume[data-accent='on'] .tmpl-rail .sc-header,
+.resume[data-accent='on'] .tmpl-spotlight .sc-summary {
+  border-left-color: var(--accent) !important;
 }
 
 .resume[data-accent='on'] .sc-skill-pill,

@@ -122,6 +122,15 @@ h3, h4 {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* Full-bleed decoration — the templates page backdrop, the landing glows —
+     is sized in vw, which counts the vertical scrollbar and so runs a few
+     pixels wider than the page can actually show, giving the whole site a
+     horizontal scrollbar. Clipping here trims only that off-screen excess:
+     this element is exactly as wide as the visible viewport, so the
+     decoration still reaches both edges.
+     `clip`, not `hidden` — hidden would make this a scroll container and the
+     sticky header and toolbars inside it would stop sticking. */
+  overflow-x: clip;
 }
 
 /* Header
