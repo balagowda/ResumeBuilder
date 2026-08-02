@@ -1,6 +1,6 @@
 # HatchResume
 
-> HatchResume (https://hatchresume.com) is a free online resume builder. It offers 25+ professional, ATS-friendly resume templates, a job-description keyword matcher, and one-click PDF export. There is no account, no watermark, and no paid tier: the app runs entirely in the visitor's browser and never uploads resume data to a server.
+> HatchResume (https://hatchresume.com) is a free online resume builder. It offers 50+ professional, ATS-friendly resume templates, a job-description keyword matcher, and one-click PDF export. There is no account, no watermark, and no paid tier: the app runs entirely in the visitor's browser and never uploads resume data to a server.
 
 ## Key facts
 
@@ -8,16 +8,16 @@
 - Price: free, with no trial, subscription, or paid export
 - Sign-up: not required — there are no user accounts
 - Privacy: resume data is stored only in the visitor's browser (local storage); HatchResume has no backend and receives no resume content
-- Templates: 25+ designs across ATS-Optimized, Professional and Creative categories
+- Templates: 50+ designs across ATS-Optimized, Professional and Creative categories
 - Output: A4 print-resolution PDF generated client-side, single or multi-page
 
 ## Pages
 
 - [Home — free resume builder](https://hatchresume.com/): overview and the entry point to the editor
-- [Resume templates](https://hatchresume.com/templates/): the full 25-template gallery
+- [Resume templates](https://hatchresume.com/templates/): the full 50-template gallery
 - [ATS resume checker](https://hatchresume.com/ats-resume-checker/): Paste your resume and get an instant ATS score: missing sections, unreadable formatting, weak bullet points, and the keywords a job posting expects. Free, no sign-up, and your resume never leaves your browser.
 - [Resume examples](https://hatchresume.com/examples/): Complete resume examples you can open in a free editor and make your own — real bullet points, ATS-safe formatting, no sign-up and no watermark.
-- [About](https://hatchresume.com/about/): HatchResume is a free online resume builder with 25+ ATS-friendly templates. No sign-up, no watermark, no subscription — and your resume never leaves your browser.
+- [About](https://hatchresume.com/about/): HatchResume is a free online resume builder with 50+ ATS-friendly templates. No sign-up, no watermark, no subscription — and your resume never leaves your browser.
 - [FAQ](https://hatchresume.com/faq/): Answers to common questions about HatchResume: pricing, sign-up, data privacy, ATS compatibility, PDF downloads, and mobile support.
 - [Alternatives](https://hatchresume.com/alternatives/): Looking for a free alternative to Zety, Resume.io, Novoresume, Enhancv, Kickresume, Resume Genius or Canva? HatchResume builds ATS-friendly resumes and exports PDFs free, with no sign-up and no watermark.
 
@@ -35,6 +35,8 @@
 - [Project Manager resume example](https://hatchresume.com/examples/project-manager/): Delivery stated in budgets, dates hit, and what the projects returned.
 - [Sales Manager resume example](https://hatchresume.com/examples/sales-manager/): Quota attainment, team performance and pipeline discipline — the three lines sales leaders are hired on.
 - [Customer Service Representative resume example](https://hatchresume.com/examples/customer-service-representative/): Support work with the metrics that prove it: CSAT, handle time, resolution rate.
+- [Teacher resume example](https://hatchresume.com/examples/teacher/): Classroom experience with the licence, grade bands and growth data a principal looks for.
+- [Accountant resume example](https://hatchresume.com/examples/accountant/): Close cycles, reconciliations and audit results stated as numbers, not duties.
 
 ## Templates
 
@@ -63,3 +65,28 @@
 - [Coral Warm](https://hatchresume.com/templates/coral-warm/) (Creative, single column): A warm, approachable single-column layout with coral headings — a widely used standard for customer-facing, HR, and communications roles.
 - [Developer Mono](https://hatchresume.com/templates/developer-mono/) (Creative, single column): A monospace, terminal-inspired resume for developers — section headers with prompt markers and code-style typography, still strictly single-column.
 - [Oxford Side-Headings](https://hatchresume.com/templates/oxford-side-headings/) (Professional, single column): The academic CV standard with section headings set in a left gutter beside the content — the layout used by Oxford-style and moderncv LaTeX resumes.
+- [Chronological Standard](https://hatchresume.com/templates/chronological-standard/) (ATS-Optimized, single column): The reverse-chronological format recruiters expect, with dates set in a left column so a career history reads straight down the page.
+- [Graphite Rule](https://hatchresume.com/templates/graphite-rule/) (Professional, single column): Charcoal typography with a hairline rule running out from each section heading. The restrained modern corporate look, with no colour to distract.
+- [Skills Matrix](https://hatchresume.com/templates/skills-matrix/) (ATS-Optimized, single column): Built for technical and IT roles: skills laid out as a three-column list a recruiter can scan in seconds, above a plain single-column history.
+- [Clinical Professional](https://hatchresume.com/templates/clinical-professional/) (Professional, single column): The healthcare standard: credentials under your name, a banded contact strip, and dedicated headings for clinical skills and licenses.
+- [Finance Standard](https://hatchresume.com/templates/finance-standard/) (ATS-Optimized, single column): The banking and consulting format: an uppercase serif name over a double rule, italic employers, and dates aligned right. Standard for MBA and finance applications.
+- [Federal Standard](https://hatchresume.com/templates/federal-standard/) (ATS-Optimized, single column): The plain, detail-first format government and public-sector applications expect, with rules above each heading and no colour or graphics anywhere.
+- [Bordered Classic](https://hatchresume.com/templates/bordered-classic/) (Professional, single column): A traditional document look with a hairline frame around the page and a centered header. Familiar to any recruiter who has opened a Word resume.
+- [Profile Spotlight](https://hatchresume.com/templates/profile-spotlight/) (Professional, single column): Opens with your summary in a tinted callout, the way management and senior applications lead with a pitch before the history starts.
+- [Split Header Modern](https://hatchresume.com/templates/split-header-modern/) (ATS-Optimized, single column): Name on the left, contact details stacked on the right — the modern chronological header, over a clean single-column body with quiet rules.
+- [Section Rail](https://hatchresume.com/templates/section-rail/) (Professional, single column): Each section sits beside a slim vertical rule, giving the page structure without boxes, bands or a sidebar for a parser to trip over.
+- [Functional Skills-First](https://hatchresume.com/templates/functional-skills-first/) (Professional, single column): The functional format for career changers and people returning to work: strengths lead the page in a panel of their own, with the dated history kept intact underneath.
+- [Garamond Executive](https://hatchresume.com/templates/garamond-executive/) (Professional, single column): Set in Garamond with letter-spaced headings and generous leading — the quiet, well-set serif look that suits senior and executive applications.
+- [Office Classic](https://hatchresume.com/templates/office-classic/) (ATS-Optimized, single column): Cambria headings over a Calibri body: the default word-processor pairing behind more resumes than any other, and the one every recruiter reads without noticing it.
+- [Recruiter Scan](https://hatchresume.com/templates/recruiter-scan/) (ATS-Optimized, single column): Built for the ten seconds a resume actually gets: oversized black section headings, wide gaps between blocks, and nothing competing with the text.
+- [Charcoal Modern](https://hatchresume.com/templates/charcoal-modern/) (Professional, single column): Your name reversed out of a charcoal block with the contact line plain beneath it — a contemporary corporate header on an otherwise unadorned page.
+- [Slate Sidebar](https://hatchresume.com/templates/slate-sidebar/) (Professional, two column): The layout most modern resume builders default to: a dark slate column on the left for contact, skills and education, with your history filling the rest of the page.
+- [Banner Two-Column](https://hatchresume.com/templates/banner-two-column/) (Professional, two column): A full-width header across the top with your name and contact details, then two columns beneath — the standard corporate layout when one page has to hold a lot.
+- [Combination Hybrid](https://hatchresume.com/templates/combination-hybrid/) (ATS-Optimized, single column): The combination format: a full-width competencies band under the header, then a dated chronological history. Skills lead, but nothing a tracking system needs is missing.
+- [Contact Grid Classic](https://hatchresume.com/templates/contact-grid-classic/) (ATS-Optimized, single column): Contact details set in a bordered grid under a centered name, over a plain single-column body — the tidy office-document look, with every detail still plain text.
+- [Banner Sidebar Executive](https://hatchresume.com/templates/banner-sidebar-executive/) (Professional, two column): A dark banner across the top over a light left rail: the senior-hire layout that leads with your name and keeps skills and education beside the history.
+- [Profile Band Two-Column](https://hatchresume.com/templates/profile-band-two-column/) (Professional, two column): Header, then your profile running the full width of the page, then two columns — the structure that gives a summary room to be read before the history starts.
+- [Edge Stripe Modern](https://hatchresume.com/templates/edge-stripe-modern/) (Creative, single column): A single colour stripe down the edge of the page and nothing else — a designed look that stays strictly single-column, so nothing interferes with parsing.
+- [Centered Rules Classic](https://hatchresume.com/templates/centered-rules-classic/) (ATS-Optimized, single column): Section headings centered between two hairline rules, body text left where it belongs. A symmetrical, formal layout with no colour and no graphics.
+- [Timeline Sidebar](https://hatchresume.com/templates/timeline-sidebar/) (Professional, two column): Your career drawn as a timeline in the main column with skills, education and contact in a light rail beside it — progression and detail on one page.
+- [Serif Two-Column](https://hatchresume.com/templates/serif-two-column/) (Professional, two column): Georgia set against a light rail: the two-column layout in a serif voice, for academic, legal and senior roles where a sans-serif page reads too casual.
