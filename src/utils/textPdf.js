@@ -29,6 +29,68 @@ const SIZE = {
 
 const LINE_GAP = 1.35;
 
+/* --------------------------------------------------------------------------
+   Encoding safety.
+
+   jsPDF's built-in fonts carry no embedded font programme, so they can only
+   encode CP1252. Hand `text()` a single character outside that set — an arrow,
+   a tick, a rupee sign, an emoji, or an accent that arrived decomposed — and
+   jsPDF emits the *whole string* as UTF-16. A standard font ships no ToUnicode
+   map, so viewers then read that back one byte at a time: the page still looks
+   correct, but selecting it copies "J o s e   G a r c i a" instead of
+   "José García", and the stray glyph comes out as mojibake. It also throws off
+   getTextWidth, which is what truncated long lines mid-word.
+
+   So everything is folded into what the font can actually encode before it is
+   drawn. That suits this export in particular: it is the ATS PDF, and parsers
+   are no fonder of decorative glyphs than the font is.
+   -------------------------------------------------------------------------- */
+
+// The typographic characters CP1252 adds above Latin-1 (quotes, dashes, bullet,
+// ellipsis, euro…). These are safe and must not be stripped.
+const CP1252_EXTRAS = new Set(
+  [...'€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ']
+);
+
+const isEncodable = (ch) => {
+  const code = ch.codePointAt(0);
+  if (code >= 0x20 && code <= 0x7e) return true; // printable ASCII
+  if (code >= 0xa0 && code <= 0xff) return true; // Latin-1 supplement
+  return CP1252_EXTRAS.has(ch);
+};
+
+// Readable stand-ins for symbols resumes actually use.
+const SUBSTITUTIONS = {
+  '→': '->', '←': '<-', '↑': '^', '↓': 'v', '⇒': '=>',
+  '≥': '>=', '≤': '<=', '≠': '!=', '≈': '~',
+  '★': '*', '☆': '*',
+  '−': '-', '‐': '-', '‑': '-', '‒': '-', '―': '-',
+  '₹': 'Rs.', '₨': 'Rs.', '₽': 'RUB', '₩': 'KRW', '₺': 'TRY',
+  '′': "'", '″': '"',
+  // Ticks and decorative blocks carry no meaning once the bullet is drawn.
+  '✓': '', '✔': '', '☑': '', '✅': '',
+  '●': '', '○': '', '▪': '', '■': '', '▶': '',
+  // Exotic spaces collapse to a plain one so they copy as a space.
+  '\u00a0': ' ', '\u202f': ' ', '\u2007': ' ', '\u2009': ' ', '\u200a': ' ',
+};
+
+// Invisible characters that would poison a line without ever being seen:
+// zero-width space/non-joiner/joiner, the BOM, and the soft hyphen.
+const INVISIBLE = /[\u200b-\u200d\ufeff\u00ad]/g;
+
+/** Fold a string into characters jsPDF's standard fonts can encode. */
+export const pdfSafe = (value) =>
+  String(value == null ? '' : value)
+    // Recomposes "e + combining acute" into "é", which CP1252 does have. This
+    // alone rescues most names pasted out of Word, Pages or a browser.
+    .normalize('NFC')
+    .replace(INVISIBLE, '')
+    .replace(/[^\u0020-\u007e]/gu, (ch) => {
+      const mapped = SUBSTITUTIONS[ch];
+      if (mapped !== undefined) return mapped;
+      return isEncodable(ch) ? ch : '';
+    });
+
 /** Map the editor's CSS font stacks onto the two standard PDF font families. */
 const pdfFontFor = (cssStack) => {
   const stack = String(cssStack || '').toLowerCase();
@@ -74,7 +136,7 @@ export default function generateAtsPdf({ formData, sectionOrder, experienceHeadi
     doc.setFont(font, style);
     doc.setFontSize(size);
     doc.setTextColor(color);
-    const lines = doc.splitTextToSize(text, width);
+    const lines = doc.splitTextToSize(pdfSafe(text), width);
     lines.forEach((line) => {
       ensureSpace(lineHeight(size));
       doc.text(line, x, y);
@@ -88,7 +150,7 @@ export default function generateAtsPdf({ formData, sectionOrder, experienceHeadi
     doc.setFontSize(SIZE.body);
     doc.setTextColor(20);
     const indent = 12;
-    const lines = doc.splitTextToSize(text, CONTENT_W - indent);
+    const lines = doc.splitTextToSize(pdfSafe(text), CONTENT_W - indent);
     ensureSpace(Math.min(lines.length, 2) * lineHeight(SIZE.body));
     lines.forEach((line, i) => {
       ensureSpace(lineHeight(SIZE.body));
@@ -107,7 +169,7 @@ export default function generateAtsPdf({ formData, sectionOrder, experienceHeadi
     doc.setFont(headFont, 'bold');
     doc.setFontSize(SIZE.heading);
     doc.setTextColor(20);
-    doc.text(label.toUpperCase(), MARGIN, y);
+    doc.text(pdfSafe(label).toUpperCase(), MARGIN, y);
     y += 4;
     doc.setDrawColor(120);
     doc.setLineWidth(0.6);
@@ -121,9 +183,9 @@ export default function generateAtsPdf({ formData, sectionOrder, experienceHeadi
     doc.setFont(bodyFont, 'bold');
     doc.setFontSize(SIZE.entryTitle);
     doc.setTextColor(20);
-    const dateText = String(dates || '').trim();
+    const dateText = pdfSafe(dates).trim();
     const dateW = dateText ? doc.getTextWidth(dateText) : 0;
-    const titleLines = doc.splitTextToSize(String(title || '').trim(), CONTENT_W - dateW - 12);
+    const titleLines = doc.splitTextToSize(pdfSafe(title).trim(), CONTENT_W - dateW - 12);
     titleLines.forEach((line, i) => {
       ensureSpace(lineHeight(SIZE.entryTitle));
       doc.text(line, MARGIN, y);
@@ -137,7 +199,7 @@ export default function generateAtsPdf({ formData, sectionOrder, experienceHeadi
   };
 
   // ---- Header ---------------------------------------------------------------
-  const fullName = String(formData.fullName || '').trim() || 'Your Name';
+  const fullName = pdfSafe(formData.fullName).trim() || 'Your Name';
   doc.setFont(headFont, 'bold');
   doc.setFontSize(SIZE.name);
   doc.setTextColor(10);
@@ -148,18 +210,20 @@ export default function generateAtsPdf({ formData, sectionOrder, experienceHeadi
     doc.setFont(headFont, 'normal');
     doc.setFontSize(SIZE.title);
     doc.setTextColor(60);
-    doc.text(String(formData.professionalTitle).trim(), MARGIN, y);
+    doc.text(pdfSafe(formData.professionalTitle).trim(), MARGIN, y);
     y += lineHeight(SIZE.title);
   }
 
   // Contact line: plain visible text (ATS parsers read it), clickable where a
   // target exists.
+  // Only the visible text is folded — the URL behind a link is not drawn with
+  // the font, so it keeps whatever characters the user entered.
   const contacts = [
-    formData.mail && { text: String(formData.mail).trim(), url: `mailto:${String(formData.mail).trim()}` },
-    formData.mobile && { text: String(formData.mobile).trim() },
-    formData.linkedin && { text: String(formData.linkedin).trim(), url: ensureUrl(formData.linkedin) },
-    formData.github && { text: String(formData.github).trim(), url: ensureUrl(formData.github) },
-    formData.other && { text: String(formData.other).trim(), url: ensureUrl(formData.other) },
+    formData.mail && { text: pdfSafe(formData.mail).trim(), url: `mailto:${String(formData.mail).trim()}` },
+    formData.mobile && { text: pdfSafe(formData.mobile).trim() },
+    formData.linkedin && { text: pdfSafe(formData.linkedin).trim(), url: ensureUrl(formData.linkedin) },
+    formData.github && { text: pdfSafe(formData.github).trim(), url: ensureUrl(formData.github) },
+    formData.other && { text: pdfSafe(formData.other).trim(), url: ensureUrl(formData.other) },
   ].filter(Boolean);
 
   if (contacts.length > 0) {
