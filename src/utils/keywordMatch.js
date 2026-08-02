@@ -39,6 +39,21 @@ const STOPWORDS = new Set([
   'familiarity', 'familiar', 'hands', 'improve', 'improving', 'knowledge', 'maintain',
   'maintaining', 'new', 'nice', 'operate', 'own', 'partner', 'participate', 'provide',
   'providing', 'solid', 'support', 'supporting', 'understanding',
+  // Role and seniority nouns. These are the worst offenders in the match: a
+  // backend posting says "engineer" six times and every engineer's resume says
+  // it too, so they scored as covered keywords without carrying any signal —
+  // padding "Already covered" and inflating the percentage.
+  'developer', 'developers', 'development', 'engineer', 'engineers', 'engineering',
+  'junior', 'lead', 'manager', 'managers', 'mid', 'principal', 'senior', 'staff',
+  // Boilerplate that describes the posting rather than a skill
+  'best', 'complex', 'critical', 'daily', 'deep', 'degree', 'detail', 'effectively',
+  'expertise', 'highly', 'large', 'multiple', 'platform', 'platforms', 'practice',
+  'practices', 'product', 'products', 'professional', 'proficiency', 'proficient',
+  'quickly', 'record', 'responsible', 'scalable', 'stack', 'technologies', 'tools',
+  'tooling', 'track', 'various',
+  // Scale words. A posting boasting "billions of events" is describing itself,
+  // not naming something a resume can claim.
+  'billions', 'hundreds', 'millions', 'thousands',
 ]);
 
 // Multi-word phrases worth surfacing verbatim. Stored space-normalised.
@@ -296,7 +311,11 @@ export const analyzeJobMatchText = (jobDescription, resumeText, limit = 28) => {
     // above all, which the stopword list would otherwise swallow, hiding the
     // language from every posting that asks for it. Being a known skill wins.
     if (!isSkill && STOPWORDS.has(token)) return;
-    if (/^\d+$/.test(token)) return;
+    // Anything opening with a digit is a quantity, not a keyword: "5+" (from
+    // "5+ years"), "2m", "300k", "95th". The old test only caught bare digits,
+    // so the ones carrying a unit or a plus ranked as key terms. No entry in
+    // SKILL_TOKENS or PHRASES starts with a digit, so nothing real is lost.
+    if (/^\d/.test(token)) return;
     // Already represented by a phrase like "machine learning"
     if (phraseWords.has(token)) return;
     // ...including when the posting hyphenates it: "cross-functional" is one
