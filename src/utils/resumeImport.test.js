@@ -102,4 +102,53 @@ describe('parseResumeText', () => {
     expect(d.fullName).toBe('Alex Chen');
     expect(d.summary).toMatch(/decade of experience/);
   });
+
+  test('keeps the opening bracket of a parenthesised area code', () => {
+    // The phone pattern used to have to start at a digit, so the "(" was left
+    // behind and the field read "206) 555-0148".
+    ['(206) 555-0148', '(020) 7946 0958'].forEach((phone) => {
+      const { data: d } = parseResumeText(`Jane Doe\njane@email.com | ${phone}\n\nSKILLS\nGo`);
+      expect(d.mobile).toBe(phone);
+    });
+  });
+
+  test('a city line is not mistaken for a professional title', () => {
+    const { data: d } = parseResumeText(
+      'JANE DOE\nSan Francisco, CA\njane@email.com\n\nSKILLS\nGo, Python'
+    );
+    expect(d.fullName).toBe('JANE DOE');
+    expect(d.professionalTitle).toBeUndefined();
+  });
+
+  test('a real title containing a comma still counts as a title', () => {
+    const { data: d } = parseResumeText(
+      'Jane Doe\nSoftware Engineer, Backend\njane@email.com\n\nSKILLS\nGo'
+    );
+    expect(d.professionalTitle).toBe('Software Engineer Backend');
+  });
+
+  test('separator removal does not leave double spaces in the name', () => {
+    const { data: d } = parseResumeText('Doe, Jane\nSoftware Engineer\njane@email.com\n\nSKILLS\nGo');
+    expect(d.fullName).toBe('Doe Jane');
+  });
+
+  test('reads a heading that carries its content on the same line', () => {
+    const { data: d } = parseResumeText(
+      'Jane Doe\njane@email.com\n\nSKILLS: Python, Go, React, AWS\n\nEXPERIENCE\nEngineer, Acme, 2020 - 2023\n• built things'
+    );
+    expect(d.skills).toBe('Python, Go, React, AWS');
+  });
+
+  test('splits undated experience entries instead of merging them', () => {
+    // Roles with no year used to collapse into one entry whose description
+    // held both jobs, with the second job's title appended at the very end.
+    const { data: d } = parseResumeText(
+      'Jane Doe\njane@email.com\n\nEXPERIENCE\nSoftware Engineer, Acme Corp\n• Built the thing\n• Shipped it\n\nSenior Engineer, Globex\n• Led the team'
+    );
+    expect(d.experiences).toHaveLength(2);
+    expect(d.experiences[0]).toMatchObject({ title: 'Software Engineer', company: 'Acme Corp' });
+    expect(d.experiences[0].description).toBe('Built the thing\nShipped it');
+    expect(d.experiences[1]).toMatchObject({ title: 'Senior Engineer', company: 'Globex' });
+    expect(d.experiences[1].description).toBe('Led the team');
+  });
 });

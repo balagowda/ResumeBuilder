@@ -42,10 +42,23 @@ const SECTION_DEFS = [
 ];
 
 const headingFor = (line) => {
+  // "SKILLS: Python, Go, React" — heading and content on one line, the usual
+  // shape in compact resumes. Neither half matched before: the line was not a
+  // heading, so no skills section opened, and it was too short to be kept as
+  // prose, so the content vanished entirely. Split at the colon and keep both.
+  const inline = line.match(/^([^:]{2,44}):\s*(.+)$/);
+  if (inline) {
+    const label = inline[1].trim();
+    if (wordsIn(label) <= 5) {
+      const def = SECTION_DEFS.find(({ pattern }) => pattern.test(label));
+      if (def) return { key: def.key, label, rest: inline[2].trim() };
+    }
+  }
+
   const normalized = line.replace(/[:\s]+$/, '').trim();
   if (!normalized || normalized.length > 44 || wordsIn(normalized) > 5) return null;
   const def = SECTION_DEFS.find(({ pattern }) => pattern.test(normalized));
-  return def ? { key: def.key, label: normalized } : null;
+  return def ? { key: def.key, label: normalized, rest: '' } : null;
 };
 
 const BULLET_PREFIX = /^[\s•\-*–—+·▪◆●○➤➔»❯>]+\s*/;
@@ -66,7 +79,10 @@ const digitCount = (s) => (s.match(/\d/g) || []).length;
 
 /** Find a phone number without mistaking a year range ("2017 - 2021") for one. */
 const findPhone = (text) => {
-  const candidates = text.match(/\+?\d[\d\s().\-/]{6,18}\d/g) || [];
+  // The optional opening paren matters: without it "(206) 555-0148" could only
+  // start matching at the 2, and the number landed in the form as
+  // "206) 555-0148" — a dangling bracket in the most common US spelling.
+  const candidates = text.match(/\+?\(?\d[\d\s().\-/]{6,18}\d/g) || [];
   return (
     candidates.find((c) => {
       const digits = digitCount(c);
@@ -85,7 +101,31 @@ const stripContact = (line) =>
     .replace(GITHUB_RE, '')
     .replace(URL_RE, '')
     .replace(/[|,;•·]/g, ' ')
+    // Collapse the gaps the separators left behind. This text becomes the name
+    // and the professional title verbatim, so "Doe, Jane" arriving as
+    // "Doe  Jane" is visible in the header of the exported resume.
+    .replace(/\s+/g, ' ')
     .trim();
+
+/**
+ * Is this header line a place rather than a job title?
+ *
+ * A city line sits exactly where a title sits — right under the name — so a
+ * resume with no title had "San Francisco, CA" promoted into the professional
+ * title field. Only a two-letter region code or a named country counts, so a
+ * real title that happens to carry a comma ("Software Engineer, Backend") is
+ * left alone.
+ */
+const looksLikeLocation = (text) => {
+  if (/^remote$/i.test(text)) return true;
+  const match = text.match(/^[A-Za-z][A-Za-z.'\- ]{1,30},\s*([A-Za-z.]{2,20})$/);
+  if (!match) return false;
+  const tail = match[1].replace(/\./g, '');
+  if (/^[A-Z]{2}$/.test(tail)) return true;
+  return /^(usa|uk|india|canada|australia|germany|france|singapore|netherlands|ireland|spain|italy|brazil|mexico|japan|china|remote)$/i.test(
+    tail
+  );
+};
 
 /** Split an entry-header remainder like "Senior Engineer | Acme Corp" in two. */
 const splitTitleLine = (text) => {
@@ -123,6 +163,22 @@ const parseDatedEntries = (lines, kind) => {
     current = null;
   };
 
+  const makeEntry = (title, subtitle, date) =>
+    kind === 'education'
+      ? { studyTitle: title, school: subtitle, date, score: '' }
+      : { title, company: subtitle, dates: date, description: '' };
+
+  /**
+   * Build an undated entry from the short lines held in `pending`. Two lines
+   * are already a title/company pair; a single line still has to be split, or
+   * "Software Engineer, Acme Corp" lands wholesale in the job-title field.
+   */
+  const entryFromPending = (held) => {
+    if (held.length > 1) return makeEntry(held[0], held[1], '');
+    const { first, second } = splitTitleLine(held[0] || '');
+    return makeEntry(first, second, '');
+  };
+
   lines.forEach(({ text, wasBullet }) => {
     const dateMatch = text.match(DATE_RE);
     const isHeader =
@@ -142,10 +198,7 @@ const parseDatedEntries = (lines, kind) => {
         title = pending[0];
         subtitle = [pending[1], first, second].filter(Boolean).join(', ');
       }
-      current =
-        kind === 'education'
-          ? { studyTitle: title, school: subtitle, date: dateMatch[0], score: '' }
-          : { title, company: subtitle, dates: dateMatch[0], description: '' };
+      current = makeEntry(title, subtitle, dateMatch[0]);
       pending = [];
       return;
     }
@@ -178,18 +231,35 @@ const parseDatedEntries = (lines, kind) => {
         pending = [...pending.slice(-1), text];
         return;
       }
+      // A bullet or a run of prose. Anything still pending was an entry header
+      // that simply carried no date — "Senior Engineer, Globex" with no year —
+      // so open the next entry from it. Without this the pending line was held
+      // until the very end and then appended to the previous entry, which put
+      // a job title in the middle of someone else's bullet list and merged two
+      // roles into one.
+      if (pending.length > 0) {
+        commit();
+        current = entryFromPending(pending);
+        pending = [];
+      }
       current.description = current.description ? `${current.description}\n${text}` : text;
       return;
     }
 
     if (isShortPlain) {
       pending = [...pending.slice(-1), text];
-    } else if (entries.length === 0 && !current) {
-      // Prose before any header — keep it so the content is not lost.
+      return;
+    }
+
+    // Prose with no entry open yet. Undated lines waiting in `pending` are its
+    // header; they used to be discarded here, losing the first role's title.
+    if (pending.length > 0) {
+      current = entryFromPending(pending);
       pending = [];
-      current = kind === 'education'
-        ? { studyTitle: text, school: '', date: '', score: '' }
-        : { title: '', company: '', dates: '', description: text };
+      if (kind !== 'education') current.description = text;
+    } else if (entries.length === 0) {
+      current = kind === 'education' ? makeEntry(text, '', '') : makeEntry('', '', '');
+      if (kind !== 'education') current.description = text;
     }
   });
   commit();
@@ -274,6 +344,7 @@ export const parseResumeText = (rawText) => {
     if (heading) {
       sections.push(currentSection);
       currentSection = { key: heading.key, label: heading.label, lines: [] };
+      if (heading.rest) currentSection.lines.push({ text: heading.rest, wasBullet: false });
       return;
     }
     currentSection.lines.push(line);
@@ -290,6 +361,7 @@ export const parseResumeText = (rawText) => {
       const contactFree = stripContact(text);
       if (!contactFree || EMAIL_RE.test(text) || DATE_RE.test(text)) return;
       if (findPhone(text)) return;
+      if (looksLikeLocation(text)) return;
       const words = wordsIn(contactFree);
       if (!nameFound && words >= 2 && words <= 5 && contactFree.length <= 40 && !/\d/.test(contactFree)) {
         data.fullName = contactFree;
