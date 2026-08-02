@@ -81,6 +81,108 @@
   text-wrap: balance;
 }
 
+/* Title row: heading, BETA badge, and the caveat tooltip's trigger.
+   Class names are page-specific on purpose — CRA serves every stylesheet
+   globally, so a generic name here would reach the rest of the app. */
+.ats-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.ats-page .ats-title-row h1 {
+  margin: 0;
+}
+
+.ats-beta-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #8b5cf6;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+.ats-beta-info {
+  position: relative;
+  display: inline-flex;
+}
+
+.ats-beta-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #fdf3e0;
+  color: #b4770a;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.ats-beta-info-btn:hover,
+.ats-beta-info.open .ats-beta-info-btn {
+  background: #f8e3bd;
+  color: #8a5a08;
+}
+
+.ats-beta-info-btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Left-anchored rather than centred on the trigger: the row starts at the page
+   gutter, so a centred tooltip would run off the left edge on a phone. */
+.ats-beta-tip {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: -6px;
+  z-index: 20;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 48px));
+  padding: 10px 13px;
+  border-radius: var(--radius-sm);
+  background: var(--ink-900);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(18, 24, 29, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.18s var(--ease), transform 0.18s var(--ease), visibility 0.18s;
+}
+
+.ats-beta-tip::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 12px;
+  border: 6px solid transparent;
+  border-bottom-color: var(--ink-900);
+}
+
+.ats-beta-info:hover .ats-beta-tip,
+.ats-beta-info-btn:focus-visible + .ats-beta-tip,
+.ats-beta-info.open .ats-beta-tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
 .ats-lead {
   font-size: 1.05rem;
   line-height: 1.7;
@@ -387,5 +489,26 @@
 
   .ats-page h1 {
     font-size: 1.8rem;
+  }
+
+  /* The trigger sits partway across the row, so a tooltip anchored to it runs
+     past the right edge on a phone and the last words get clipped. Anchor to
+     the row instead — it spans gutter to gutter, so 100% always fits. The
+     caret goes with it, having nothing left to point at. */
+  .ats-title-row {
+    position: relative;
+  }
+
+  .ats-beta-info {
+    position: static;
+  }
+
+  .ats-beta-tip {
+    left: 0;
+    max-width: 100%;
+  }
+
+  .ats-beta-tip::before {
+    display: none;
   }
 }
