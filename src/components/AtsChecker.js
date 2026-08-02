@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { checkResumeText } from '../utils/atsCheck';
 import { analyzeJobMatchText } from '../utils/keywordMatch';
@@ -27,6 +27,28 @@ const AtsChecker = () => {
   const [resumeText, setResumeText] = useState('');
   const [jobText, setJobText] = useState('');
 
+  // The beta caveat lives in a tooltip rather than on the page: hover or focus
+  // reveals it on a pointer/keyboard, and the click toggle is what makes it
+  // reachable on touch, where neither of those exists.
+  const [betaOpen, setBetaOpen] = useState(false);
+  const betaRef = useRef(null);
+
+  useEffect(() => {
+    if (!betaOpen) return undefined;
+    const close = (event) => {
+      if (betaRef.current && !betaRef.current.contains(event.target)) setBetaOpen(false);
+    };
+    const onKey = (event) => {
+      if (event.key === 'Escape') setBetaOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', close);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [betaOpen]);
+
   const result = useMemo(() => checkResumeText(resumeText), [resumeText]);
   const match = useMemo(
     () => (jobText.trim() ? analyzeJobMatchText(jobText, resumeText) : null),
@@ -35,8 +57,35 @@ const AtsChecker = () => {
 
   return (
     <div className="ats-page">
+      <div className="glow-blob blob-1"></div>
+      <div className="glow-blob blob-2"></div>
       <div className="ats-inner">
-        <h1>{ATS_CHECKER_COPY.h1}</h1>
+        {/* The badge and its caveat sit beside the <h1> rather than inside it,
+            so the heading text stays exactly what the pre-rendered page and the
+            sitemap declare. */}
+        <div className="ats-title-row">
+          <h1>{ATS_CHECKER_COPY.h1}</h1>
+          <span className="ats-beta-badge">BETA</span>
+          <span
+            className={`ats-beta-info${betaOpen ? ' open' : ''}`}
+            ref={betaRef}
+          >
+            <button
+              type="button"
+              className="ats-beta-info-btn"
+              aria-label="How accurate is this checker?"
+              aria-describedby="ats-beta-tip"
+              aria-expanded={betaOpen}
+              onClick={() => setBetaOpen((open) => !open)}
+            >
+              <i className="fas fa-triangle-exclamation" aria-hidden="true"></i>
+            </button>
+            <span className="ats-beta-tip" id="ats-beta-tip" role="tooltip">
+              These checks are automated and may occasionally make mistakes or miss
+              context — use your best judgment.
+            </span>
+          </span>
+        </div>
         <p className="ats-lead">{ATS_CHECKER_COPY.lead}</p>
         <p className="ats-privacy">
           <i className="fas fa-lock" aria-hidden="true"></i> {ATS_CHECKER_COPY.privacy}

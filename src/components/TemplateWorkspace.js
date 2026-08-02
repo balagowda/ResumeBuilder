@@ -584,6 +584,15 @@ export default function TemplateWorkspace({ templateId }) {
           clonedSheet.style.left = '0';
           clonedSheet.style.top = '0';
           clonedSheet.style.margin = '0';
+          // The rounded corners and shadow are on-screen card chrome for the
+          // floating preview sheet. html2canvas anti-aliases the border-radius
+          // clip against the white canvas fill, leaving a faint white sliver at
+          // each corner — invisible on a white background, but visible wherever
+          // a template paints a solid color to the sheet's edge (e.g. the
+          // Modern Creative sidebar). A printed A4 page has square corners
+          // anyway, so drop both for the capture.
+          clonedSheet.style.borderRadius = '0';
+          clonedSheet.style.boxShadow = 'none';
         },
         ignoreElements: (element) => {
           // Check if classList exists and contains is a function (SVG elements can break this)

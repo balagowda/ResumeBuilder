@@ -23,8 +23,13 @@
    section boundary, so the hero has atmosphere and the rest of the page is
    clean white to alternate against.
 
-   .blob-1/2/3 are the markup's existing hooks; each paints one stop. */
-.glow-blob {
+   .blob-1/2/3 are the markup's existing hooks; each paints one stop.
+
+   Scoped to .landing-container: every page in the app ships its own decorative
+   blobs under the same class names (see HomePage.css, ResumeExamples.css,
+   AtsChecker.css), and Create React App serves all CSS globally, so an
+   unscoped rule here reaches every one of them. */
+.landing-container .glow-blob {
   position: absolute;
   top: 0;
   border-radius: 50%;
@@ -32,7 +37,7 @@
   z-index: 0;
 }
 
-.blob-1 {
+.landing-container .blob-1 {
   width: 820px;
   height: 600px;
   right: -200px;
@@ -41,7 +46,7 @@
   filter: blur(60px);
 }
 
-.blob-2 {
+.landing-container .blob-2 {
   width: 760px;
   height: 540px;
   left: -260px;
@@ -50,7 +55,7 @@
   filter: blur(60px);
 }
 
-.blob-3 {
+.landing-container .blob-3 {
   width: 680px;
   height: 460px;
   left: 40%;
@@ -602,25 +607,30 @@
   100% { stroke-dasharray: 95, 100; }
 }
 
-.ats-score {
+/* Scoped to .panel-ats: the standalone checker page styles its own, unrelated
+   .ats-score card (AtsChecker.css). Unscoped, the `position: absolute` here
+   leaked onto it — CRA serves all CSS globally, and that rule declares no
+   position of its own — pulling the score card out of flow so the check list
+   rendered underneath it. */
+.panel-ats .ats-score {
   position: absolute;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--ink-900);
 }
 
-.ats-text {
+.panel-ats .ats-text {
   display: flex;
   flex-direction: column;
 }
 
-.ats-text strong {
+.panel-ats .ats-text strong {
   font-size: 0.85rem;
   color: var(--ink-900);
   line-height: 1.2;
 }
 
-.ats-text span {
+.panel-ats .ats-text span {
   font-size: 0.75rem;
   color: var(--ink-500);
 }

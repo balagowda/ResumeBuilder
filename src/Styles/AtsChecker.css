@@ -3,6 +3,66 @@
 .ats-page {
   width: 100%;
   padding: 40px 24px 88px;
+  position: relative;
+}
+
+.ats-page::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  width: 100vw;
+  height: 880px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background-image: radial-gradient(circle at center, rgba(18, 24, 29, 0.075) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  background-position: center top;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,1) 15%,
+    rgba(0,0,0,1) 50%,
+    rgba(0,0,0,0) 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,1) 15%,
+    rgba(0,0,0,1) 50%,
+    rgba(0,0,0,0) 100%
+  );
+  z-index: -2;
+}
+
+.ats-page .glow-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: -1;
+  pointer-events: none;
+  animation: ats-float-breath 8s ease-in-out infinite alternate;
+}
+
+@keyframes ats-float-breath {
+  0% { transform: scale(1) translateY(0); opacity: 0.7; }
+  100% { transform: scale(1.15) translateY(-30px); opacity: 1; }
+}
+
+.ats-page .blob-1 {
+  width: 720px;
+  height: 460px;
+  left: -240px;
+  top: -120px;
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 66%);
+}
+
+.ats-page .blob-2 {
+  width: 720px;
+  height: 460px;
+  right: -240px;
+  top: -120px;
+  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.14) 0%, rgba(168, 85, 247, 0) 66%);
 }
 
 .ats-inner {
@@ -19,6 +79,108 @@
   max-width: 20ch;
   margin: 0 0 16px;
   text-wrap: balance;
+}
+
+/* Title row: heading, BETA badge, and the caveat tooltip's trigger.
+   Class names are page-specific on purpose — CRA serves every stylesheet
+   globally, so a generic name here would reach the rest of the app. */
+.ats-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.ats-page .ats-title-row h1 {
+  margin: 0;
+}
+
+.ats-beta-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #8b5cf6;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+.ats-beta-info {
+  position: relative;
+  display: inline-flex;
+}
+
+.ats-beta-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #fdf3e0;
+  color: #b4770a;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.ats-beta-info-btn:hover,
+.ats-beta-info.open .ats-beta-info-btn {
+  background: #f8e3bd;
+  color: #8a5a08;
+}
+
+.ats-beta-info-btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Left-anchored rather than centred on the trigger: the row starts at the page
+   gutter, so a centred tooltip would run off the left edge on a phone. */
+.ats-beta-tip {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: -6px;
+  z-index: 20;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 48px));
+  padding: 10px 13px;
+  border-radius: var(--radius-sm);
+  background: var(--ink-900);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(18, 24, 29, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.18s var(--ease), transform 0.18s var(--ease), visibility 0.18s;
+}
+
+.ats-beta-tip::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 12px;
+  border: 6px solid transparent;
+  border-bottom-color: var(--ink-900);
+}
+
+.ats-beta-info:hover .ats-beta-tip,
+.ats-beta-info-btn:focus-visible + .ats-beta-tip,
+.ats-beta-info.open .ats-beta-tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .ats-lead {
@@ -72,23 +234,26 @@
 .ats-field textarea {
   width: 100%;
   resize: vertical;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(18, 24, 29, 0.1);
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   font-family: inherit;
   font-size: 0.92rem;
   line-height: 1.55;
   color: var(--ink-900);
-  background: var(--surface-2);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 10px rgba(18, 24, 29, 0.03), inset 0 1px 2px rgba(255, 255, 255, 0.8);
   transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease),
               background-color 0.2s var(--ease);
 }
 
 .ats-field textarea:focus {
   outline: none;
-  background: var(--surface);
+  background: #ffffff;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px var(--brand-tint);
+  box-shadow: 0 0 0 3px var(--brand-tint), 0 4px 16px rgba(18, 24, 29, 0.06);
 }
 
 .ats-empty {
@@ -97,7 +262,15 @@
 }
 
 /* Score */
-.ats-score {
+/* Scoped to .ats-page, and it has to stay that way. The landing page's 3D
+   mockup carries its own floating "95" badge under the same .ats-score name,
+   and this stylesheet ships in the lazy /ats-resume-checker chunk — so once a
+   visitor opens the checker, these rules stay in the document for the rest of
+   the session and start applying to that badge too. Unscoped, the padding,
+   background and display:flex here turned it into a grey block the moment you
+   navigated back to the landing page, while a hard refresh looked fine. */
+.ats-page .ats-score {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -108,7 +281,7 @@
   background: var(--surface-3);
 }
 
-.ats-score-num {
+.ats-page .ats-score-num {
   font-family: var(--font-display);
   font-size: 3.4rem;
   font-weight: 600;
@@ -116,21 +289,21 @@
   line-height: 1;
 }
 
-.ats-score-label {
+.ats-page .ats-score-label {
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.ats-score-stats {
+.ats-page .ats-score-stats {
   font-size: 0.85rem;
   color: var(--ink-500);
 }
 
-.ats-score-good { background: var(--accent-green-tint); color: var(--accent-green-ink); }
-.ats-score-ok { background: #fdf3e0; color: #8a5a08; }
-.ats-score-low { background: #fdeceb; color: #a32219; }
+.ats-page .ats-score-good { background: var(--accent-green-tint); color: var(--accent-green-ink); }
+.ats-page .ats-score-ok { background: #fdf3e0; color: #8a5a08; }
+.ats-page .ats-score-low { background: #fdeceb; color: #a32219; }
 
 /* Check list */
 .ats-checks {
@@ -321,5 +494,26 @@
 
   .ats-page h1 {
     font-size: 1.8rem;
+  }
+
+  /* The trigger sits partway across the row, so a tooltip anchored to it runs
+     past the right edge on a phone and the last words get clipped. Anchor to
+     the row instead — it spans gutter to gutter, so 100% always fits. The
+     caret goes with it, having nothing left to point at. */
+  .ats-title-row {
+    position: relative;
+  }
+
+  .ats-beta-info {
+    position: static;
+  }
+
+  .ats-beta-tip {
+    left: 0;
+    max-width: 100%;
+  }
+
+  .ats-beta-tip::before {
+    display: none;
   }
 }
