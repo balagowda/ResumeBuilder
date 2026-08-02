@@ -35,6 +35,8 @@ const AtsChecker = () => {
 
   return (
     <div className="ats-page">
+      <div className="glow-blob blob-1"></div>
+      <div className="glow-blob blob-2"></div>
       <div className="ats-inner">
         <h1>{ATS_CHECKER_COPY.h1}</h1>
         <p className="ats-lead">{ATS_CHECKER_COPY.lead}</p>

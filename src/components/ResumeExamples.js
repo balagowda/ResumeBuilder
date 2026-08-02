@@ -17,6 +17,8 @@ export const ExamplesHub = () => {
 
   return (
     <div className="examples-page">
+      <div className="glow-blob blob-1"></div>
+      <div className="glow-blob blob-2"></div>
       <div className="examples-inner">
         <h1>Resume Examples by Job Title</h1>
         <p className="examples-lead">
@@ -85,6 +87,8 @@ export const ExampleDetail = () => {
   if (!example) {
     return (
       <div className="examples-page">
+        <div className="glow-blob blob-1"></div>
+        <div className="glow-blob blob-2"></div>
         <div className="examples-inner">
           <h1>Example not found</h1>
           <p>
@@ -102,6 +106,8 @@ export const ExampleDetail = () => {
 
   return (
     <div className="examples-page">
+      <div className="glow-blob blob-1"></div>
+      <div className="glow-blob blob-2"></div>
       <div className="examples-inner">
         <nav className="examples-crumbs" aria-label="Breadcrumb">
           <Link to="/examples">Resume examples</Link>
