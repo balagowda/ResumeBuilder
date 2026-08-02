@@ -161,6 +161,9 @@
 
 /* Score */
 .ats-score {
+  /* Declared explicitly: this class name is also used by a decorative badge on
+     the landing page, and CRA serves every stylesheet globally. */
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;

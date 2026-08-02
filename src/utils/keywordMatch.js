@@ -74,6 +74,8 @@ const PHRASES = [
   'search engine optimization'
 ];
 
+const PHRASE_SET = new Set(PHRASES);
+
 // Single tokens that are almost always a genuine skill or technology.
 const SKILL_TOKENS = new Set([
   'python', 'java', 'javascript', 'typescript', 'golang', 'go', 'rust', 'ruby', 'php',
@@ -184,6 +186,18 @@ const tokenize = (text) =>
     .map((t) => t.replace(/^[.+#-]+/, '').replace(/[.-]+$/, ''))
     .filter(Boolean);
 
+/**
+ * The haystack phrase lookups run against.
+ *
+ * A hyphenated compound is a single token ("cross-functional"), but the phrase
+ * list spells the same idea with spaces ("cross functional"), so a literal
+ * lookup never fired and a resume saying "cross-functional teams" was reported
+ * as missing the keyword. Flattening hyphens to spaces here makes both
+ * spellings look alike for phrase matching, while the token list itself keeps
+ * the hyphens that belong to names like scikit-learn and objective-c.
+ */
+const phraseHaystack = (tokens) => ` ${tokens.join(' ').replace(/-/g, ' ')} `;
+
 /** Crude suffix stripping so "pipelines" matches "pipeline". Applied to both
  *  sides of every comparison, so exactness matters less than consistency. */
 const stem = (word) => {
@@ -244,7 +258,7 @@ export const analyzeJobMatchText = (jobDescription, resumeText, limit = 28) => {
     return { score: 0, matched: [], missing: [], total: 0, tooShort: true };
   }
 
-  const jdJoined = ` ${jdTokens.join(' ')} `;
+  const jdJoined = phraseHaystack(jdTokens);
   const candidates = new Map(); // term -> { term, count, weight, isPhrase }
 
   // Phrases first, so their component words can be suppressed afterwards.
@@ -260,6 +274,10 @@ export const analyzeJobMatchText = (jobDescription, resumeText, limit = 28) => {
   };
 
   PHRASES.forEach((phrase) => {
+    // A plural spelling whose singular is also listed ("data pipelines" beside
+    // "data pipeline") would be counted twice and shown as two chips for one
+    // idea — the plural is already folded into the singular entry below.
+    if (phrase.endsWith('s') && PHRASE_SET.has(phrase.slice(0, -1))) return;
     // "REST APIs" should still count towards the "rest api" phrase.
     const plural = `${phrase}s`;
     const count =
@@ -272,12 +290,19 @@ export const analyzeJobMatchText = (jobDescription, resumeText, limit = 28) => {
   });
 
   jdTokens.forEach((token) => {
-    if (token.length < 2 || STOPWORDS.has(token)) return;
+    if (token.length < 2) return;
+    const isSkill = SKILL_TOKENS.has(token);
+    // A handful of real technologies collide with ordinary English — "Go"
+    // above all, which the stopword list would otherwise swallow, hiding the
+    // language from every posting that asks for it. Being a known skill wins.
+    if (!isSkill && STOPWORDS.has(token)) return;
     if (/^\d+$/.test(token)) return;
     // Already represented by a phrase like "machine learning"
     if (phraseWords.has(token)) return;
+    // ...including when the posting hyphenates it: "cross-functional" is one
+    // token, but the phrase entry already claimed both of its halves.
+    if (token.includes('-') && token.split('-').every((part) => phraseWords.has(part))) return;
 
-    const isSkill = SKILL_TOKENS.has(token);
     const existing = candidates.get(token);
     if (existing) {
       existing.count += 1;
@@ -300,10 +325,15 @@ export const analyzeJobMatchText = (jobDescription, resumeText, limit = 28) => {
   // Build the resume's searchable forms once.
   const resumeTokens = tokenize(resumeText);
   const resumeStems = new Set(resumeTokens.map(stem));
-  const resumeJoined = ` ${resumeTokens.join(' ')} `;
+  const resumeJoined = phraseHaystack(resumeTokens);
 
   const isPresent = (entry) => {
-    if (entry.isPhrase) {
+    // Only a multi-word entry has to be found as a run of words. Several
+    // entries in the phrase list are single words ("mentoring",
+    // "microservices", "accessibility"); those are ordinary tokens and have to
+    // go through the stemmer, or a resume saying "Mentored 4 engineers" is
+    // reported as missing "mentoring".
+    if (entry.isPhrase && entry.term.includes(' ')) {
       return (
         resumeJoined.includes(` ${entry.term} `) || resumeJoined.includes(` ${entry.term}s `)
       );
