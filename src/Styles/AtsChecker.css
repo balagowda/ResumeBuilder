@@ -262,9 +262,14 @@
 }
 
 /* Score */
-.ats-score {
-  /* Declared explicitly: this class name is also used by a decorative badge on
-     the landing page, and CRA serves every stylesheet globally. */
+/* Scoped to .ats-page, and it has to stay that way. The landing page's 3D
+   mockup carries its own floating "95" badge under the same .ats-score name,
+   and this stylesheet ships in the lazy /ats-resume-checker chunk — so once a
+   visitor opens the checker, these rules stay in the document for the rest of
+   the session and start applying to that badge too. Unscoped, the padding,
+   background and display:flex here turned it into a grey block the moment you
+   navigated back to the landing page, while a hard refresh looked fine. */
+.ats-page .ats-score {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -276,7 +281,7 @@
   background: var(--surface-3);
 }
 
-.ats-score-num {
+.ats-page .ats-score-num {
   font-family: var(--font-display);
   font-size: 3.4rem;
   font-weight: 600;
@@ -284,21 +289,21 @@
   line-height: 1;
 }
 
-.ats-score-label {
+.ats-page .ats-score-label {
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.ats-score-stats {
+.ats-page .ats-score-stats {
   font-size: 0.85rem;
   color: var(--ink-500);
 }
 
-.ats-score-good { background: var(--accent-green-tint); color: var(--accent-green-ink); }
-.ats-score-ok { background: #fdf3e0; color: #8a5a08; }
-.ats-score-low { background: #fdeceb; color: #a32219; }
+.ats-page .ats-score-good { background: var(--accent-green-tint); color: var(--accent-green-ink); }
+.ats-page .ats-score-ok { background: #fdf3e0; color: #8a5a08; }
+.ats-page .ats-score-low { background: #fdeceb; color: #a32219; }
 
 /* Check list */
 .ats-checks {
