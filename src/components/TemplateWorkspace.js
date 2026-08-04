@@ -29,6 +29,56 @@ const SHEET_PAD = 64; // 32px top + 32px bottom
 const MIN_SCALE = 0.7;
 const SCROLLBAR_GUTTER = 16;
 
+/* Ceilings for the html2canvas capture.
+ *
+ * Mobile Safari refuses to allocate a canvas past roughly 16.7M pixels, and on
+ * older iPhones and iPads past 4096px on any one side. It does not throw when
+ * it gives up — it hands back a blank bitmap — so an oversized capture came out
+ * as an empty PDF rather than an error. A three-page resume at the old fixed
+ * 3x was 1680 x 7146, which is over both. */
+const MAX_CANVAS_SIDE = 4096;
+const MAX_CANVAS_AREA = 16 * 1024 * 1024;
+const PREFERRED_CAPTURE_SCALE = 3; // retina-crisp text when stretched onto A4
+
+/** The largest capture scale this sheet can use and still be allocated. */
+const captureScaleFor = (widthPx, heightPx) =>
+  Math.max(
+    1,
+    Math.min(
+      PREFERRED_CAPTURE_SCALE,
+      MAX_CANVAS_SIDE / Math.max(widthPx, heightPx),
+      Math.sqrt(MAX_CANVAS_AREA / (widthPx * heightPx))
+    )
+  );
+
+/**
+ * Did the capture come back empty?
+ *
+ * Checked by painting the whole thing into a thumbnail and reading that, rather
+ * than sampling the full-size bitmap: it costs one small readback whatever the
+ * page count, and it cannot miss content by looking in the wrong corner.
+ */
+const isBlankCanvas = (canvas) => {
+  try {
+    const probe = document.createElement('canvas');
+    probe.width = 64;
+    probe.height = 64;
+    const ctx = probe.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return false;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.drawImage(canvas, 0, 0, 64, 64);
+    const { data } = ctx.getImageData(0, 0, 64, 64);
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i] < 250 || data[i + 1] < 250 || data[i + 2] < 250) return false;
+    }
+    return true;
+  } catch {
+    // A tainted or unreadable canvas is not evidence of a blank one.
+    return false;
+  }
+};
+
 /**
  * How far the sheet has to shrink to fit `available` px of width.
  *
@@ -120,6 +170,14 @@ export default function TemplateWorkspace({ templateId }) {
   const importResumeInputRef = useRef();
   const [isImporting, setIsImporting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  // Set when "Download PDF" produced no print dialog — see handlePrintPDF.
+  const [printUnavailable, setPrintUnavailable] = useState(false);
+  // A ready-made file behind a tappable link, for browsers that ignore a
+  // programmatic download — see offerManualSave.
+  const [manualSave, setManualSave] = useState(null);
+  // The image capture takes seconds on a phone, with nothing on screen to say
+  // so — long enough that it reads as a dead button and gets tapped again.
+  const [isExporting, setIsExporting] = useState(false);
   const panelRef = useRef();
   const navigate = useNavigate();
 
@@ -576,14 +634,35 @@ export default function TemplateWorkspace({ templateId }) {
     setFormData({ ...formData, [section]: updated }, { label: `reorder ${section}` });
   };
   
+  /**
+   * Park a generated file behind a link the user can tap.
+   *
+   * The object URL stays alive for as long as the link is on screen, and the
+   * previous one is released when it is replaced or the editor unmounts.
+   */
+  const offerManualSave = useCallback((blob, filename) => {
+    setManualSave((previous) => {
+      if (previous) URL.revokeObjectURL(previous.url);
+      return { url: URL.createObjectURL(blob), filename };
+    });
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (manualSave) URL.revokeObjectURL(manualSave.url);
+    },
+    [manualSave]
+  );
+
   // This is intentionally an image export. It is useful when somebody needs
   // a pixel snapshot of the preview, but an image has no usable text layer.
   // The normal PDF action below uses the browser print pipeline instead, which
   // keeps the chosen template's real text selectable and searchable.
   const handleDownloadImagePDF = async () => {
     const originalElement = resumeRef.current;
-    if (!originalElement) return;
+    if (!originalElement || isExporting) return;
 
+    setIsExporting(true);
     try {
       // The sheet on screen is scaled — by the user's zoom, and on a narrow
       // screen by the shrink-to-fit factor — and html2canvas takes its bounds
@@ -597,7 +676,10 @@ export default function TemplateWorkspace({ templateId }) {
       // wrapper, drops it at the origin on its own, and the explicit bounds
       // below crop exactly that. Nothing on screen moves.
       const canvas = await html2canvas(originalElement, {
-        scale: 3, // 3x scale guarantees retina-quality crisp text when stretched
+        // Capped rather than a flat 3x: see captureScaleFor. A long resume on a
+        // phone used to ask for a bitmap the device would not allocate, and got
+        // a blank one back without an error.
+        scale: captureScaleFor(SHEET_W, sheetHeight),
         useCORS: true,
         backgroundColor: '#ffffff',
         scrollX: 0,
@@ -639,6 +721,16 @@ export default function TemplateWorkspace({ templateId }) {
         }
       });
 
+      // A device that could not allocate the bitmap hands back a blank one
+      // instead of throwing, so check before spending the rest of the work on
+      // it — an empty PDF that downloads successfully is the worst outcome
+      // here, because nothing tells the user it went wrong.
+      if (!canvas.width || !canvas.height || isBlankCanvas(canvas)) {
+        throw new Error(
+          'Your browser could not render an image this large — it came back empty. Use "Download ATS PDF" instead, which builds the file as text and has no size limit.'
+        );
+      }
+
       // Create an A4 PDF
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -673,7 +765,13 @@ export default function TemplateWorkspace({ templateId }) {
           0, 0, canvas.width, sliceHeight
         );
 
-        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        // 0.92 rather than 1.0: indistinguishable on rendered text, and a good
+        // deal less memory to hold per page, which is what tips a phone over.
+        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        // Release each page bitmap as we go instead of keeping pageCount of
+        // them alive until the loop ends.
+        pageCanvas.width = 0;
+        pageCanvas.height = 0;
       }
 
       // --- INJECT CLICKABLE LINKS ---
@@ -714,9 +812,18 @@ export default function TemplateWorkspace({ templateId }) {
 
       const filename = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'Resume'}.pdf`;
       pdf.save(filename);
+
+      // Capturing the sheet takes seconds on a phone, and by the time it
+      // finishes the tap that started it no longer counts as user activation —
+      // which iOS Safari requires before it will accept a download. The save
+      // above is simply ignored there, silently. So offer the same file behind
+      // a link the user can tap themselves, which does carry activation.
+      offerManualSave(pdf.output('blob'), filename);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(`Failed to download PDF. Error: ${error.message}`);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -731,10 +838,47 @@ export default function TemplateWorkspace({ templateId }) {
     }
   };
 
-  // Kept as a fallback: the browser's print-to-PDF pipeline renders the
-  // template exactly as styled, also with selectable text.
+  // The browser's print-to-PDF pipeline renders the template exactly as styled,
+  // with selectable text — the best output of the three when it works.
+  //
+  // On mobile it often does not. window.print() is a silent no-op inside the
+  // in-app browsers a lot of phone traffic arrives through (Instagram, Facebook,
+  // LinkedIn, Gmail): the button is tapped, no dialog opens, no error is raised,
+  // and nothing downloads. There is no feature test for that — window.print is
+  // always a function — so instead we watch for the signals a real print pass
+  // emits and, if none arrives, point at the two exports that build the file in
+  // the page and cannot be suppressed this way.
   const handlePrintPDF = () => {
-    window.print();
+    let printOpened = false;
+    const markOpened = () => {
+      printOpened = true;
+    };
+    const printQuery = window.matchMedia ? window.matchMedia('print') : null;
+    const onQueryChange = (event) => {
+      if (event.matches) markOpened();
+    };
+
+    window.addEventListener('beforeprint', markOpened);
+    if (printQuery && printQuery.addEventListener) {
+      printQuery.addEventListener('change', onQueryChange);
+    }
+
+    try {
+      window.print();
+      // Chrome and Safari apply print media synchronously inside print(), so a
+      // dialog that has already opened and closed still shows up here.
+      if (printQuery && printQuery.matches) markOpened();
+    } catch {
+      printOpened = false;
+    }
+
+    window.setTimeout(() => {
+      window.removeEventListener('beforeprint', markOpened);
+      if (printQuery && printQuery.removeEventListener) {
+        printQuery.removeEventListener('change', onQueryChange);
+      }
+      setPrintUnavailable(!printOpened);
+    }, 1200);
   };
 
   const handleSwitchTemplate = (e) => {
@@ -1033,6 +1177,59 @@ export default function TemplateWorkspace({ templateId }) {
 
   const renderResumeContent = () =>
     renderResumeTemplate(templateId, { formData, sectionOrder, experienceHeading, formatTextToList });
+
+  /**
+   * The three exports, plus whatever we have had to tell the user about them.
+   *
+   * Rendered twice: once under the sheet, and once inside the mobile preview
+   * modal. Below 1100px the panels stack, which left the only copy roughly five
+   * screens below the fold, under the whole form and a full-height preview —
+   * and the floating Preview button, the one way to see the resume on a phone,
+   * opened a modal with no way to download from it. So the export a phone user
+   * reaches for was, in practice, unreachable.
+   */
+  const renderDownloadActions = (place) => (
+    <div className={`download-actions download-actions-${place}`}>
+      <button className="download-btn download-btn-ats" onClick={handleDownloadTextPDF} title="Downloads a clean single-column PDF with selectable text — the format ATS software reads most reliably.">
+        <i className="fas fa-robot"></i> Download ATS PDF
+      </button>
+      <button className="download-btn" onClick={handlePrintPDF} title="Opens your browser's Save as PDF dialog with selectable text in this template's design">
+        <i className="fas fa-file-pdf"></i> Download PDF
+      </button>
+      <button className="image-pdf-btn" onClick={handleDownloadImagePDF} disabled={isExporting} title="Downloads a pixel snapshot. Its text cannot be selected or read by ATS software.">
+        <i className={`fas ${isExporting ? 'fa-spinner fa-spin' : 'fa-camera'}`}></i>
+        {isExporting ? ' Rendering…' : ' Image PDF'}
+      </button>
+
+      {printUnavailable && (
+        <p className="download-fallback" role="status">
+          <i className="fas fa-triangle-exclamation"></i>
+          {/* Phrased as a question rather than a verdict: a browser could in
+              principle print without emitting either signal we watch for, and
+              this has to read correctly even then. */}
+          <span>
+            No print dialog? Some browsers block it silently — most often the
+            ones built into apps like Instagram or LinkedIn. Use{' '}
+            <strong>Download ATS PDF</strong>, which builds the file right here,
+            or open this page in Chrome or Safari.
+          </span>
+        </p>
+      )}
+
+      {manualSave && (
+        <p className="download-fallback" role="status">
+          <i className="fas fa-circle-down"></i>
+          <span>
+            Download didn’t start?{' '}
+            <a href={manualSave.url} download={manualSave.filename}>
+              Tap here to save {manualSave.filename}
+            </a>
+            .
+          </span>
+        </p>
+      )}
+    </div>
+  );
 
   const renderInputPanel = () => {
     const completeness = calculateCompleteness();
@@ -1441,17 +1638,7 @@ export default function TemplateWorkspace({ templateId }) {
               </button>
             </div>
           </div>
-          <div className="download-actions">
-            <button className="download-btn download-btn-ats" onClick={handleDownloadTextPDF} title="Downloads a clean single-column PDF with selectable text — the format ATS software reads most reliably.">
-              <i className="fas fa-robot"></i> Download ATS PDF
-            </button>
-            <button className="download-btn" onClick={handlePrintPDF} title="Opens your browser's Save as PDF dialog with selectable text in this template's design">
-              <i className="fas fa-file-pdf"></i> Download PDF
-            </button>
-            <button className="image-pdf-btn" onClick={handleDownloadImagePDF} title="Downloads a pixel snapshot. Its text cannot be selected or read by ATS software.">
-              <i className="fas fa-camera"></i> Image PDF
-            </button>
-          </div>
+          {renderDownloadActions('panel')}
           <p className="ats-hint">
             <i className="fas fa-circle-info"></i> Download PDF opens your browser’s print dialog — choose “Save as PDF” for the selected template with fully selectable text. Use ATS PDF for the most parser-friendly single-column version. Image PDF is for visual snapshots only.
           </p>
@@ -1505,6 +1692,9 @@ export default function TemplateWorkspace({ templateId }) {
                 </div>
               </div>
             </div>
+            {/* On a phone this modal is where the resume actually gets looked
+                at, so it is also where it has to be downloadable from. */}
+            {renderDownloadActions('modal')}
           </div>
         </div>
       )}

@@ -1915,6 +1915,61 @@
   margin-right: 4px;
 }
 
+/* The copy inside the mobile preview modal. Full-width buttons, because this
+   is the one place on a phone where the resume is actually being looked at. */
+.download-actions-modal {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+}
+
+@media (max-width: 1100px) {
+  .download-actions-modal .download-btn,
+  .download-actions-modal .image-pdf-btn {
+    flex: 1 1 100%;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Image PDF is a quiet text button elsewhere. Stretched to full width
+     between two solid pills it reads as disabled, so give it an outline. */
+  .download-actions-modal .image-pdf-btn {
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 30px;
+    background: #f8fafc;
+  }
+}
+
+/* Shown when a download could not be delivered the usual way — the print
+   dialog never opened, or the browser ignored a programmatic save. */
+.download-fallback {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.download-fallback i {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.download-fallback a {
+  color: #92400e;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 /* ==========================================================================
    JOB MATCH PANEL
    ========================================================================== */
