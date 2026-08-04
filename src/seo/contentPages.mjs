@@ -32,7 +32,7 @@ export const CONTENT_PAGES = [
           '50+ free professional resume templates, including single-column ATS layouts',
           'A job-description matcher that shows which keywords from a posting your resume is missing',
           'A writing review that flags weak openers, passive voice, unquantified claims and repeated verbs',
-          'Two PDF exports: a text-based one applicant tracking systems can read, and a pixel-exact image one',
+          'Three PDF exports: a selectable PDF of the chosen template, a text-based ATS version, and an image-only visual snapshot',
           'Page-overflow warnings with one-click "fit to one page" resizing',
           'Drag-and-drop section reordering',
           'Multiple saved resume versions with undo and redo',
@@ -95,7 +95,7 @@ export const CONTENT_PAGES = [
       },
       {
         q: 'How do I download my resume as a PDF?',
-        a: 'There are two export buttons in the editor. "Download ATS PDF" goes through your browser\'s print-to-PDF and keeps the text selectable, which is what applicant tracking systems need in order to read it — use this one when applying. "Download Print PDF" captures the preview as an image, so the layout is pixel-exact but the text cannot be parsed; use it for printing or emailing a human. Both are free, generated on your own device, and support multi-page resumes.',
+        a: 'Use "Download PDF" to open your browser\'s print dialog, then choose "Save as PDF". This preserves the selected template design and keeps its text selectable, searchable and readable by most systems. "Download ATS PDF" downloads a clean, single-column text PDF designed for maximum parser compatibility. "Image PDF" is a flattened visual snapshot for cases where exact pixels matter, but its text cannot be selected or reliably parsed. Every option is free, generated on your own device, and supports multi-page resumes.',
       },
       {
         q: 'Does HatchResume check how my resume is written?',

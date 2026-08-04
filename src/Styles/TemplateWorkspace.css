@@ -919,6 +919,27 @@
   box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
 }
 
+/* A deliberately quiet fallback. Unlike the two text-based exports, this
+   creates a flattened image PDF, so it must not look like the primary choice. */
+.image-pdf-btn {
+  align-self: center;
+  appearance: none;
+  border: 0;
+  padding: 8px 2px;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.image-pdf-btn:hover {
+  color: #334155;
+}
+
 /* ==========================================================================
    RESUME TEMPLATE DESIGNS (A4 PREVIEW SHEETS)
    ========================================================================== */
@@ -1894,22 +1915,6 @@
   margin-right: 4px;
 }
 
-/* Inline text-button inside the hint for the browser print fallback. */
-.ats-hint-link {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: #059669;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.ats-hint-link:hover {
-  color: #047857;
-}
-
 /* ==========================================================================
    JOB MATCH PANEL
    ========================================================================== */
@@ -2540,6 +2545,7 @@
   .download-actions,
   .ats-hint,
   .overflow-banner,
+  .mobile-preview-fab,
   .page-guides,
   .preview-btn,
   .preview-modal {
@@ -2565,14 +2571,56 @@
   }
 
   .print-target {
+    /* The editor gives every sheet a 794px minimum height so it looks like an
+       A4 page on screen. At print scale that rounds a little taller than A4
+       and creates an otherwise blank second page. Let paper, not the preview
+       card, provide the empty space below a short resume. */
     height: auto !important;
-    min-height: 794px;
+    min-height: 0 !important;
     margin: 0 auto !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     overflow: visible !important;
+    /* Browsers normally economise on ink by dropping background fills and
+       colours when printing. Resume sidebars, header bands and accents are
+       part of the selected template, so ask the print engine to preserve them
+       in the saved PDF. The WebKit prefix covers Chrome and Safari. */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
     /* Scale the 560px preview sheet up to true A4 width (794px @ 96dpi) */
-    zoom: 1.4178;
+    zoom: 1.4173;
+  }
+
+  /* The editor adds controls directly inside the sheet to make the preview
+     convenient. A saved PDF must contain only the resume itself, even if a
+     later UI control is added and missed by the broad selector above. */
+  .print-target > :not(.resume-fit) {
+    display: none !important;
+  }
+
+  .print-target * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* The coloured rails normally get their full height from the editor sheet.
+     Browser printing uses natural content height instead, which leaves a short
+     sidebar beside a taller A4 page. 792px × the print zoom above is one A4
+     page (794px was just enough to overflow onto a blank second page), so the
+     rail reaches the page edge without bringing that blank page back. */
+  .print-target:has(.tmpl-creative),
+  .print-target:has(.tmpl-rightbar) {
+    min-height: 792px !important;
+  }
+
+  /* Let the actual flex columns, rather than only the sheet's fallback
+     gradient, reach the A4 edge. Without this, a short sidebar ends where its
+     content ends and exposes a thin, visibly misaligned change in background
+     below it. Banner templates have their own top band, so they deliberately
+     keep their natural column height. */
+  .print-target:has(.tmpl-creative) .creative-split-container,
+  .print-target:has(.tmpl-rightbar:not(.tmpl-banner):not(.tmpl-bannerside):not(.tmpl-profileband)) .rb-container {
+    min-height: 792px;
   }
 
   /* The on-screen sheet is one tall block; let the browser paginate it for

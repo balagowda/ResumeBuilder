@@ -45,4 +45,13 @@ describe('App shell', () => {
 
     expect(document.title).toMatch(/HatchResume FAQ/i);
   });
+
+  test('makes the selected template available as a selectable PDF export', async () => {
+    renderAt('/template7');
+
+    expect(
+      await screen.findByRole('button', { name: 'Download PDF' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Image PDF' })).toBeInTheDocument();
+  });
 });

@@ -13,7 +13,7 @@ A 100% free, privacy-first resume builder. Pick one of 50+ professional, ATS-fri
 - **Import your existing resume** — upload a PDF, DOCX, or TXT and the form fills itself; the file never leaves your device
 - **Job description matching** — paste a posting and see which of its keywords your resume is missing
 - **Writing review** — flags weak openers, passive voice, unquantified claims, repeated verbs and common misspellings as you type
-- **Two PDF export options** — a text-based ATS-friendly PDF, and a pixel-perfect version for printing
+- **Three PDF export options** — a selectable PDF of the chosen template, a text-based ATS-friendly PDF, and an image-only visual snapshot when exact pixels matter
 - **Version compare** — side-by-side diff of any two saved resumes, showing exactly which fields differ
 - **Complete backups** — one file round-trips every resume you've made
 - **Page overflow protection** — warns when content runs onto a second page, with one-click "fit to one page" resizing

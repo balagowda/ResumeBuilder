@@ -134,8 +134,9 @@ export default function TemplateWorkspace({ templateId }) {
 
   const contentScale = formData.contentScale || 1;
   // What the sheet is displayed at: the user's zoom, then shrunk again if the
-  // screen is too narrow for 1:1. Export does not go through this — see
-  // handleDownloadPDF — so nothing here moves while a PDF is being made.
+  // screen is too narrow for 1:1. The image export does not go through this —
+  // see handleDownloadImagePDF — so nothing here moves while a snapshot is
+  // being made.
   const displayScale = (zoom / 100) * fitScale;
   const scaledHeight = contentHeight * contentScale;
   const pageCount = Math.max(1, Math.ceil((scaledHeight + SHEET_PAD) / PAGE_H));
@@ -545,7 +546,11 @@ export default function TemplateWorkspace({ templateId }) {
     setFormData({ ...formData, [section]: updated }, { label: `reorder ${section}` });
   };
   
-  const handleDownloadPDF = async () => {
+  // This is intentionally an image export. It is useful when somebody needs
+  // a pixel snapshot of the preview, but an image has no usable text layer.
+  // The normal PDF action below uses the browser print pipeline instead, which
+  // keeps the chosen template's real text selectable and searchable.
+  const handleDownloadImagePDF = async () => {
     const originalElement = resumeRef.current;
     if (!originalElement) return;
 
@@ -1390,16 +1395,15 @@ export default function TemplateWorkspace({ templateId }) {
             <button className="download-btn download-btn-ats" onClick={handleDownloadTextPDF} title="Downloads a clean single-column PDF with selectable text — the format ATS software reads most reliably.">
               <i className="fas fa-robot"></i> Download ATS PDF
             </button>
-            <button className="download-btn" onClick={handleDownloadPDF} title="Exact snapshot of the preview as an image-based PDF">
-              <i className="fas fa-camera"></i> Download Print PDF
+            <button className="download-btn" onClick={handlePrintPDF} title="Opens your browser's Save as PDF dialog with selectable text in this template's design">
+              <i className="fas fa-file-pdf"></i> Download PDF
+            </button>
+            <button className="image-pdf-btn" onClick={handleDownloadImagePDF} title="Downloads a pixel snapshot. Its text cannot be selected or read by ATS software.">
+              <i className="fas fa-camera"></i> Image PDF
             </button>
           </div>
           <p className="ats-hint">
-            <i className="fas fa-circle-info"></i> ATS PDF downloads instantly with selectable text so recruiting software can parse it. Prefer the styled layout with selectable text?{' '}
-            <button type="button" className="ats-hint-link" onClick={handlePrintPDF}>
-              Print / Save as PDF
-            </button>{' '}
-            uses your browser's print dialog.
+            <i className="fas fa-circle-info"></i> Download PDF opens your browser’s print dialog — choose “Save as PDF” for the selected template with fully selectable text. Use ATS PDF for the most parser-friendly single-column version. Image PDF is for visual snapshots only.
           </p>
         </div>
       </div>
