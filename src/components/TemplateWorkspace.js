@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { renderResumeTemplate, TEMPLATES, SAMPLE_DATA, formatTextToList, DEFAULT_SECTION_ORDER } from './ResumeTemplates';
+import { renderResumeTemplate, TEMPLATES, SAMPLE_DATA, formatTextToList, normalizeSectionOrder } from './ResumeTemplates';
 import Summary from './Summary';
 import ContactFields from './ContactFields';
 import Experiences from './Experiences';
@@ -81,11 +81,17 @@ export default function TemplateWorkspace({ templateId }) {
     markBackedUp,
     storageError,
     clearEverything,
+    undo,
+    redo,
   } = store;
 
   // Per-resume view state, previously component-only — so a reload silently
   // reset the section order the user had arranged.
-  const sectionOrder = store.active?.sectionOrder || DEFAULT_SECTION_ORDER;
+  // Normalised on the way out rather than on the way in, so a resume saved
+  // before the reorder fix — one section short, with an empty entry where it
+  // used to be — heals itself the next time it is opened.
+  const savedSectionOrder = store.active?.sectionOrder;
+  const sectionOrder = useMemo(() => normalizeSectionOrder(savedSectionOrder), [savedSectionOrder]);
   const setSectionOrder = useCallback(
     (order, opts = { label: 'reorder sections' }) => updateActive({ sectionOrder: order }, opts),
     [updateActive]
@@ -234,8 +240,19 @@ export default function TemplateWorkspace({ templateId }) {
 
   // Order matters: repaginate first, then measure, so the height that drives
   // the page count already accounts for the injected breaks.
-  useLayoutEffect(applyPageBreaks);
-  useLayoutEffect(measureContent);
+  //
+  // Both are scoped to what can actually move the sheet. They used to run after
+  // every render, so dragging the sidebar, zooming, or collapsing a form
+  // section re-walked the whole document with getBoundingClientRect — up to
+  // forty forced-reflow passes — for a layout that had not changed.
+  // `contentHeight` is in the list on purpose: it is what the ResizeObserver
+  // reports, so anything that resizes the sheet without going through React
+  // (a web font finishing loading, most importantly) still repaginates.
+  const layoutInputs = [formData, sectionOrder, experienceHeading, templateId, contentHeight];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(applyPageBreaks, [applyPageBreaks, ...layoutInputs]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(measureContent, [measureContent, ...layoutInputs]);
 
   // A failed fit describes the resume as it was, so any edit makes it stale.
   // Keyed on formData identity rather than the measured height: the height
@@ -384,13 +401,16 @@ export default function TemplateWorkspace({ templateId }) {
       if (isEditing(event.target)) return;
 
       event.preventDefault();
-      if (event.shiftKey) store.redo();
-      else store.undo();
+      if (event.shiftKey) redo();
+      else undo();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [store]);
+    // Depending on the whole store would rebind this listener on every render —
+    // the hook returns a fresh object each time — which meant tearing down and
+    // re-adding a window listener on every keystroke. undo/redo are stable.
+  }, [undo, redo]);
 
   // Drag-and-Drop section reordering
   const handleDragStart = (e, section) => {
@@ -428,15 +448,25 @@ export default function TemplateWorkspace({ templateId }) {
   };
 
   const handleDrop = (e, targetSection) => {
+    // Always cancel the drop, even when it is not a reorder: handleDragOver
+    // already told the browser this is a drop target, and leaving the default
+    // in place would let a dropped file navigate the tab away from the editor.
     e.preventDefault();
     const draggedSection = e.dataTransfer.getData('section');
     setDragOverSection(null);
     if (draggedSection === targetSection) return;
+
+    const from = sectionOrder.indexOf(draggedSection);
+    const to = sectionOrder.indexOf(targetSection);
+    // Only a drag that started on a section handle carries a section name. A
+    // resume file heading for the import zone, or text dragged out of a
+    // textarea, carries none — and indexOf('') is -1, so the splice below used
+    // to delete the last section and leave an empty entry in its place.
+    if (from < 0 || to < 0) return;
+
     const newOrder = [...sectionOrder];
-    const draggedIndex = newOrder.indexOf(draggedSection);
-    const targetIndex = newOrder.indexOf(targetSection);
-    newOrder.splice(draggedIndex, 1);
-    newOrder.splice(targetIndex, 0, draggedSection);
+    newOrder.splice(from, 1);
+    newOrder.splice(to, 0, draggedSection);
     setSectionOrder(newOrder, { label: 'reorder sections' });
     document.querySelectorAll('.draggable-section').forEach((el) => {
       el.classList.remove('dragging');
@@ -756,8 +786,14 @@ export default function TemplateWorkspace({ templateId }) {
     const link = document.createElement('a');
     link.href = url;
     link.download = 'hatchresume_backup.json';
+    // Firefox only fires the download for an anchor that is actually in the
+    // document, and revoking the object URL in the same tick can cancel the
+    // transfer before it starts. Attach it, click it, then let the URL go on the
+    // next turn of the event loop.
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 0);
     // Clears the "not backed up" warning and the close prompt.
     markBackedUp();
   };
@@ -784,7 +820,19 @@ export default function TemplateWorkspace({ templateId }) {
           }
         } else {
           // Legacy backup: one bare formData object, merged into the open resume.
-          setFormData((prev) => ({ ...prev, ...imported }), { label: 'restore backup' });
+          setFormData(
+            (prev) => {
+              const merged = { ...prev, ...imported };
+              // The templates index these lists directly, so a hand-edited or
+              // truncated backup that turned one into something else would take
+              // the whole editor down rather than import badly.
+              Object.keys(prev).forEach((key) => {
+                if (Array.isArray(prev[key]) && !Array.isArray(merged[key])) merged[key] = prev[key];
+              });
+              return merged;
+            },
+            { label: 'restore backup' }
+          );
         }
       } catch (err) {
         alert('Could not import this file. Please choose a resume backup (.json) exported from this site.');
@@ -858,7 +906,9 @@ export default function TemplateWorkspace({ templateId }) {
   };
 
   const handleClearData = () => {
-    if (window.confirm('Clear every resume you have here? This cannot be undone — download a backup first if you want to keep them.')) {
+    // clearEverything commits through the history stack, so one undo brings it
+    // all back; the prompt used to say it could not be undone.
+    if (window.confirm('Clear every resume you have here? Ctrl+Z will bring them back while this tab is open, but download a backup if you want to keep them for good.')) {
       clearEverything();
       setFitFailed(false);
     }

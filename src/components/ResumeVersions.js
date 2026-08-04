@@ -31,10 +31,13 @@ const ResumeVersions = ({
 
   const handleDelete = () => {
     if (!active) return;
+    // Deleting goes through the history stack like every other change, so the
+    // prompt says so — it used to claim the opposite, which made a reversible
+    // action look final.
     const message =
       resumes.length === 1
-        ? `Delete "${active.name}"? This is your only resume, so you will be left with a blank one.`
-        : `Delete "${active.name}"? This cannot be undone.`;
+        ? `Delete "${active.name}"? This is your only resume, so you will be left with a blank one. You can undo it with Ctrl+Z or the undo button.`
+        : `Delete "${active.name}"? You can undo it with Ctrl+Z or the undo button.`;
     if (window.confirm(message)) onDelete(activeId);
   };
 

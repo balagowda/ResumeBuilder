@@ -235,17 +235,20 @@ export default function generateAtsPdf({ formData, sectionOrder, experienceHeadi
     let x = MARGIN;
     contacts.forEach((c, i) => {
       const w = doc.getTextWidth(c.text);
-      if (x > MARGIN && x + w > PAGE_W - MARGIN) {
+      // The separator is drawn before its item rather than after the previous
+      // one, and counted in the width test — otherwise a line that ran out of
+      // room ended with a dangling "|" and the next one began flush.
+      const sepWidth = i > 0 ? sepW : 0;
+      if (x > MARGIN && x + sepWidth + w > PAGE_W - MARGIN) {
         x = MARGIN;
         y += lineHeight(SIZE.contact);
+      } else if (i > 0) {
+        doc.text(sep, x, y);
+        x += sepW;
       }
       if (c.url) doc.textWithLink(c.text, x, y, { url: c.url });
       else doc.text(c.text, x, y);
       x += w;
-      if (i < contacts.length - 1) {
-        doc.text(sep, x, y);
-        x += sepW;
-      }
     });
     y += lineHeight(SIZE.contact);
   }

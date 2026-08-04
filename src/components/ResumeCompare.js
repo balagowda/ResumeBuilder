@@ -28,6 +28,7 @@ const fieldsFor = (record) => {
   push('skills', 'Skills', data.skills);
 
   const walk = (list, section, sectionLabel, titleKey, extraKeys) => {
+    const seenTitles = new Map();
     (list || []).forEach((entry, i) => {
       if (!entry) return;
       const title = String(entry[titleKey] || '').trim();
@@ -35,7 +36,13 @@ const fieldsFor = (record) => {
       const parts = [title, ...extraKeys.map((k) => String(entry[k] || '').trim())].filter(Boolean);
       // Entries are keyed by their title so a renamed entry shows as one
       // changed row, and reordering alone does not flag every entry.
-      const key = `${section}:${title ? title.toLowerCase() : i}`;
+      const base = title ? title.toLowerCase() : String(i);
+      // Two entries can share a title — the same job title at two companies, or
+      // two degrees from one school. Left alone they collapse onto one key, so
+      // one silently overwrote the other in the diff and React saw duplicates.
+      const occurrence = (seenTitles.get(base) || 0) + 1;
+      seenTitles.set(base, occurrence);
+      const key = `${section}:${base}${occurrence > 1 ? `#${occurrence}` : ''}`;
       push(key, label, parts.join('\n'));
     });
   };
