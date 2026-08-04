@@ -40,6 +40,14 @@ const MAX_CANVAS_SIDE = 4096;
 const MAX_CANVAS_AREA = 16 * 1024 * 1024;
 const PREFERRED_CAPTURE_SCALE = 3; // retina-crisp text when stretched onto A4
 
+// iPadOS identifies itself as macOS in its user agent, so touch points are
+// needed as well as the usual phone/tablet identifiers.
+const isMobileOrTablet = () => {
+  const ua = navigator.userAgent || '';
+  return /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+};
+
 /** The largest capture scale this sheet can use and still be allocated. */
 const captureScaleFor = (widthPx, heightPx) =>
   Math.max(
@@ -647,6 +655,51 @@ export default function TemplateWorkspace({ templateId }) {
     });
   }, []);
 
+  const triggerBrowserDownload = useCallback((url, filename) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }, []);
+
+  /**
+   * Deliver an already-generated PDF without relying on jsPDF's `save()`.
+   * Mobile browsers get the native share sheet when available; otherwise the
+   * PDF stays behind a real, second-tap save control instead of disappearing.
+   */
+  const deliverPdf = useCallback(async (blob, filename) => {
+    const mobile = isMobileOrTablet();
+    const url = URL.createObjectURL(blob);
+
+    if (!mobile) {
+      triggerBrowserDownload(url, filename);
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return;
+    }
+
+    const file = new File([blob], filename, { type: 'application/pdf' });
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename });
+        URL.revokeObjectURL(url);
+        return;
+      }
+    } catch (error) {
+      // A cancelled share sheet is not an export failure. The retained Save
+      // PDF control below is still available, and works in embedded browsers.
+      if (error && error.name !== 'AbortError') console.warn('Native PDF share failed:', error);
+    }
+
+    // Android browsers generally honour this immediately. iOS may show the
+    // PDF preview instead; the visible Save PDF control handles both cases.
+    offerManualSave(blob, filename);
+    triggerBrowserDownload(url, filename);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, [offerManualSave, triggerBrowserDownload]);
+
   useEffect(
     () => () => {
       if (manualSave) URL.revokeObjectURL(manualSave.url);
@@ -811,14 +864,7 @@ export default function TemplateWorkspace({ templateId }) {
       });
 
       const filename = `${formData.fullName ? formData.fullName.replace(/\s+/g, '_') : 'Resume'}.pdf`;
-      pdf.save(filename);
-
-      // Capturing the sheet takes seconds on a phone, and by the time it
-      // finishes the tap that started it no longer counts as user activation —
-      // which iOS Safari requires before it will accept a download. The save
-      // above is simply ignored there, silently. So offer the same file behind
-      // a link the user can tap themselves, which does carry activation.
-      offerManualSave(pdf.output('blob'), filename);
+      await deliverPdf(pdf.output('blob'), filename);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(`Failed to download PDF. Error: ${error.message}`);
@@ -829,13 +875,25 @@ export default function TemplateWorkspace({ templateId }) {
 
   // One-click text-based export: a real text-layer PDF built with jsPDF, so
   // the text is selectable and ATS parsers can read it — no print dialog.
-  const handleDownloadTextPDF = () => {
+  const handleDownloadTextPDF = async () => {
     try {
-      generateAtsPdf({ formData, sectionOrder, experienceHeading });
+      const { blob, filename } = generateAtsPdf({ formData, sectionOrder, experienceHeading });
+      await deliverPdf(blob, filename);
     } catch (error) {
       console.error('Error generating ATS PDF:', error);
       alert(`Failed to download ATS PDF. Error: ${error.message}`);
     }
+  };
+
+  // Mobile browsers often suppress `window.print()` completely. Export the
+  // selected template as a PDF there instead; desktop keeps the selectable
+  // browser-print output.
+  const handleDownloadPDF = () => {
+    if (isMobileOrTablet()) {
+      handleDownloadImagePDF();
+      return;
+    }
+    handlePrintPDF();
   };
 
   // The browser's print-to-PDF pipeline renders the template exactly as styled,
@@ -1193,7 +1251,7 @@ export default function TemplateWorkspace({ templateId }) {
       <button className="download-btn download-btn-ats" onClick={handleDownloadTextPDF} title="Downloads a clean single-column PDF with selectable text — the format ATS software reads most reliably.">
         <i className="fas fa-robot"></i> Download ATS PDF
       </button>
-      <button className="download-btn" onClick={handlePrintPDF} title="Opens your browser's Save as PDF dialog with selectable text in this template's design">
+      <button className="download-btn" onClick={handleDownloadPDF} title="Downloads the selected template on phones and tablets; opens the browser's Save as PDF dialog on desktop">
         <i className="fas fa-file-pdf"></i> Download PDF
       </button>
       <button className="image-pdf-btn" onClick={handleDownloadImagePDF} disabled={isExporting} title="Downloads a pixel snapshot. Its text cannot be selected or read by ATS software.">
@@ -1220,9 +1278,9 @@ export default function TemplateWorkspace({ templateId }) {
         <p className="download-fallback" role="status">
           <i className="fas fa-circle-down"></i>
           <span>
-            Download didn’t start?{' '}
+            Save your PDF with the browser or app, or{' '}
             <a href={manualSave.url} download={manualSave.filename}>
-              Tap here to save {manualSave.filename}
+              tap here to open {manualSave.filename}
             </a>
             .
           </span>

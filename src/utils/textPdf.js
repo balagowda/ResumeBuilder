@@ -330,5 +330,8 @@ export default function generateAtsPdf({ formData, sectionOrder, experienceHeadi
   });
 
   const filename = `${formData.fullName ? String(formData.fullName).trim().replace(/\s+/g, '_') : 'Resume'}_ATS.pdf`;
-  doc.save(filename);
+  // Let the caller decide how to deliver the file. `doc.save()` relies on a
+  // programmatic download, which iOS/iPadOS and embedded mobile browsers can
+  // silently discard.
+  return { blob: doc.output('blob'), filename };
 }
