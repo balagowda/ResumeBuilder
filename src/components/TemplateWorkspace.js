@@ -1237,6 +1237,26 @@ export default function TemplateWorkspace({ templateId }) {
     renderResumeTemplate(templateId, { formData, sectionOrder, experienceHeading, formatTextToList });
 
   /**
+   * Sets expectations before anyone taps a download on a small screen.
+   *
+   * Rendered in both previews but hidden above 1100px by CSS, since it is only
+   * true of the stacked layout. It names the ATS export rather than declaring
+   * mobile unsupported: that one is synchronous jsPDF with no print dialog and
+   * no canvas, so it is the export with no mobile failure mode — unlike
+   * "Download PDF", which is window.print() and is silently ignored by the
+   * browsers built into apps like Instagram and LinkedIn.
+   */
+  const renderMobileDownloadNotice = () => (
+    <p className="mobile-download-notice" role="note">
+      <i className="fas fa-triangle-exclamation" aria-hidden="true"></i>
+      <span>
+        For the best result, download on a desktop. On a phone or tablet,{' '}
+        <strong>“Download ATS PDF”</strong> is the option that works reliably.
+      </span>
+    </p>
+  );
+
+  /**
    * The three exports, plus whatever we have had to tell the user about them.
    *
    * Rendered twice: once under the sheet, and once inside the mobile preview
@@ -1594,6 +1614,7 @@ export default function TemplateWorkspace({ templateId }) {
           </div>
         </div>
         <div className="resume-panel" ref={panelRef}>
+          {renderMobileDownloadNotice()}
           <div className="zoom-toolbar">
             <button className="zoom-btn" onClick={() => setZoom((z) => Math.max(50, z - 10))} title="Zoom out">
               <i className="fas fa-search-minus"></i>
@@ -1727,6 +1748,7 @@ export default function TemplateWorkspace({ templateId }) {
             <button className="close-btn" onClick={togglePreview} title="Close Preview">
               <i className="fas fa-times"></i>
             </button>
+            {renderMobileDownloadNotice()}
             <div
               className="preview-scaler"
               style={{ height: `${Math.round(sheetHeight * previewFitScale)}px` }}
