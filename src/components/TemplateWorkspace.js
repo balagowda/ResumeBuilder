@@ -1719,7 +1719,12 @@ export default function TemplateWorkspace({ templateId }) {
           </div>
           {renderDownloadActions('panel')}
           <p className="ats-hint">
-            <i className="fas fa-circle-info"></i> Download PDF opens your browser’s print dialog — choose “Save as PDF” for the selected template with fully selectable text. Use ATS PDF for the most parser-friendly single-column version. Image PDF is for visual snapshots only.
+            {/* Download PDF does two different things now — the print dialog on
+                desktop, the image export on a phone, where print() is silently
+                ignored — so the hint has to say which is which. Claiming
+                selectable text everywhere was wrong on exactly the devices that
+                most need to be told otherwise. */}
+            <i className="fas fa-circle-info"></i> On desktop, Download PDF opens your browser’s print dialog — choose “Save as PDF” for the selected template with fully selectable text. On a phone or tablet it saves a picture of the template instead, so use ATS PDF there: single-column, selectable text, and the version parsers read most reliably. Image PDF is a visual snapshot only.
           </p>
         </div>
       </div>
