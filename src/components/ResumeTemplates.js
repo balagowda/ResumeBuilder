@@ -14,6 +14,24 @@ import '../Styles/TemplateWorkspace.css';
 
 export const DEFAULT_SECTION_ORDER = ['summary', 'skills', 'experiences', 'projects', 'education', 'others'];
 
+/**
+ * Coerce a saved section order back into a complete, valid one.
+ *
+ * A stored order is user data that has been through drag-and-drop, an import
+ * and a backup round-trip, so it can be missing a section or carry an entry
+ * that names nothing. Either way the section silently disappears from the form,
+ * the preview and the ATS PDF, which all iterate this list — so unknown entries
+ * are dropped and anything missing is appended in its default position.
+ */
+export const normalizeSectionOrder = (order) => {
+  if (!Array.isArray(order)) return DEFAULT_SECTION_ORDER;
+  const kept = order.filter(
+    (section, i) => DEFAULT_SECTION_ORDER.includes(section) && order.indexOf(section) === i
+  );
+  if (kept.length === DEFAULT_SECTION_ORDER.length) return kept;
+  return [...kept, ...DEFAULT_SECTION_ORDER.filter((section) => !kept.includes(section))];
+};
+
 export const formatTextToList = (text) => {
   if (!text) return null;
   const lines = text.split('\n').filter(line => line.trim() !== '');

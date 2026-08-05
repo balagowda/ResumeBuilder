@@ -19,6 +19,28 @@ import {
  * stays defined next to the form that renders it.
  */
 export default function useResumeStore(makeEmpty) {
+  /**
+   * Force any resume data arriving from outside the app into the shape the
+   * templates expect.
+   *
+   * A backup file can be hand-edited, truncated, or predate a field that has
+   * since been added. The templates index `formData.experiences` and friends
+   * directly, so a missing or wrongly-typed list is not a degraded render — it
+   * throws, and the whole editor goes blank. The blank form is the schema, so
+   * every list it declares has to survive as a list.
+   */
+  const withShape = useCallback(
+    (data) => {
+      const base = makeEmpty();
+      const merged = { ...base, ...(data && typeof data === 'object' && !Array.isArray(data) ? data : {}) };
+      Object.keys(base).forEach((key) => {
+        if (Array.isArray(base[key]) && !Array.isArray(merged[key])) merged[key] = base[key];
+      });
+      return merged;
+    },
+    [makeEmpty]
+  );
+
   // Hydrate synchronously in the initialiser rather than in an effect, so a
   // returning user never sees a frame of empty form before their data lands.
   const [initial] = useState(() => {
@@ -63,19 +85,31 @@ export default function useResumeStore(makeEmpty) {
   const [lastBackupAt, setLastBackupAt] = useState(initial.lastBackupAt);
   const [storageError, setStorageError] = useState(null);
 
-  // Skip the persist effect on the very first render, so hydrating does not
-  // immediately write the same store straight back.
-  const hydrated = useRef(false);
+  // What was last read from — or written to — storage. Hydrating must not write
+  // the same store straight back, and a re-render that changed nothing must not
+  // either: both would report "Autosaved" over a form nobody has touched.
+  //
+  // Deliberately a serialised snapshot rather than a "first render" flag. A flag
+  // set in its own effect does not work, because effects run in declaration
+  // order — it was already true by the time the persist effect first ran, which
+  // is why the guard below never fired — and one set inside this effect would
+  // still be defeated by StrictMode's second pass.
+  const lastPersisted = useRef(null);
 
   useEffect(() => {
     if (initial.mode === MODE_DEVICE) requestPersistence();
-    hydrated.current = true;
   }, [initial.mode]);
 
   // Persist whenever anything meaningful changes.
   useEffect(() => {
-    if (!hydrated.current) return;
-    const result = saveStore({ schema: 1, activeId, resumes, lastBackupAt }, mode);
+    const store = { schema: 1, activeId, resumes, lastBackupAt };
+    const snapshot = JSON.stringify({ mode, store });
+    if (lastPersisted.current === snapshot) return;
+    const isHydration = lastPersisted.current === null;
+    lastPersisted.current = snapshot;
+    if (isHydration) return;
+
+    const result = saveStore(store, mode);
     if (result.ok) {
       setSavedAt(new Date());
       setStorageError(null);
@@ -149,14 +183,14 @@ export default function useResumeStore(makeEmpty) {
    */
   const createResumeFrom = useCallback(
     (name, data, extra = {}) => {
-      const record = createResumeRecord(name || 'Untitled resume', data, extra);
+      const record = createResumeRecord(name || 'Untitled resume', withShape(data), extra);
       commit(
         (doc) => ({ resumes: [...doc.resumes, record], activeId: record.id }),
         { label: 'load example' }
       );
       return record.id;
     },
-    [commit]
+    [commit, withShape]
   );
 
   /**
@@ -169,7 +203,7 @@ export default function useResumeStore(makeEmpty) {
   const importResumes = useCallback(
     (records, preferredActiveId) => {
       const rebuilt = records.map((r) =>
-        createResumeRecord(r.name, r.data, {
+        createResumeRecord(r.name, withShape(r.data), {
           sectionOrder: Array.isArray(r.sectionOrder) ? r.sectionOrder : null,
           experienceHeading: typeof r.experienceHeading === 'string' ? r.experienceHeading : null,
           templateId: r.templateId || null,
@@ -187,7 +221,7 @@ export default function useResumeStore(makeEmpty) {
       );
       return nextActive;
     },
-    [commit]
+    [commit, withShape]
   );
 
   const duplicateResume = useCallback(

@@ -19,6 +19,8 @@ const YEARS = Array.from({ length: 56 }, (_, i) => String(CURRENT_YEAR + 5 - i))
 
 const PRESENT_WORDS = /^(present|current|now|ongoing|till date|to date)$/i;
 
+const BLANK_RANGE = { startMonth: '', startYear: '', endMonth: '', endYear: '', present: false };
+
 const part = (raw) => {
   const text = (raw || '').trim();
   if (!text) return { month: '', year: '' };
@@ -34,16 +36,33 @@ const part = (raw) => {
   const yearOnly = text.match(/^(\d{4})$/);
   if (yearOnly) return { month: '', year: yearOnly[1] };
 
+  // A month on its own is what a half-filled range looks like after the user
+  // has picked a month but not yet a year. Matched exactly rather than by
+  // prefix, so a freeform word that merely starts like a month ("Marketing")
+  // is still treated as freeform.
+  const monthOnly = MONTHS.find((m) => m.toLowerCase() === text.toLowerCase());
+  if (monthOnly) return { month: monthOnly, year: '' };
+
   return null;
 };
 
 /** Split "Jan 2020 - Present" into structured halves, or null if it is freeform. */
 export const parseRange = (value) => {
   const text = (value || '').trim();
-  if (!text) return { startMonth: '', startYear: '', endMonth: '', endYear: '', present: false };
+  if (!text) return { ...BLANK_RANGE };
 
   const halves = text.split(/\s*[-–—]\s*|\s+to\s+/i);
-  if (halves.length !== 2) return null;
+  if (halves.length > 2) return null;
+
+  // A single point ("2024", "Jan 2020") is a legitimate date on its own, and is
+  // also what a half-filled range is stored as. Either way it has to read back,
+  // or reopening the entry would show empty pickers over a date that is there.
+  if (halves.length === 1) {
+    const only = part(halves[0]);
+    if (!only) return null;
+    if (only.present) return { ...BLANK_RANGE, present: true };
+    return { ...BLANK_RANGE, startMonth: only.month || '', startYear: only.year || '' };
+  }
 
   const start = part(halves[0]);
   const end = part(halves[1]);
@@ -68,15 +87,42 @@ const format = ({ startMonth, startYear, endMonth, endYear, present }) => {
   return `${left} - ${right}`;
 };
 
-const DateRangeField = ({ id, label = 'Dates', value, onChange }) => {
+/** Derive the field's whole view state from a stored date string. */
+const seed = (value) => {
   const parsed = parseRange(value);
   // Freeform values open in text mode so nothing the user typed is ever
   // silently rewritten or lost.
-  const [freeform, setFreeform] = useState(parsed === null);
+  return { value, freeform: parsed === null, range: parsed || { ...BLANK_RANGE } };
+};
 
-  const range = parsed || { startMonth: '', startYear: '', endMonth: '', endYear: '', present: false };
+const DateRangeField = ({ id, label = 'Dates', value = '', onChange }) => {
+  // The range is held here as well as in the stored string, because a range
+  // being filled in cannot always be spelled unambiguously as one: picking a
+  // start year gives "2020", which on its own is indistinguishable from a
+  // single-point date. Deriving the pickers from the string alone meant every
+  // pick reset the one before it, so a range could never be built at all.
+  //
+  // It is re-derived whenever `value` arrives as something this field did not
+  // itself write — switching resume, an undo, a restored backup, or an entry
+  // being deleted above this one — so the pickers can never show another
+  // entry's dates, and the mode always matches the value on screen.
+  const [local, setLocal] = useState(() => seed(value));
+  if (local.value !== value) setLocal(seed(value));
 
-  const update = (patch) => onChange(format({ ...range, ...patch }));
+  const { freeform, range } = local;
+  const setFreeform = (next) => setLocal((prev) => ({ ...prev, freeform: next }));
+
+  const update = (patch) => {
+    const next = { ...range, ...patch };
+    const text = format(next);
+    setLocal({ value: text, freeform: false, range: next });
+    onChange(text);
+  };
+
+  const updateFreeform = (text) => {
+    setLocal({ value: text, freeform: true, range: parseRange(text) || { ...BLANK_RANGE } });
+    onChange(text);
+  };
 
   if (freeform) {
     return (
@@ -86,8 +132,8 @@ const DateRangeField = ({ id, label = 'Dates', value, onChange }) => {
           id={id}
           type="text"
           className="input-field"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
+          value={value}
+          onChange={(e) => updateFreeform(e.target.value)}
           placeholder="e.g., Jan 2020 - Dec 2021"
         />
         <button type="button" className="date-range-switch" onClick={() => setFreeform(false)}>

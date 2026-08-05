@@ -513,8 +513,34 @@ export const lintSources = (sources, summaryText = null) => {
   }
 
   const WEIGHT = { high: 12, medium: 7, low: 3 };
-  const penalty = issues.reduce((sum, i) => sum + WEIGHT[i.severity], 0);
-  const score = bulletCount === 0 ? 0 : Math.max(0, Math.min(100, 100 - penalty));
+
+  // Bullet-level issues are scored by density, not by raw count. Summing them
+  // outright punished length rather than quality: a thirty-bullet resume
+  // collects more issues than a six-bullet one however well it is written, so
+  // any resume of normal length hit zero and stopped being able to show
+  // improvement — fixing three bullets moved nothing.
+  //
+  // Dividing by the bullet count makes the score mean "how bad is a typical
+  // bullet here", which is length-independent and responds to every edit. The
+  // multiplier is calibrated so that a resume where most bullets trip the usual
+  // pair of rules (weak opener, no metric) lands in the teens rather than the
+  // seventies, while one bad bullet among twenty barely registers.
+  const PER_BULLET_WEIGHT = 4;
+  // Two rules describe the document rather than any one bullet, so they stay
+  // flat — dividing them by the bullet count would let a long resume repeat the
+  // same verb for free.
+  const DOCUMENT_RULES = new Set(['repeated-verb', 'thin-summary']);
+
+  let bulletPenalty = 0;
+  let documentPenalty = 0;
+  issues.forEach((i) => {
+    if (DOCUMENT_RULES.has(i.rule)) documentPenalty += WEIGHT[i.severity];
+    else bulletPenalty += WEIGHT[i.severity];
+  });
+
+  const density = bulletCount === 0 ? 0 : (bulletPenalty / bulletCount) * PER_BULLET_WEIGHT;
+  const score =
+    bulletCount === 0 ? 0 : Math.max(0, Math.min(100, Math.round(100 - density - documentPenalty)));
 
   const RANK = { high: 0, medium: 1, low: 2 };
   issues.sort((a, b) => RANK[a.severity] - RANK[b.severity]);

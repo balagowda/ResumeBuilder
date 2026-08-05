@@ -3,6 +3,7 @@ import { Routes, Route, NavLink, Link, useLocation } from 'react-router-dom';
 import './App.css';
 import LandingPage from './components/LandingPage';
 import ContentPage from './components/ContentPage';
+import ErrorBoundary from './components/ErrorBoundary';
 // Metadata only — importing TEMPLATES from ResumeTemplates would pull all 50
 // template renderers into the landing page's bundle just to declare routes.
 import { TEMPLATES } from './components/templateMeta.mjs';
@@ -83,22 +84,26 @@ function App() {
         </div>
       </header>
       <main className={isFullWidthPage ? "App-main-full" : "App-main"}>
-        <Suspense fallback={<RouteFallback />}>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/templates" element={<HomePage />} />
-            <Route path="/templates/:slug" element={<TemplateDetail />} />
-            <Route path="/examples" element={<ExamplesHub />} />
-            <Route path="/examples/:slug" element={<ExampleDetail />} />
-            <Route path="/ats-resume-checker" element={<AtsChecker />} />
-            {TEMPLATES.map((t) => (
-              <Route key={t.id} path={`/template${t.id}`} element={<TemplateWorkspace templateId={t.id} />} />
-            ))}
-            {CONTENT_PAGES.map((page) => (
-              <Route key={page.path} path={page.path} element={<ContentPage pagePath={page.path} />} />
-            ))}
-          </Routes>
-        </Suspense>
+        {/* Keyed on the path so navigating away from a page that threw clears
+            the error instead of pinning the visitor to it. */}
+        <ErrorBoundary key={path}>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/templates" element={<HomePage />} />
+              <Route path="/templates/:slug" element={<TemplateDetail />} />
+              <Route path="/examples" element={<ExamplesHub />} />
+              <Route path="/examples/:slug" element={<ExampleDetail />} />
+              <Route path="/ats-resume-checker" element={<AtsChecker />} />
+              {TEMPLATES.map((t) => (
+                <Route key={t.id} path={`/template${t.id}`} element={<TemplateWorkspace templateId={t.id} />} />
+              ))}
+              {CONTENT_PAGES.map((page) => (
+                <Route key={page.path} path={page.path} element={<ContentPage pagePath={page.path} />} />
+              ))}
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </main>
       {showFooter && (
         <footer className="App-footer">

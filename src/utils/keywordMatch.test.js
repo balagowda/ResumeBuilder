@@ -26,6 +26,24 @@ describe('synonym handling', () => {
     const result = analyzeJobMatchText(jd('K8s and Docker'), 'Ran workloads on Kubernetes with Docker');
     expect(matchedTerms(result)).toContain('kubernetes');
   });
+
+  // "." reads as a word break, so the js rule used to fire inside these names
+  // and rewrite them to "next.javascript" / "node.javascript" — which is what
+  // the missing-keywords list then showed the user.
+  test('dotted framework names are left intact', () => {
+    expect(normalizeText('Next.js and Node.js')).toBe('next.js and node.js');
+  });
+
+  test('Next.js in a posting is reported under its own name', () => {
+    const result = analyzeJobMatchText(jd('Next.js and Terraform'), 'Wrote Python scripts');
+    expect(missingTerms(result)).toContain('next.js');
+    expect(missingTerms(result).join(' ')).not.toContain('javascript');
+  });
+
+  test('a resume naming Node.js still covers it', () => {
+    const result = analyzeJobMatchText(jd('Node.js and Docker'), 'Built services in Node.js and Docker');
+    expect(matchedTerms(result)).toContain('node.js');
+  });
 });
 
 describe('stemming', () => {

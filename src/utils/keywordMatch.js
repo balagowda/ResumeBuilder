@@ -187,11 +187,20 @@ export const normalizeText = (text) => {
     
   // Apply synonym mapping
   Object.entries(SYNONYMS).forEach(([synonym, canonical]) => {
-    // Replace full words only
-    const regex = new RegExp(`\\b${synonym.replace(/\./g, '\\.')}\\b`, 'g');
-    normalized = normalized.replace(regex, canonical);
+    // Replace whole terms only. \b is the wrong boundary here: it treats "." as
+    // a word break, so the "js" rule fired inside "next.js" and "node.js" and
+    // rewrote them to "next.javascript" / "node.javascript" — which is what the
+    // user then saw in the missing-keywords list, and which stopped either name
+    // matching its SKILL_TOKENS entry. A term ends where the characters that
+    // can live inside a technology name run out.
+    // The trailing guard has to let a sentence-ending "." through — "…using
+    // Amazon Web Services." is still the term — while still refusing a "." that
+    // joins the term to another word.
+    const escaped = synonym.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(^|[^\\w.+#-])${escaped}(?![\\w+#-])(?!\\.\\w)`, 'g');
+    normalized = normalized.replace(regex, (match, before) => `${before}${canonical}`);
   });
-  
+
   return normalized;
 };
 
